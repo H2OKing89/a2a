@@ -6,9 +6,9 @@ to understand data structures and for offline testing.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 def save_golden_sample(
@@ -16,7 +16,7 @@ def save_golden_sample(
     name: str,
     source: str,
     output_dir: Path,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> Path:
     """
     Save a golden sample to disk.
@@ -36,27 +36,27 @@ def save_golden_sample(
 
     # Convert Pydantic models to dict
     if hasattr(data, "model_dump"):
-        data = data.model_dump()
+        data = data.model_dump()  # type: ignore
     elif hasattr(data, "dict"):
-        data = data.dict()
+        data = data.dict()  # type: ignore
 
     # If it's a list of models, convert each
     if isinstance(data, list):
-        data = [item.model_dump() if hasattr(item, "model_dump") else item for item in data]
+        data = [item.model_dump() if hasattr(item, "model_dump") else item for item in data]  # type: ignore
 
     # Build sample document
-    sample = {
+    sample: dict[str, Any] = {
         "_meta": {
             "name": name,
             "source": source,
-            "captured_at": datetime.utcnow().isoformat() + "Z",
+            "captured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             **(metadata or {}),
         },
         "data": data,
     }
 
     # Generate filename
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     filename = f"{source}_{name}_{timestamp}.json"
     filepath = output_dir / filename
 
@@ -67,7 +67,7 @@ def save_golden_sample(
     return filepath
 
 
-def load_golden_sample(filepath: Path) -> dict:
+def load_golden_sample(filepath: Path) -> dict[str, Any]:
     """
     Load a golden sample from disk.
 
@@ -78,7 +78,7 @@ def load_golden_sample(filepath: Path) -> dict:
         Sample document with _meta and data
     """
     with open(filepath) as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore
 
 
 def list_golden_samples(

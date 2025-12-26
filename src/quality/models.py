@@ -3,7 +3,6 @@ Quality analysis data models.
 """
 
 from enum import IntEnum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 

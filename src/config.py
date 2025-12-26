@@ -4,7 +4,7 @@ Loads from config.yaml, .env, and environment variables.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import yaml
 from dotenv import load_dotenv
@@ -154,28 +154,29 @@ class Settings(BaseSettings):
     @classmethod
     def load(cls, config_path: Path | None = None) -> "Settings":
         """Load settings from config.yaml and environment."""
-        config_data = {}
+        config_data: dict[str, Any] = {}
 
         if config_path is None:
             config_path = Path("config.yaml")
 
         if config_path.exists():
             with open(config_path, encoding="utf-8") as f:
-                yaml_config = yaml.safe_load(f) or {}
+                yaml_content: Any = yaml.safe_load(f)
+                yaml_config: dict[str, Any] = yaml_content or {}
 
             # Map yaml structure to settings
             if "paths" in yaml_config:
-                config_data["paths"] = PathSettings(**yaml_config["paths"])
+                config_data["paths"] = PathSettings(**yaml_config["paths"])  # type: ignore
             if "quality" in yaml_config:
-                config_data["quality"] = QualitySettings(**yaml_config["quality"])
+                config_data["quality"] = QualitySettings(**yaml_config["quality"])  # type: ignore
             if "enrichment" in yaml_config:
-                config_data["enrichment"] = EnrichmentSettings(**yaml_config["enrichment"])
+                config_data["enrichment"] = EnrichmentSettings(**yaml_config["enrichment"])  # type: ignore
             if "cache" in yaml_config:
-                config_data["cache"] = CacheSettings(**yaml_config["cache"])
+                config_data["cache"] = CacheSettings(**yaml_config["cache"])  # type: ignore
             if "audible" in yaml_config:
-                config_data["audible"] = AudibleSettings(**yaml_config["audible"])
+                config_data["audible"] = AudibleSettings(**yaml_config["audible"])  # type: ignore
             if "abs" in yaml_config:
-                config_data["abs"] = ABSSettings(**yaml_config["abs"])
+                config_data["abs"] = ABSSettings(**yaml_config["abs"])  # type: ignore
             if "verbose" in yaml_config:
                 config_data["verbose"] = yaml_config["verbose"]
             if "debug" in yaml_config:
@@ -191,7 +192,7 @@ class Settings(BaseSettings):
 
         config_data["rate_limit"] = APIRateLimitSettings()
 
-        return cls(**config_data)
+        return cls(**config_data)  # type: ignore
 
 
 # Global settings instance

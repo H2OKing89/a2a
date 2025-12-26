@@ -6,10 +6,9 @@ CLI for audiobook management tool.
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import typer
-from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
@@ -19,9 +18,9 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.abs import ABSClient
-from src.audible import AudibleAuthError, AudibleClient
+from src.audible import AudibleAuthError, AudibleBook, AudibleClient
 from src.cache import SQLiteCache
-from src.config import get_settings, reload_settings
+from src.config import get_settings
 from src.quality import AudibleEnrichmentService, QualityAnalyzer, QualityReport, QualityTier
 from src.utils import save_golden_sample
 
@@ -155,7 +154,7 @@ def cache_command(
             count = cache.cleanup_expired()
             console.print(f"[green]✓[/green] Removed {count} expired items")
         elif stats:
-            cache_stats = cache.get_stats()
+            cache_stats: dict[str, Any] = cache.get_stats()
 
             # Format namespaces display
             namespaces_display = (
@@ -348,7 +347,7 @@ def search(
     """Search a library."""
     try:
         with get_abs_client() as client:
-            results = client.search_library(library_id, query)
+            results: dict[str, Any] = client.search_library(library_id, query)
 
             books = results.get("book", [])
             authors = results.get("authors", [])
@@ -452,10 +451,10 @@ def audible_login(
             password = typer.prompt("Password", hide_input=True)
 
             def otp_callback() -> str:
-                return typer.prompt("Enter OTP/2FA code")
+                return str(typer.prompt("Enter OTP/2FA code"))
 
             def cvf_callback() -> str:
-                return typer.prompt("Enter CVF verification code")
+                return str(typer.prompt("Enter CVF verification code"))
 
             client = AudibleClient.from_login(
                 email=email,
@@ -467,7 +466,7 @@ def audible_login(
                 cvf_callback=cvf_callback,
             )
 
-        console.print(f"\n[green]✓[/green] Login successful!")
+        console.print("\n[green]✓[/green] Login successful!")
         console.print(f"  Marketplace: {client.marketplace}")
         console.print(f"  Credentials saved to: {auth_file}")
 
@@ -481,12 +480,12 @@ def audible_status():
     """Check Audible connection status."""
     settings = get_settings()
 
-    console.print(f"\n[bold]Audible Status[/bold]")
+    console.print("\n[bold]Audible Status[/bold]")
     console.print(f"Auth file: {settings.audible.auth_file}")
     console.print(f"Locale: {settings.audible.locale}")
 
     if not settings.audible.auth_file.exists():
-        console.print(f"\n[yellow]⚠[/yellow] Auth file not found. Run 'audible login' first.")
+        console.print("\n[yellow]⚠[/yellow] Auth file not found. Run 'audible login' first.")
         raise typer.Exit(1)
 
     try:
@@ -496,13 +495,13 @@ def audible_status():
             # Get library count
             items = client.get_library(num_results=1, use_cache=False)
             library_count = len(items)
-            console.print(f"\n[bold]Account Status:[/bold]")
+            console.print("\n[bold]Account Status:[/bold]")
             console.print(f"  Library accessible: [green]Yes[/green] ({library_count}+ items)")
 
             # Cache stats
-            cache_stats = client.get_cache_stats()
+            cache_stats: dict[str, Any] = client.get_cache_stats()
             if cache_stats.get("enabled"):
-                console.print(f"\n[bold]Cache:[/bold] SQLite")
+                console.print("\n[bold]Cache:[/bold] SQLite")
                 console.print(f"  Total entries: {cache_stats.get('total_entries', 0)}")
                 console.print(f"  Memory entries: {cache_stats.get('memory_entries', 0)}")
                 console.print(f"  DB size: {cache_stats.get('db_size_mb', 0):.2f} MB")
@@ -568,6 +567,7 @@ def audible_item(
     """Show details for an audiobook by ASIN."""
     try:
         with get_audible_client() as client:
+            book: AudibleBook | None = None
             if catalog:
                 book = client.get_catalog_product(asin)
             else:
@@ -587,7 +587,7 @@ def audible_item(
                 series_str = f"{s.title}" + (f" #{s.sequence}" if s.sequence else "")
 
             # Build categories string
-            categories = []
+            categories: list[str] = []
             for ladder in book.category_ladders:
                 if ladder.ladder:
                     cats = [c.name for c in ladder.ladder if c.name]
@@ -736,7 +736,7 @@ def audible_cache(
             count = cache.cleanup_expired()
             console.print(f"[green]✓[/green] Removed {count} expired items")
         else:
-            stats = cache.get_stats()
+            stats: dict[str, Any] = cache.get_stats()
 
             # Format namespaces display
             namespaces_display = "\n".join(f"  {k}: {v}" for k, v in stats.get("namespaces", {}).items()) or "  (none)"
@@ -779,7 +779,7 @@ def sample_abs(
     """
     try:
         with get_abs_client() as client:
-            console.print(f"\n[bold]Collecting ABS Golden Samples[/bold]\n")
+            console.print("\n[bold]Collecting ABS Golden Samples[/bold]\n")
 
             # Sample: Library list
             console.print("  Fetching libraries...")
@@ -870,7 +870,7 @@ def sample_audible(
 
     try:
         with get_audible_client() as client:
-            console.print(f"\n[bold]Collecting Audible Golden Samples[/bold]\n")
+            console.print("\n[bold]Collecting Audible Golden Samples[/bold]\n")
             console.print(f"  Marketplace: {client.marketplace}\n")
 
             # Sample: Library (first page)
@@ -965,7 +965,7 @@ def quality_scan(
                 library_id = libraries[0].id
 
             # Get item count
-            items_resp = client._get(f"/libraries/{library_id}/items", params={"limit": 0})
+            items_resp: dict[str, Any] = client._get(f"/libraries/{library_id}/items", params={"limit": 0})
             total_items = len(items_resp.get("results", []))
 
             if limit > 0:
@@ -992,7 +992,7 @@ def quality_scan(
                 for item in items:
                     item_id = item.get("id")
                     try:
-                        full_item = client._get(f"/items/{item_id}", params={"expanded": 1})
+                        full_item: dict[str, Any] = client._get(f"/items/{item_id}", params={"expanded": 1})
                         quality = analyzer.analyze_item(full_item)
                         report.add_item(quality)
                     except Exception as e:
@@ -1114,7 +1114,7 @@ def quality_low(
                 library_id = libraries[0].id
 
             # Get all items
-            items_resp = client._get(f"/libraries/{library_id}/items", params={"limit": 0})
+            items_resp: dict[str, Any] = client._get(f"/libraries/{library_id}/items", params={"limit": 0})
             all_items = items_resp.get("results", [])
 
             console.print(f"Scanning {len(all_items)} items for quality < {threshold} kbps...\n")
@@ -1134,7 +1134,7 @@ def quality_low(
                 for item in all_items:
                     item_id = item.get("id")
                     try:
-                        full_item = client._get(f"/items/{item_id}", params={"expanded": 1})
+                        full_item: dict[str, Any] = client._get(f"/items/{item_id}", params={"expanded": 1})
                         quality = analyzer.analyze_item(full_item)
 
                         if quality.bitrate_kbps < threshold:
@@ -1233,7 +1233,7 @@ def quality_item(
         with get_abs_client() as client:
             # Try to get item directly, or search by ASIN
             try:
-                full_item = client._get(f"/items/{item_id}", params={"expanded": 1})
+                full_item: dict[str, Any] = client._get(f"/items/{item_id}", params={"expanded": 1})
             except Exception:
                 # Try searching by ASIN
                 libraries = client.get_libraries()
@@ -1242,7 +1242,9 @@ def quality_item(
                     raise typer.Exit(1)
 
                 # Search in first library
-                results = client._get(f"/libraries/{libraries[0].id}/search", params={"q": item_id, "limit": 1})
+                results: dict[str, Any] = client._get(
+                    f"/libraries/{libraries[0].id}/search", params={"q": item_id, "limit": 1}
+                )
                 books = results.get("book", [])
                 if not books:
                     console.print("[red]Item not found[/red]")
@@ -1334,7 +1336,7 @@ def quality_upgrades(
                 console.print(f"Using library: [bold]{libraries[0].name}[/bold]\n")
 
             # Get all items
-            items_resp = abs_client._get(f"/libraries/{library_id}/items", params={"limit": 0})
+            items_resp: dict[str, Any] = abs_client._get(f"/libraries/{library_id}/items", params={"limit": 0})
             all_items = items_resp.get("results", [])
             item_ids = [item.get("id") for item in all_items if item.get("id")]
 
@@ -1463,7 +1465,7 @@ def quality_upgrades(
             upgrade_candidates.sort(key=lambda x: x.upgrade_priority, reverse=True)
 
             if not upgrade_candidates:
-                console.print(f"[yellow]No items match the selected filters[/yellow]")
+                console.print("[yellow]No items match the selected filters[/yellow]")
                 return
 
             # Display table
@@ -1531,7 +1533,7 @@ def quality_upgrades(
             owned_count = sum(1 for c in upgrade_candidates if c.owned_on_audible)
             atmos_count = sum(1 for c in upgrade_candidates if c.has_atmos_upgrade)
 
-            console.print(f"\n[bold]Summary:[/bold]")
+            console.print("\n[bold]Summary:[/bold]")
             console.print(f"  [green]Plus Catalog (FREE):[/green] {plus_count}")
             console.print(f"  [cyan]Good Deals (<$9):[/cyan] {deals_count}")
             console.print(f"  [dim]Already Owned:[/dim] {owned_count}")

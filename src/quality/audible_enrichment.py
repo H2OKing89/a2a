@@ -9,11 +9,9 @@ Enriches audiobook quality data with Audible catalog information:
 - Cover images and Audible URLs
 """
 
-import hashlib
-import time
 from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import BaseModel, Field
 
@@ -134,13 +132,13 @@ class AudibleEnrichment(BaseModel):
         if self.pricing:
             # Monthly deals (type=sale) with big discounts
             if self.pricing.is_monthly_deal:
-                discount = self.pricing.discount_percent
-                if discount and discount >= 50:
+                discount = self.pricing.discount_percent or 0
+                if discount >= 50:
                     return f"MONTHLY_DEAL (${self.pricing.effective_price:.2f}, {discount:.0f}% off)"
 
             if self.pricing.is_good_deal:
-                discount = self.pricing.discount_percent
-                if discount and discount > 0:
+                discount = self.pricing.discount_percent or 0
+                if discount > 0:
                     return f"GOOD_DEAL (${self.pricing.effective_price:.2f}, {discount:.0f}% off)"
                 return f"GOOD_DEAL (${self.pricing.effective_price:.2f})"
             elif self.pricing.credit_price == 1.0:
@@ -181,8 +179,8 @@ class AudibleEnrichment(BaseModel):
         # Good deals get priority
         elif self.pricing and self.pricing.is_good_deal:
             boost = 2.5
-            discount = self.pricing.discount_percent
-            if discount and discount >= 50:
+            discount = self.pricing.discount_percent or 0
+            if discount >= 50:
                 boost = 3.0
 
         # Atmos upgrade available
@@ -230,7 +228,7 @@ class AudibleEnrichmentService:
         self._api_calls = 0
 
     @property
-    def stats(self) -> dict:
+    def stats(self) -> dict[str, int]:
         """Get enrichment stats."""
         return {
             "cache_hits": self._cache_hits,
@@ -244,7 +242,18 @@ class AudibleEnrichmentService:
             self._library_asins = {item.asin for item in library}
         return self._library_asins
 
-    def _parse_plans(self, plans: list[dict]) -> PlusCatalogInfo:
+    def _get_catalog_product(self, asin: str) -> dict[str, Any]:
+        """Get product data from Audible catalog API."""
+        return cast(
+            dict[str, Any],
+            self._client._request(
+                "GET",
+                f"1.0/catalog/products/{asin}",
+                response_groups="contributors,media,product_attrs,product_desc,product_details,product_extended_attrs,series,category_ladders,customer_rights,price",
+            ),
+        )
+
+    def _parse_plans(self, plans: list[dict[str, Any]]) -> PlusCatalogInfo:
         """
         Parse plans array for Plus Catalog info.
 
@@ -256,8 +265,8 @@ class AudibleEnrichmentService:
             return info
 
         for plan in plans:
-            plan_name = plan.get("plan_name", "")
-            end_date_str = plan.get("end_date", "")
+            plan_name = cast(str, plan.get("plan_name", ""))
+            end_date_str = cast(str, plan.get("end_date", ""))
 
             # US Minerva = Plus Catalog
             if "Minerva" in plan_name or "AYCE" in plan_name.upper():
@@ -284,7 +293,7 @@ class AudibleEnrichmentService:
 
         return info
 
-    def _parse_pricing(self, price_data: dict | None) -> PricingInfo | None:
+    def _parse_pricing(self, price_data: dict[str, Any] | None) -> PricingInfo | None:
         """Parse pricing data from API response."""
         if not price_data:
             return None
@@ -341,11 +350,7 @@ class AudibleEnrichmentService:
         # Get catalog data via raw API for plans field
         self._api_calls += 1
         try:
-            response = self._client._request(
-                "GET",
-                f"1.0/catalog/products/{asin}",
-                response_groups="contributors,media,product_attrs,product_desc,product_details,product_extended_attrs,series,category_ladders,customer_rights,price",
-            )
+            response = self._get_catalog_product(asin)
             product = response.get("product", response)
         except Exception:
             return None
@@ -364,25 +369,26 @@ class AudibleEnrichmentService:
         enrichment.audible_url = f"https://www.audible.com/pd/{asin}"
 
         # Cover image URL (from product_images)
-        product_images = product.get("product_images", {})
+        product_images = cast(dict[str, Any], product.get("product_images", {}))
         if product_images:
             # Prefer 500px, fall back to largest available
-            enrichment.cover_image_url = (
+            enrichment.cover_image_url = cast(
+                str | None,
                 product_images.get("500")
                 or product_images.get("1024")
                 or product_images.get("252")
-                or next(iter(product_images.values()), None)
+                or next(iter(product_images.values()), None),
             )
 
         # Pricing
-        enrichment.pricing = self._parse_pricing(product.get("price"))
+        enrichment.pricing = self._parse_pricing(cast(dict[str, Any] | None, product.get("price")))
 
         # Plus Catalog from plans
-        enrichment.plus_catalog = self._parse_plans(product.get("plans", []))
+        enrichment.plus_catalog = self._parse_plans(cast(list[dict[str, Any]], product.get("plans", [])))
 
         # Available codecs
-        available_codecs = product.get("available_codecs", [])
-        enrichment.available_codecs = [c.get("name", "") for c in available_codecs]
+        available_codecs = cast(list[dict[str, Any]], product.get("available_codecs", []))
+        enrichment.available_codecs = [cast(str, c.get("name", "")) for c in available_codecs]
 
         # Check for Atmos
         enrichment.has_atmos = product.get("has_dolby_atmos", False)
