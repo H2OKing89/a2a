@@ -442,9 +442,10 @@ class SeriesMatcher:
         Compare an ABS series with Audible catalog.
 
         This is the main entry point for series comparison. It:
-        1. Searches Audible for the series
-        2. Matches ABS books to Audible books
-        3. Identifies missing books
+        1. Tries ASIN-based lookup first (more reliable when we have ASINs)
+        2. Falls back to keyword search
+        3. Matches ABS books to Audible books
+        4. Identifies missing books
 
         Args:
             abs_series: ABS series to analyze
@@ -453,17 +454,27 @@ class SeriesMatcher:
         Returns:
             SeriesComparisonResult
         """
-        # Get primary author from series (for better search)
-        primary_author = None
-        if abs_series.books:
-            primary_author = abs_series.books[0].author_name
+        audible_books: list[AudibleSeriesBook] = []
+        series_asin: str | None = None
 
-        # Search Audible for this series
-        audible_books = self.search_audible_series(
-            series_name=abs_series.name,
-            author=primary_author,
-            use_cache=use_cache,
-        )
+        # Strategy 1: Use ASIN lookups if we have ASINs (more reliable)
+        abs_asins = [b.asin for b in abs_series.books if b.asin]
+        if abs_asins:
+            audible_books, series_asin = self.get_series_books_by_asin(abs_asins, use_cache=use_cache)
+            logger.debug(f"ASIN lookup found {len(audible_books)} books for {abs_series.name}")
+
+        # Strategy 2: Fall back to keyword search if ASIN lookup didn't work
+        if not audible_books:
+            primary_author = None
+            if abs_series.books:
+                primary_author = abs_series.books[0].author_name
+
+            audible_books = self.search_audible_series(
+                series_name=abs_series.name,
+                author=primary_author,
+                use_cache=use_cache,
+            )
+            logger.debug(f"Keyword search found {len(audible_books)} books for {abs_series.name}")
 
         # Create series match result
         if audible_books:
@@ -471,12 +482,13 @@ class SeriesMatcher:
             series_match = SeriesMatchResult(
                 abs_series=abs_series,
                 audible_series=AudibleSeriesInfo(
+                    asin=series_asin,
                     title=abs_series.name,
                     book_count=len(audible_books),
                     books=audible_books,
                 ),
                 name_match_score=100.0,  # Since we found matching books
-                confidence=MatchConfidence.HIGH,
+                confidence=MatchConfidence.HIGH if series_asin else MatchConfidence.MEDIUM,
             )
         else:
             series_match = SeriesMatchResult(
