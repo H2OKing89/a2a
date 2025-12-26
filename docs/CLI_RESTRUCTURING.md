@@ -140,6 +140,6 @@ Commands:
 
 ## Migration Notes
 
-- No breaking changes to functionality, only command paths
-- Users may need to update scripts/aliases
+- No changes to command functionality, but command paths have changed (breaking for existing scripts/aliases)
+- Users will need to update scripts/aliases to use new command paths
 - Consider adding deprecation warnings for direct root commands (optional)
