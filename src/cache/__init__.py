@@ -19,11 +19,11 @@ def get_cache(
 ) -> SQLiteCache:
     """
     Factory function to get a cache instance.
-    
+
     Args:
         db_path: Path to SQLite database
         default_ttl_hours: Default TTL for cached items
-        
+
     Returns:
         SQLiteCache instance
     """
