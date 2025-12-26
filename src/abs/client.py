@@ -537,6 +537,82 @@ class ABSClient:
         data = self._post("/items/batch/get", json={"libraryItemIds": item_ids})
         return [LibraryItemExpanded.model_validate(item) for item in data.get("libraryItems", [])]
     
+    def batch_get_items_expanded(
+        self,
+        item_ids: list[str],
+        use_cache: bool = True,
+        max_workers: int = 10,
+        progress_callback: Optional[callable] = None,
+    ) -> list[dict]:
+        """
+        Get multiple library items with expanded data, using parallel requests.
+        
+        Uses ThreadPoolExecutor for concurrent fetching since this is typically
+        hitting a local server without rate limits.
+        
+        Args:
+            item_ids: List of item IDs
+            use_cache: Use cached data if available
+            max_workers: Number of parallel workers (default 10)
+            progress_callback: Optional callback(completed, total) for progress updates
+            
+        Returns:
+            List of expanded item dicts
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        results = {}
+        cache_hits = 0
+        to_fetch = []
+        
+        # First check cache for all items
+        if use_cache and self._cache:
+            for item_id in item_ids:
+                cache_key = f"item_{item_id}_exp1"
+                cached = self._cache.get("abs_items", cache_key)
+                if cached:
+                    results[item_id] = cached
+                    cache_hits += 1
+                else:
+                    to_fetch.append(item_id)
+        else:
+            to_fetch = list(item_ids)
+        
+        # Fetch remaining items in parallel
+        if to_fetch:
+            def fetch_item(item_id: str) -> tuple[str, Optional[dict]]:
+                try:
+                    # Direct request without rate limiting for speed
+                    url = f"/api/items/{item_id}"
+                    response = self._client.get(url, params={"expanded": 1})
+                    if response.status_code == 200:
+                        data = response.json()
+                        # Cache the result
+                        if self._cache:
+                            cache_key = f"item_{item_id}_exp1"
+                            self._cache.set("abs_items", cache_key, data, ttl_seconds=self._cache_ttl_seconds)
+                        return (item_id, data)
+                except Exception:
+                    pass
+                return (item_id, None)
+            
+            completed = cache_hits
+            total = len(item_ids)
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {executor.submit(fetch_item, item_id): item_id for item_id in to_fetch}
+                
+                for future in as_completed(futures):
+                    item_id, data = future.result()
+                    if data:
+                        results[item_id] = data
+                    completed += 1
+                    if progress_callback:
+                        progress_callback(completed, total)
+        
+        # Return in original order
+        return [results.get(item_id) for item_id in item_ids if item_id in results]
+    
     def scan_item(self, item_id: str) -> dict:
         """
         Scan a library item for changes.
