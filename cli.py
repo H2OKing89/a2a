@@ -133,9 +133,9 @@ def status():
     else:
         try:
             with get_audible_client() as client:
-                items = client.get_library(num_results=1, use_cache=True)
+                client.get_library(num_results=1, use_cache=True)  # Verify connectivity
                 console.print(f"  [green]✓[/green] Connected to marketplace: [bold]{client.marketplace}[/bold]")
-                console.print(f"  [green]✓[/green] Library accessible")
+                console.print("  [green]✓[/green] Library accessible")
         except AudibleAuthError as e:
             console.print(f"  [red]✗[/red] Auth failed: {e}")
             has_errors = True
