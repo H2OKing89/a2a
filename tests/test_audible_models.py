@@ -124,8 +124,8 @@ class TestAudibleBook:
             title="Test Book",
             series=None,  # API sometimes returns None
         )
-        # Should not raise, series defaults to empty list or accepts None
-        assert book.series is None or book.series == []
+        # When None is explicitly passed, it should remain None
+        assert book.series is None
 
     def test_book_with_none_category_ladders(self):
         """Test book handles None category_ladders."""
@@ -134,7 +134,8 @@ class TestAudibleBook:
             title="Test Book",
             category_ladders=None,  # API sometimes returns None
         )
-        assert book.category_ladders is None or book.category_ladders == []
+        # When None is explicitly passed, it should remain None
+        assert book.category_ladders is None
 
     def test_book_with_empty_lists(self):
         """Test book with explicit empty lists."""
@@ -235,9 +236,9 @@ class TestAudibleLibraryItem:
             series=None,
             category_ladders=None,
         )
-        # Should not raise validation error
-        assert item.series is None or item.series == []
-        assert item.category_ladders is None or item.category_ladders == []
+        # When None is explicitly passed, it should remain None
+        assert item.series is None
+        assert item.category_ladders is None
 
     def test_library_item_with_percent_complete(self):
         """Test library item with listening progress."""
