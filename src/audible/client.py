@@ -26,10 +26,8 @@ from .models import (
     AudibleListeningStats,
 )
 
-# Support both old JSON cache and new SQLite cache
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
-    from .cache import AudibleCache
 
 
 class AudibleError(Exception):
