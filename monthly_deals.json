@@ -1,0 +1,58 @@
+{
+  "summary": {
+    "total_candidates": 2,
+    "plus_catalog_count": 0,
+    "monthly_deals_count": 2,
+    "good_deals_count": 2,
+    "already_owned_count": 0,
+    "atmos_available_count": 0
+  },
+  "upgrade_candidates": [
+    {
+      "title": "The Wandering Inn, Book 15",
+      "author": "Pirateaba",
+      "asin": "B0DRLJZX5G",
+      "bitrate_kbps": 63.0,
+      "format": "M4B",
+      "size_mb": 851.4,
+      "path": "/audiobooks/Pirateaba/The Wandering Inn/The Wandering Inn vol_15 Garden of Sanctuary (2025) (Pirateaba) {ASIN.B0DRLJZX5G}",
+      "tier": "Poor",
+      "upgrade_priority": 480,
+      "owned_on_audible": false,
+      "is_plus_catalog": false,
+      "plus_expiration": null,
+      "is_monthly_deal": true,
+      "list_price": 59.99,
+      "sale_price": 7.99,
+      "discount_percent": 86.7,
+      "is_good_deal": true,
+      "has_atmos_upgrade": false,
+      "acquisition_recommendation": "MONTHLY_DEAL ($7.99, 87% off)",
+      "audible_url": "https://www.audible.com/pd/B0DRLJZX5G",
+      "cover_image_url": "https://m.media-amazon.com/images/I/51hZjFxvjCL._SL500_.jpg"
+    },
+    {
+      "title": "Krew elf\u00f3w",
+      "author": "Andrzej Sapkowski",
+      "asin": "B00XV1ALO0",
+      "bitrate_kbps": 63.0,
+      "format": "M4B",
+      "size_mb": 297.8,
+      "path": "/audiobooks/Andrzej Sapkowski/The Witcher/Blood of Elves",
+      "tier": "Poor",
+      "upgrade_priority": 420,
+      "owned_on_audible": false,
+      "is_plus_catalog": false,
+      "plus_expiration": null,
+      "is_monthly_deal": true,
+      "list_price": 25.19,
+      "sale_price": 7.99,
+      "discount_percent": 68.3,
+      "is_good_deal": true,
+      "has_atmos_upgrade": false,
+      "acquisition_recommendation": "MONTHLY_DEAL ($7.99, 68% off)",
+      "audible_url": "https://www.audible.com/pd/B00XV1ALO0",
+      "cover_image_url": "https://m.media-amazon.com/images/I/51mde09DauL._SL500_.jpg"
+    }
+  ]
+}
