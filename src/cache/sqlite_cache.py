@@ -8,13 +8,13 @@ Provides efficient storage and retrieval of cached data with:
 - Cross-referencing between data sources
 """
 
-import json
 import sqlite3
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Iterator
+from typing import Any
 
 import orjson
 
@@ -22,27 +22,27 @@ import orjson
 class SQLiteCache:
     """
     SQLite-based cache for API responses.
-    
+
     Features:
     - Namespace support for different data types (abs_items, audible_library, etc.)
     - TTL-based expiration with efficient cleanup
     - Indexed lookups by key and common metadata fields
     - Full-text search on titles and authors
     - Memory cache layer for hot data
-    
+
     Example:
         cache = SQLiteCache("./data/cache.db")
-        
+
         # Store data
         cache.set("audible_library", "B08XYZ123", book_data, ttl_hours=2)
-        
+
         # Retrieve
         data = cache.get("audible_library", "B08XYZ123")
-        
+
         # Search
         results = cache.search_by_title("Project Hail Mary")
     """
-    
+
     def __init__(
         self,
         db_path: Path | str,
@@ -51,7 +51,7 @@ class SQLiteCache:
     ):
         """
         Initialize the SQLite cache.
-        
+
         Args:
             db_path: Path to SQLite database file
             default_ttl_hours: Default TTL in hours for cached items
@@ -60,20 +60,21 @@ class SQLiteCache:
         self.db_path = Path(db_path)
         self.default_ttl_seconds = default_ttl_hours * 3600
         self.max_memory_entries = max_memory_entries
-        
+
         # In-memory cache for frequently accessed items
         self._memory_cache: dict[str, tuple[Any, float]] = {}  # key -> (data, expires_at)
-        
+
         # Ensure directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize database
         self._init_db()
-    
+
     def _init_db(self) -> None:
         """Initialize database schema."""
         with self._get_connection() as conn:
-            conn.executescript("""
+            conn.executescript(
+                """
                 -- Main cache table
                 CREATE TABLE IF NOT EXISTS cache (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,26 +83,26 @@ class SQLiteCache:
                     data TEXT NOT NULL,
                     created_at REAL NOT NULL,
                     expires_at REAL NOT NULL,
-                    
+
                     -- Metadata for searching (extracted from data)
                     asin TEXT,
                     title TEXT,
                     author TEXT,
                     source TEXT,  -- 'abs' or 'audible'
-                    
+
                     UNIQUE(namespace, key)
                 );
-                
+
                 -- Indexes for common queries
-                CREATE INDEX IF NOT EXISTS idx_cache_namespace_key 
+                CREATE INDEX IF NOT EXISTS idx_cache_namespace_key
                     ON cache(namespace, key);
-                CREATE INDEX IF NOT EXISTS idx_cache_expires 
+                CREATE INDEX IF NOT EXISTS idx_cache_expires
                     ON cache(expires_at);
-                CREATE INDEX IF NOT EXISTS idx_cache_asin 
+                CREATE INDEX IF NOT EXISTS idx_cache_asin
                     ON cache(asin) WHERE asin IS NOT NULL;
-                CREATE INDEX IF NOT EXISTS idx_cache_source_asin 
+                CREATE INDEX IF NOT EXISTS idx_cache_source_asin
                     ON cache(source, asin) WHERE asin IS NOT NULL;
-                
+
                 -- Full-text search table
                 CREATE VIRTUAL TABLE IF NOT EXISTS cache_fts USING fts5(
                     title,
@@ -111,25 +112,25 @@ class SQLiteCache:
                     content='cache',
                     content_rowid='id'
                 );
-                
+
                 -- Triggers to keep FTS in sync
                 CREATE TRIGGER IF NOT EXISTS cache_ai AFTER INSERT ON cache BEGIN
                     INSERT INTO cache_fts(rowid, title, author, namespace, key)
                     VALUES (new.id, new.title, new.author, new.namespace, new.key);
                 END;
-                
+
                 CREATE TRIGGER IF NOT EXISTS cache_ad AFTER DELETE ON cache BEGIN
                     INSERT INTO cache_fts(cache_fts, rowid, title, author, namespace, key)
                     VALUES ('delete', old.id, old.title, old.author, old.namespace, old.key);
                 END;
-                
+
                 CREATE TRIGGER IF NOT EXISTS cache_au AFTER UPDATE ON cache BEGIN
                     INSERT INTO cache_fts(cache_fts, rowid, title, author, namespace, key)
                     VALUES ('delete', old.id, old.title, old.author, old.namespace, old.key);
                     INSERT INTO cache_fts(rowid, title, author, namespace, key)
                     VALUES (new.id, new.title, new.author, new.namespace, new.key);
                 END;
-                
+
                 -- Cross-reference table for ABS <-> Audible mapping
                 CREATE TABLE IF NOT EXISTS asin_mapping (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -143,13 +144,14 @@ class SQLiteCache:
                     matched_at REAL,
                     UNIQUE(abs_id)
                 );
-                
-                CREATE INDEX IF NOT EXISTS idx_mapping_asin 
+
+                CREATE INDEX IF NOT EXISTS idx_mapping_asin
                     ON asin_mapping(asin);
-                CREATE INDEX IF NOT EXISTS idx_mapping_abs_id 
+                CREATE INDEX IF NOT EXISTS idx_mapping_abs_id
                     ON asin_mapping(abs_id) WHERE abs_id IS NOT NULL;
-            """)
-    
+            """
+            )
+
     @contextmanager
     def _get_connection(self) -> Iterator[sqlite3.Connection]:
         """Get a database connection with proper settings."""
@@ -165,11 +167,11 @@ class SQLiteCache:
             yield conn
         finally:
             conn.close()
-    
+
     def _memory_key(self, namespace: str, key: str) -> str:
         """Generate memory cache key."""
         return f"{namespace}:{key}"
-    
+
     def _extract_metadata(self, data: dict | list, namespace: str) -> dict:
         """Extract searchable metadata from cached data."""
         metadata = {
@@ -178,26 +180,26 @@ class SQLiteCache:
             "author": None,
             "source": None,
         }
-        
+
         # Determine source from namespace
         if namespace.startswith("abs_"):
             metadata["source"] = "abs"
         elif namespace.startswith("audible") or namespace in ("library", "catalog", "search"):
             metadata["source"] = "audible"
-        
+
         # Handle list data (e.g., library items) - no metadata extraction for lists
         if isinstance(data, list):
             return metadata
-        
+
         # Extract ASIN
         metadata["asin"] = data.get("asin")
-        
+
         # Extract title - handle different data structures
         if "title" in data:
             metadata["title"] = data["title"]
         elif "media" in data and "metadata" in data["media"]:
             metadata["title"] = data["media"]["metadata"].get("title")
-        
+
         # Extract author
         if "authors" in data and data["authors"]:
             if isinstance(data["authors"][0], dict):
@@ -208,33 +210,33 @@ class SQLiteCache:
             metadata["author"] = data["primary_author"]
         elif "media" in data and "metadata" in data["media"]:
             metadata["author"] = data["media"]["metadata"].get("authorName")
-        
+
         return metadata
-    
+
     # -------------------------------------------------------------------------
     # Core Cache Operations
     # -------------------------------------------------------------------------
-    
+
     def get(
         self,
         namespace: str,
         key: str,
         ignore_expired: bool = False,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """
         Get an item from cache.
-        
+
         Args:
             namespace: Cache namespace
             key: Unique identifier
             ignore_expired: If True, return even if expired
-            
+
         Returns:
             Cached data or None if not found/expired
         """
         mem_key = self._memory_key(namespace, key)
         now = time.time()
-        
+
         # Check memory cache first
         if mem_key in self._memory_cache:
             data, expires_at = self._memory_cache[mem_key]
@@ -242,40 +244,39 @@ class SQLiteCache:
                 return data
             else:
                 del self._memory_cache[mem_key]
-        
+
         # Check database
         with self._get_connection() as conn:
             if ignore_expired:
                 row = conn.execute(
-                    "SELECT data FROM cache WHERE namespace = ? AND key = ?",
-                    (namespace, key)
+                    "SELECT data FROM cache WHERE namespace = ? AND key = ?", (namespace, key)
                 ).fetchone()
             else:
                 row = conn.execute(
                     "SELECT data, expires_at FROM cache WHERE namespace = ? AND key = ? AND expires_at > ?",
-                    (namespace, key, now)
+                    (namespace, key, now),
                 ).fetchone()
-            
+
             if row:
                 data = orjson.loads(row["data"])
                 expires_at = row["expires_at"] if "expires_at" in row.keys() else now + 3600
-                
+
                 # Add to memory cache
                 self._add_to_memory(mem_key, data, expires_at)
                 return data
-        
+
         return None
-    
+
     def set(
         self,
         namespace: str,
         key: str,
         data: Any,
-        ttl_seconds: Optional[float] = None,
+        ttl_seconds: float | None = None,
     ) -> None:
         """
         Store an item in cache.
-        
+
         Args:
             namespace: Cache namespace
             key: Unique identifier
@@ -284,23 +285,24 @@ class SQLiteCache:
         """
         if ttl_seconds is None:
             ttl_seconds = self.default_ttl_seconds
-        
+
         now = time.time()
         expires_at = now + ttl_seconds
-        
+
         # Convert Pydantic models to dict
         if hasattr(data, "model_dump"):
             data = data.model_dump()
-        
+
         # Extract metadata
         metadata = self._extract_metadata(data, namespace)
-        
+
         # Serialize data
         data_json = orjson.dumps(data).decode("utf-8")
-        
+
         # Store in database
         with self._get_connection() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO cache (namespace, key, data, created_at, expires_at, asin, title, author, source)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(namespace, key) DO UPDATE SET
@@ -311,142 +313,133 @@ class SQLiteCache:
                     title = excluded.title,
                     author = excluded.author,
                     source = excluded.source
-            """, (
-                namespace, key, data_json, now, expires_at,
-                metadata["asin"], metadata["title"], metadata["author"], metadata["source"]
-            ))
-        
+            """,
+                (
+                    namespace,
+                    key,
+                    data_json,
+                    now,
+                    expires_at,
+                    metadata["asin"],
+                    metadata["title"],
+                    metadata["author"],
+                    metadata["source"],
+                ),
+            )
+
         # Add to memory cache
         mem_key = self._memory_key(namespace, key)
         self._add_to_memory(mem_key, data, expires_at)
-    
+
     def _add_to_memory(self, key: str, data: Any, expires_at: float) -> None:
         """Add to memory cache with LRU eviction."""
         self._memory_cache[key] = (data, expires_at)
-        
+
         # Evict if over limit
         if len(self._memory_cache) > self.max_memory_entries:
             # Remove oldest entries
             sorted_keys = sorted(
-                self._memory_cache.keys(),
-                key=lambda k: self._memory_cache[k][1]  # Sort by expires_at
+                self._memory_cache.keys(), key=lambda k: self._memory_cache[k][1]  # Sort by expires_at
             )
-            for k in sorted_keys[:len(sorted_keys) // 4]:
+            for k in sorted_keys[: len(sorted_keys) // 4]:
                 del self._memory_cache[k]
-    
+
     def delete(self, namespace: str, key: str) -> bool:
         """
         Delete an item from cache.
-        
+
         Returns:
             True if item was deleted
         """
         mem_key = self._memory_key(namespace, key)
         self._memory_cache.pop(mem_key, None)
-        
+
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "DELETE FROM cache WHERE namespace = ? AND key = ?",
-                (namespace, key)
-            )
+            cursor = conn.execute("DELETE FROM cache WHERE namespace = ? AND key = ?", (namespace, key))
             return cursor.rowcount > 0
-    
+
     def clear_namespace(self, namespace: str) -> int:
         """Clear all items in a namespace."""
         # Clear from memory
         keys_to_delete = [k for k in self._memory_cache if k.startswith(f"{namespace}:")]
         for k in keys_to_delete:
             del self._memory_cache[k]
-        
+
         # Clear from database
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "DELETE FROM cache WHERE namespace = ?",
-                (namespace,)
-            )
+            cursor = conn.execute("DELETE FROM cache WHERE namespace = ?", (namespace,))
             return cursor.rowcount
-    
+
     def clear_all(self) -> int:
         """Clear all cached items."""
         self._memory_cache.clear()
-        
+
         with self._get_connection() as conn:
             cursor = conn.execute("DELETE FROM cache")
             return cursor.rowcount
-    
+
     def cleanup_expired(self) -> int:
         """Remove all expired entries."""
         now = time.time()
-        
+
         # Clean memory cache
-        expired_keys = [
-            k for k, (_, expires_at) in self._memory_cache.items()
-            if expires_at <= now
-        ]
+        expired_keys = [k for k, (_, expires_at) in self._memory_cache.items() if expires_at <= now]
         for k in expired_keys:
             del self._memory_cache[k]
-        
+
         # Clean database
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "DELETE FROM cache WHERE expires_at <= ?",
-                (now,)
-            )
+            cursor = conn.execute("DELETE FROM cache WHERE expires_at <= ?", (now,))
             return cursor.rowcount
-    
+
     # -------------------------------------------------------------------------
     # Search Operations
     # -------------------------------------------------------------------------
-    
-    def search_by_asin(self, asin: str, source: Optional[str] = None) -> list[dict]:
+
+    def search_by_asin(self, asin: str, source: str | None = None) -> list[dict]:
         """
         Find cached items by ASIN.
-        
+
         Args:
             asin: ASIN to search for
             source: Filter by source ('abs' or 'audible')
-            
+
         Returns:
             List of matching cached data
         """
         now = time.time()
-        
+
         with self._get_connection() as conn:
             if source:
                 rows = conn.execute(
                     "SELECT namespace, key, data FROM cache WHERE asin = ? AND source = ? AND expires_at > ?",
-                    (asin, source, now)
+                    (asin, source, now),
                 ).fetchall()
             else:
                 rows = conn.execute(
-                    "SELECT namespace, key, data FROM cache WHERE asin = ? AND expires_at > ?",
-                    (asin, now)
+                    "SELECT namespace, key, data FROM cache WHERE asin = ? AND expires_at > ?", (asin, now)
                 ).fetchall()
-            
+
             return [
-                {
-                    "namespace": row["namespace"],
-                    "key": row["key"],
-                    "data": orjson.loads(row["data"])
-                }
-                for row in rows
+                {"namespace": row["namespace"], "key": row["key"], "data": orjson.loads(row["data"])} for row in rows
             ]
-    
+
     def search_by_title(self, query: str, limit: int = 20) -> list[dict]:
         """
         Full-text search by title.
-        
+
         Args:
             query: Search query
             limit: Maximum results
-            
+
         Returns:
             List of matching items with relevance scores
         """
         now = time.time()
-        
+
         with self._get_connection() as conn:
-            rows = conn.execute("""
+            rows = conn.execute(
+                """
                 SELECT c.namespace, c.key, c.data, c.title, c.author,
                        bm25(cache_fts) as score
                 FROM cache_fts
@@ -454,8 +447,10 @@ class SQLiteCache:
                 WHERE cache_fts MATCH ? AND c.expires_at > ?
                 ORDER BY score
                 LIMIT ?
-            """, (f'title:"{query}"*', now, limit)).fetchall()
-            
+            """,
+                (f'title:"{query}"*', now, limit),
+            ).fetchall()
+
             return [
                 {
                     "namespace": row["namespace"],
@@ -463,25 +458,26 @@ class SQLiteCache:
                     "title": row["title"],
                     "author": row["author"],
                     "score": row["score"],
-                    "data": orjson.loads(row["data"])
+                    "data": orjson.loads(row["data"]),
                 }
                 for row in rows
             ]
-    
+
     def search_fts(self, query: str, limit: int = 20) -> list[dict]:
         """
         Full-text search across title and author.
-        
+
         Args:
             query: Search query
             limit: Maximum results
         """
         now = time.time()
-        
+
         with self._get_connection() as conn:
             # Escape special FTS characters and add wildcards
             safe_query = query.replace('"', '""')
-            rows = conn.execute("""
+            rows = conn.execute(
+                """
                 SELECT c.namespace, c.key, c.data, c.title, c.author,
                        bm25(cache_fts) as score
                 FROM cache_fts
@@ -489,8 +485,10 @@ class SQLiteCache:
                 WHERE cache_fts MATCH ? AND c.expires_at > ?
                 ORDER BY score
                 LIMIT ?
-            """, (f'"{safe_query}"*', now, limit)).fetchall()
-            
+            """,
+                (f'"{safe_query}"*', now, limit),
+            ).fetchall()
+
             return [
                 {
                     "namespace": row["namespace"],
@@ -498,28 +496,28 @@ class SQLiteCache:
                     "title": row["title"],
                     "author": row["author"],
                     "score": row["score"],
-                    "data": orjson.loads(row["data"])
+                    "data": orjson.loads(row["data"]),
                 }
                 for row in rows
             ]
-    
+
     # -------------------------------------------------------------------------
     # ASIN Mapping (ABS <-> Audible cross-reference)
     # -------------------------------------------------------------------------
-    
+
     def set_asin_mapping(
         self,
         asin: str,
-        abs_id: Optional[str] = None,
-        abs_path: Optional[str] = None,
-        audible_asin: Optional[str] = None,
-        title: Optional[str] = None,
-        author: Optional[str] = None,
+        abs_id: str | None = None,
+        abs_path: str | None = None,
+        audible_asin: str | None = None,
+        title: str | None = None,
+        author: str | None = None,
         confidence: float = 1.0,
     ) -> None:
         """
         Store an ASIN mapping between ABS and Audible.
-        
+
         Args:
             asin: Primary ASIN (usually from metadata)
             abs_id: ABS library item ID
@@ -530,7 +528,8 @@ class SQLiteCache:
             confidence: Match confidence (0.0 to 1.0)
         """
         with self._get_connection() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO asin_mapping (asin, abs_id, abs_path, audible_asin, title, author, match_confidence, matched_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(asin) DO UPDATE SET
@@ -541,90 +540,84 @@ class SQLiteCache:
                     author = COALESCE(excluded.author, asin_mapping.author),
                     match_confidence = excluded.match_confidence,
                     matched_at = excluded.matched_at
-            """, (asin, abs_id, abs_path, audible_asin, title, author, confidence, time.time()))
-    
-    def get_asin_mapping(self, asin: str) -> Optional[dict]:
+            """,
+                (asin, abs_id, abs_path, audible_asin, title, author, confidence, time.time()),
+            )
+
+    def get_asin_mapping(self, asin: str) -> dict | None:
         """Get ASIN mapping by ASIN."""
         with self._get_connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM asin_mapping WHERE asin = ?",
-                (asin,)
-            ).fetchone()
-            
+            row = conn.execute("SELECT * FROM asin_mapping WHERE asin = ?", (asin,)).fetchone()
+
             if row:
                 return dict(row)
         return None
-    
-    def get_mapping_by_abs_id(self, abs_id: str) -> Optional[dict]:
+
+    def get_mapping_by_abs_id(self, abs_id: str) -> dict | None:
         """Get ASIN mapping by ABS item ID."""
         with self._get_connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM asin_mapping WHERE abs_id = ?",
-                (abs_id,)
-            ).fetchone()
-            
+            row = conn.execute("SELECT * FROM asin_mapping WHERE abs_id = ?", (abs_id,)).fetchone()
+
             if row:
                 return dict(row)
         return None
-    
+
     def get_unmapped_abs_items(self) -> list[dict]:
         """Get ABS items that don't have Audible mappings."""
         with self._get_connection() as conn:
-            rows = conn.execute("""
+            rows = conn.execute(
+                """
                 SELECT c.key, c.data, c.title, c.author
                 FROM cache c
                 LEFT JOIN asin_mapping m ON c.key = m.abs_id
                 WHERE c.namespace LIKE 'abs_%'
                   AND c.expires_at > ?
                   AND m.audible_asin IS NULL
-            """, (time.time(),)).fetchall()
-            
+            """,
+                (time.time(),),
+            ).fetchall()
+
             return [
                 {
                     "abs_id": row["key"],
                     "title": row["title"],
                     "author": row["author"],
-                    "data": orjson.loads(row["data"])
+                    "data": orjson.loads(row["data"]),
                 }
                 for row in rows
             ]
-    
+
     # -------------------------------------------------------------------------
     # Statistics
     # -------------------------------------------------------------------------
-    
+
     def get_stats(self) -> dict:
         """Get cache statistics."""
         with self._get_connection() as conn:
             # Total counts
             total = conn.execute("SELECT COUNT(*) as count FROM cache").fetchone()["count"]
-            
+
             # By namespace
             namespaces = {}
-            for row in conn.execute(
-                "SELECT namespace, COUNT(*) as count FROM cache GROUP BY namespace"
-            ).fetchall():
+            for row in conn.execute("SELECT namespace, COUNT(*) as count FROM cache GROUP BY namespace").fetchall():
                 namespaces[row["namespace"]] = row["count"]
-            
+
             # Expired count
             now = time.time()
-            expired = conn.execute(
-                "SELECT COUNT(*) as count FROM cache WHERE expires_at <= ?",
-                (now,)
-            ).fetchone()["count"]
-            
+            expired = conn.execute("SELECT COUNT(*) as count FROM cache WHERE expires_at <= ?", (now,)).fetchone()[
+                "count"
+            ]
+
             # Mapping stats
-            mapping_count = conn.execute(
-                "SELECT COUNT(*) as count FROM asin_mapping"
-            ).fetchone()["count"]
-            
+            mapping_count = conn.execute("SELECT COUNT(*) as count FROM asin_mapping").fetchone()["count"]
+
             matched_count = conn.execute(
                 "SELECT COUNT(*) as count FROM asin_mapping WHERE audible_asin IS NOT NULL"
             ).fetchone()["count"]
-            
+
             # Database size
             db_size = self.db_path.stat().st_size if self.db_path.exists() else 0
-        
+
         return {
             "enabled": True,
             "backend": "sqlite",
@@ -637,23 +630,23 @@ class SQLiteCache:
             "asin_mappings": mapping_count,
             "matched_items": matched_count,
         }
-    
+
     # -------------------------------------------------------------------------
     # Convenience Methods (compatible with old interface)
     # -------------------------------------------------------------------------
-    
-    def get_library_item(self, asin: str) -> Optional[dict]:
+
+    def get_library_item(self, asin: str) -> dict | None:
         """Get cached library item by ASIN."""
         return self.get("library", asin)
-    
-    def set_library_item(self, asin: str, data: dict, ttl_seconds: Optional[float] = None) -> None:
+
+    def set_library_item(self, asin: str, data: dict, ttl_seconds: float | None = None) -> None:
         """Cache a library item."""
         self.set("library", asin, data, ttl_seconds)
-    
-    def get_catalog_product(self, asin: str) -> Optional[dict]:
+
+    def get_catalog_product(self, asin: str) -> dict | None:
         """Get cached catalog product by ASIN."""
         return self.get("catalog", asin)
-    
-    def set_catalog_product(self, asin: str, data: dict, ttl_seconds: Optional[float] = None) -> None:
+
+    def set_catalog_product(self, asin: str, data: dict, ttl_seconds: float | None = None) -> None:
         """Cache a catalog product."""
         self.set("catalog", asin, data, ttl_seconds)

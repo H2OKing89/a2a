@@ -4,13 +4,13 @@ Audiobookshelf API client module.
 
 from .client import ABSClient
 from .models import (
-    Library,
-    LibraryItem,
-    LibraryItemMinified,
-    LibraryItemExpanded,
-    BookMetadata,
     AudioFile,
     Author,
+    BookMetadata,
+    Library,
+    LibraryItem,
+    LibraryItemExpanded,
+    LibraryItemMinified,
     Series,
 )
 

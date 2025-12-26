@@ -7,166 +7,166 @@ Based on the Audible API response structures with response_groups:
 """
 
 from datetime import datetime
-from typing import Optional, Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
 
 class AudibleAuthor(BaseModel):
     """Author/contributor information."""
-    
-    asin: Optional[str] = None
+
+    asin: str | None = None
     name: str
-    
+
     model_config = {"extra": "ignore"}
 
 
 class AudibleNarrator(BaseModel):
     """Narrator information."""
-    
+
     name: str
-    
+
     model_config = {"extra": "ignore"}
 
 
 class AudibleSeries(BaseModel):
     """Series information."""
-    
-    asin: Optional[str] = None
+
+    asin: str | None = None
     title: str
-    sequence: Optional[str] = None
-    url: Optional[str] = None
-    
+    sequence: str | None = None
+    url: str | None = None
+
     model_config = {"extra": "ignore"}
 
 
 class AudibleRating(BaseModel):
     """Rating information."""
-    
-    overall_distribution: Optional[dict[str, int]] = Field(default=None, alias="overall_distribution")
-    performance_distribution: Optional[dict[str, int]] = Field(default=None, alias="performance_distribution")
-    story_distribution: Optional[dict[str, int]] = Field(default=None, alias="story_distribution")
-    num_reviews: Optional[int] = Field(default=None, alias="num_reviews")
-    
+
+    overall_distribution: dict[str, int] | None = Field(default=None, alias="overall_distribution")
+    performance_distribution: dict[str, int] | None = Field(default=None, alias="performance_distribution")
+    story_distribution: dict[str, int] | None = Field(default=None, alias="story_distribution")
+    num_reviews: int | None = Field(default=None, alias="num_reviews")
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleCategory(BaseModel):
     """Category/genre information."""
-    
-    id: Optional[str] = Field(default=None, alias="category_id")
-    name: Optional[str] = Field(default=None, alias="name")
-    root: Optional[str] = None
-    
+
+    id: str | None = Field(default=None, alias="category_id")
+    name: str | None = Field(default=None, alias="name")
+    root: str | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleCategoryLadder(BaseModel):
     """Category hierarchy (ladder)."""
-    
+
     ladder: list[AudibleCategory] = Field(default_factory=list)
-    root: Optional[str] = None
-    
+    root: str | None = None
+
     model_config = {"extra": "ignore"}
 
 
 class AudiblePlan(BaseModel):
     """Plan/subscription info."""
-    
-    plan_name: Optional[str] = None
+
+    plan_name: str | None = None
     is_in_plan: bool = Field(default=False, alias="is_in_plan")
-    
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleBook(BaseModel):
     """
     Core audiobook metadata from Audible.
-    
+
     This model is used for both library items and catalog products.
     """
-    
+
     # Core identifiers
     asin: str
     title: str
-    subtitle: Optional[str] = None
-    
+    subtitle: str | None = None
+
     # Authors and narrators
     authors: list[AudibleAuthor] = Field(default_factory=list)
     narrators: list[AudibleNarrator] = Field(default_factory=list)
-    
+
     # Publisher info
-    publisher_name: Optional[str] = None
-    publisher_summary: Optional[str] = None
-    
+    publisher_name: str | None = None
+    publisher_summary: str | None = None
+
     # Release info
-    release_date: Optional[str] = None
-    issue_date: Optional[str] = None
-    
+    release_date: str | None = None
+    issue_date: str | None = None
+
     # Runtime
-    runtime_length_min: Optional[int] = None
-    format_type: Optional[str] = None
-    
+    runtime_length_min: int | None = None
+    format_type: str | None = None
+
     # Language
-    language: Optional[str] = None
-    
+    language: str | None = None
+
     # Series
     series: list[AudibleSeries] = Field(default_factory=list)
-    
+
     # Categories
     category_ladders: list[AudibleCategoryLadder] = Field(default_factory=list)
-    
+
     # Ratings
-    rating: Optional[AudibleRating] = None
-    
+    rating: AudibleRating | None = None
+
     # Images
-    product_images: Optional[dict[str, str]] = None
-    
+    product_images: dict[str, str] | None = None
+
     # Pricing
-    price: Optional[dict[str, Any]] = None
-    
+    price: dict[str, Any] | None = None
+
     # Sample URL
-    sample_url: Optional[str] = None
-    
+    sample_url: str | None = None
+
     # Extended attributes
     is_ayce: bool = Field(default=False, alias="is_ayce")  # All You Can Eat (included in subscription)
     is_adult_product: bool = Field(default=False, alias="is_adult_product")
-    
+
     # Audible Plus catalog
     is_listenable: bool = Field(default=False, alias="is_listenable")
-    
+
     # Content info
-    content_type: Optional[str] = None
-    content_delivery_type: Optional[str] = None
-    
+    content_type: str | None = None
+    content_delivery_type: str | None = None
+
     # Merchandising summary (short description)
-    merchandising_summary: Optional[str] = None
-    
+    merchandising_summary: str | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}
-    
+
     @property
-    def runtime_hours(self) -> Optional[float]:
+    def runtime_hours(self) -> float | None:
         """Get runtime in hours."""
         if self.runtime_length_min:
             return round(self.runtime_length_min / 60, 2)
         return None
-    
+
     @property
-    def primary_author(self) -> Optional[str]:
+    def primary_author(self) -> str | None:
         """Get primary author name."""
         if self.authors:
             return self.authors[0].name
         return None
-    
+
     @property
-    def primary_narrator(self) -> Optional[str]:
+    def primary_narrator(self) -> str | None:
         """Get primary narrator name."""
         if self.narrators:
             return self.narrators[0].name
         return None
-    
+
     @property
-    def primary_series(self) -> Optional[AudibleSeries]:
+    def primary_series(self) -> AudibleSeries | None:
         """Get primary series."""
         if self.series:
             return self.series[0]
@@ -176,14 +176,14 @@ class AudibleBook(BaseModel):
 class AudibleLibraryItem(AudibleBook):
     """
     Library-specific audiobook item with ownership/status info.
-    
+
     Extends AudibleBook with library-specific fields.
     """
-    
+
     # Library-specific fields
-    purchase_date: Optional[str] = None
-    origin_type: Optional[str] = None
-    
+    purchase_date: str | None = None
+    origin_type: str | None = None
+
     # Status flags
     is_downloaded: bool = Field(default=False, alias="is_downloaded")
     is_finished: bool = Field(default=False, alias="is_finished")
@@ -192,73 +192,73 @@ class AudibleLibraryItem(AudibleBook):
     is_visible: bool = Field(default=True, alias="is_visible")
     is_removable: bool = Field(default=False, alias="is_removable")
     is_returnable: bool = Field(default=False, alias="is_returnable")
-    
+
     # Listening progress
-    percent_complete: Optional[float] = Field(default=None, alias="percent_complete")
-    
+    percent_complete: float | None = Field(default=None, alias="percent_complete")
+
     # PDF availability
-    pdf_url: Optional[str] = None
-    
+    pdf_url: str | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleCatalogProduct(AudibleBook):
     """
     Catalog product with additional catalog-specific fields.
-    
+
     Used for search results and product lookups.
     """
-    
+
     # Availability
-    sku: Optional[str] = None
-    sku_lite: Optional[str] = None
-    
+    sku: str | None = None
+    sku_lite: str | None = None
+
     # Reviews
-    reviews: Optional[list[dict]] = None
-    
+    reviews: list[dict] | None = None
+
     # Customer rights (if authenticated)
-    customer_rights: Optional[dict] = None
-    
+    customer_rights: dict | None = None
+
     # Relationships (similar products, etc.)
-    relationships: Optional[list[dict]] = None
-    
+    relationships: list[dict] | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleLibraryResponse(BaseModel):
     """Response from GET /1.0/library."""
-    
+
     items: list[AudibleLibraryItem] = Field(default_factory=list)
-    response_groups: Optional[list[str]] = None
-    total_results: Optional[int] = Field(default=None, alias="total_results")
-    
+    response_groups: list[str] | None = None
+    total_results: int | None = Field(default=None, alias="total_results")
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleCatalogResponse(BaseModel):
     """Response from GET /1.0/catalog/products."""
-    
+
     products: list[AudibleCatalogProduct] = Field(default_factory=list)
-    total_results: Optional[int] = Field(default=None, alias="total_results")
-    
+    total_results: int | None = Field(default=None, alias="total_results")
+
     model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class AudibleListeningStats(BaseModel):
     """User listening statistics from /1.0/stats/aggregates."""
-    
+
     # Total stats
-    total_listening_time_ms: Optional[int] = Field(default=None, alias="totalListeningTimeMs")
-    total_finished_titles: Optional[int] = Field(default=None, alias="totalFinishedTitles")
-    
+    total_listening_time_ms: int | None = Field(default=None, alias="totalListeningTimeMs")
+    total_finished_titles: int | None = Field(default=None, alias="totalFinishedTitles")
+
     # Daily/monthly breakdowns if requested
-    daily_listening_stats: Optional[list[dict]] = None
-    monthly_listening_stats: Optional[list[dict]] = None
-    
+    daily_listening_stats: list[dict] | None = None
+    monthly_listening_stats: list[dict] | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}
-    
+
     @property
-    def total_hours(self) -> Optional[float]:
+    def total_hours(self) -> float | None:
         """Total listening time in hours."""
         if self.total_listening_time_ms:
             return round(self.total_listening_time_ms / (1000 * 60 * 60), 2)
@@ -267,14 +267,14 @@ class AudibleListeningStats(BaseModel):
 
 class AudibleAccountInfo(BaseModel):
     """Account information from /1.0/account/information."""
-    
-    customer_id: Optional[str] = None
-    customer_name: Optional[str] = None
-    customer_email: Optional[str] = None
-    marketplace: Optional[str] = None
-    
+
+    customer_id: str | None = None
+    customer_name: str | None = None
+    customer_email: str | None = None
+    marketplace: str | None = None
+
     # Subscription details
-    subscription_details: Optional[dict] = None
-    plan_summary: Optional[dict] = None
-    
+    subscription_details: dict | None = None
+    plan_summary: dict | None = None
+
     model_config = {"extra": "ignore", "populate_by_name": True}

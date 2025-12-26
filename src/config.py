@@ -17,15 +17,15 @@ load_dotenv()
 
 class ABSSettings(BaseSettings):
     """Audiobookshelf API settings."""
-    
+
     model_config = SettingsConfigDict(
         env_prefix="ABS_",
         extra="ignore",
     )
-    
+
     host: str = Field(default="http://localhost:13378", description="ABS server URL")
     api_key: str = Field(default="", description="ABS API key/token")
-    
+
     # Caching settings
     cache_enabled: bool = Field(default=True, description="Enable response caching")
     cache_ttl_hours: float = Field(default=2.0, description="Cache TTL in hours")
@@ -33,30 +33,30 @@ class ABSSettings(BaseSettings):
 
 class AudibleSettings(BaseSettings):
     """Audible API settings."""
-    
+
     model_config = SettingsConfigDict(
         env_prefix="AUDIBLE_",
         extra="ignore",
     )
-    
+
     # Authentication
     auth_file: Path = Field(
         default=Path("./data/audible_auth.json"),
         description="Path to saved Audible credentials",
     )
     locale: str = Field(default="us", description="Audible marketplace locale (us, uk, de, etc.)")
-    
+
     # Optional email/password for programmatic login
-    email: Optional[str] = Field(default=None, description="Audible/Amazon email")
-    password: Optional[str] = Field(default=None, description="Audible/Amazon password")
-    
+    email: str | None = Field(default=None, description="Audible/Amazon email")
+    password: str | None = Field(default=None, description="Audible/Amazon password")
+
     # Rate limiting
     rate_limit_delay: float = Field(default=0.5, description="Base delay between requests in seconds")
     requests_per_minute: float = Field(default=20.0, description="Maximum requests per minute")
     burst_size: int = Field(default=5, description="Number of requests before burst delay")
     backoff_multiplier: float = Field(default=2.0, description="Backoff multiplier on rate limit errors")
     max_backoff_seconds: float = Field(default=60.0, description="Maximum backoff delay in seconds")
-    
+
     # Caching
     cache_enabled: bool = Field(default=True, description="Enable response caching")
     cache_ttl_days: int = Field(default=10, description="Cache TTL in days")
@@ -64,12 +64,12 @@ class AudibleSettings(BaseSettings):
 
 class APIRateLimitSettings(BaseSettings):
     """Rate limiting settings for API calls."""
-    
+
     model_config = SettingsConfigDict(
         env_prefix="API_RATE_LIMIT_",
         extra="ignore",
     )
-    
+
     base_delay: float = Field(default=0.1, description="Base delay between requests")
     burst_size: int = Field(default=10, description="Number of requests before burst delay")
     burst_delay: float = Field(default=1.0, description="Delay after burst")
@@ -80,7 +80,7 @@ class APIRateLimitSettings(BaseSettings):
 
 class PathSettings(BaseSettings):
     """Path configuration settings."""
-    
+
     library_root: Path = Field(default=Path("/mnt/user/data/audio/audiobooks"))
     data_dir: Path = Field(default=Path("./data"))
     cache_dir: Path = Field(default=Path("./data/cache"))
@@ -90,12 +90,12 @@ class PathSettings(BaseSettings):
 
 class CacheSettings(BaseSettings):
     """Unified cache settings (SQLite backend)."""
-    
+
     model_config = SettingsConfigDict(
         env_prefix="CACHE_",
         extra="ignore",
     )
-    
+
     enabled: bool = Field(default=True, description="Enable caching globally")
     db_path: Path = Field(default=Path("./data/cache/cache.db"), description="SQLite database path")
     default_ttl_hours: float = Field(default=2.0, description="Default TTL for cached items")
@@ -106,9 +106,9 @@ class CacheSettings(BaseSettings):
 
 class QualitySettings(BaseSettings):
     """Audio quality thresholds."""
-    
+
     model_config = SettingsConfigDict(extra="ignore")
-    
+
     bitrate_threshold_kbps: float = Field(default=100.0)
     ultra_bitrate_kbps: float = Field(default=256.0)
     high_bitrate_kbps: float = Field(default=128.0)
@@ -122,7 +122,7 @@ class QualitySettings(BaseSettings):
 
 class EnrichmentSettings(BaseSettings):
     """Audible enrichment settings."""
-    
+
     enabled: bool = Field(default=True)
     requests_per_minute: float = Field(default=20.0)
     burst_size: int = Field(default=5)
@@ -133,13 +133,13 @@ class EnrichmentSettings(BaseSettings):
 
 class Settings(BaseSettings):
     """Main application settings."""
-    
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
-    
+
     abs: ABSSettings = Field(default_factory=ABSSettings)
     audible: AudibleSettings = Field(default_factory=AudibleSettings)
     rate_limit: APIRateLimitSettings = Field(default_factory=APIRateLimitSettings)
@@ -147,22 +147,22 @@ class Settings(BaseSettings):
     cache: CacheSettings = Field(default_factory=CacheSettings)
     quality: QualitySettings = Field(default_factory=QualitySettings)
     enrichment: EnrichmentSettings = Field(default_factory=EnrichmentSettings)
-    
+
     verbose: bool = Field(default=True)
     debug: bool = Field(default=False)
-    
+
     @classmethod
-    def load(cls, config_path: Optional[Path] = None) -> "Settings":
+    def load(cls, config_path: Path | None = None) -> "Settings":
         """Load settings from config.yaml and environment."""
         config_data = {}
-        
+
         if config_path is None:
             config_path = Path("config.yaml")
-        
+
         if config_path.exists():
-            with open(config_path) as f:
+            with open(config_path, encoding="utf-8") as f:
                 yaml_config = yaml.safe_load(f) or {}
-            
+
             # Map yaml structure to settings
             if "paths" in yaml_config:
                 config_data["paths"] = PathSettings(**yaml_config["paths"])
@@ -180,22 +180,22 @@ class Settings(BaseSettings):
                 config_data["verbose"] = yaml_config["verbose"]
             if "debug" in yaml_config:
                 config_data["debug"] = yaml_config["debug"]
-        
+
         # Load ABS settings from environment (merge with yaml if present)
         if "abs" not in config_data:
             config_data["abs"] = ABSSettings()
-        
+
         # Load Audible settings - merge env with yaml
         if "audible" not in config_data:
             config_data["audible"] = AudibleSettings()
-        
+
         config_data["rate_limit"] = APIRateLimitSettings()
-        
+
         return cls(**config_data)
 
 
 # Global settings instance
-_settings: Optional[Settings] = None
+_settings: Settings | None = None
 
 
 def get_settings() -> Settings:
@@ -206,7 +206,7 @@ def get_settings() -> Settings:
     return _settings
 
 
-def reload_settings(config_path: Optional[Path] = None) -> Settings:
+def reload_settings(config_path: Path | None = None) -> Settings:
     """Reload settings from config."""
     global _settings
     _settings = Settings.load(config_path)

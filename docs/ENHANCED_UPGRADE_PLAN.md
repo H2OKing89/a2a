@@ -20,7 +20,7 @@ Our discovery with golden samples (Providence USAC, Harry Potter Atmos) revealed
 1. **`available_codecs` doesn't expose USAC/xHE-AAC**
    - Only shows legacy AAC formats (LC_32, LC_64, LC_128)
    - USAC availability is hidden
-   
+
 2. **`best_available_bitrate` is misleading for modern formats**
    - Shows 64 kbps for USAC content (actual 128 kbps)
    - Shows 128 kbps for Atmos content (actual 768 kbps)
@@ -63,7 +63,7 @@ def analyze_local_quality(mediainfo: dict) -> LocalQuality:
     codec = mediainfo.get('codec', '').upper()
     bitrate = mediainfo.get('bitrate_kbps')
     channels = mediainfo.get('channels', 2)
-    
+
     # Detect premium formats
     if 'E-AC-3' in codec or 'EC-3' in codec:
         return LocalQuality(
@@ -72,7 +72,7 @@ def analyze_local_quality(mediainfo: dict) -> LocalQuality:
             is_premium=True,
             upgrade_possible=False  # Already best
         )
-    
+
     if 'USAC' in codec or 'XHE' in codec:
         # USAC is ~2x efficient
         effective_quality = bitrate * 2 if bitrate else 256
@@ -82,7 +82,7 @@ def analyze_local_quality(mediainfo: dict) -> LocalQuality:
             is_premium=True,
             upgrade_possible=False  # USAC is excellent
         )
-    
+
     # Standard AAC
     return LocalQuality(
         tier='AAC',
@@ -97,25 +97,25 @@ def analyze_local_quality(mediainfo: dict) -> LocalQuality:
 ```python
 def check_upgrade_availability(api_data: dict) -> UpgradeOptions:
     """Check what upgrades are available via API."""
-    
+
     options = UpgradeOptions()
-    
+
     # Atmos detection is RELIABLE
     if api_data.get('has_dolby_atmos'):
         options.atmos_available = True
         options.best_upgrade = 'ATMOS'
-    
+
     # Plus Catalog = FREE upgrade
     if api_data.get('is_plus_catalog'):
         options.is_free = True
         options.priority_boost = 5.0
-    
+
     # Bitrate upgrade (only trust for non-Atmos, non-USAC)
     api_bitrate = api_data.get('best_available_bitrate', 0)
     if not options.atmos_available:
         options.api_best_bitrate = api_bitrate
         # But don't trust it fully - could be USAC hidden
-    
+
     return options
 ```
 
@@ -124,7 +124,7 @@ def check_upgrade_availability(api_data: dict) -> UpgradeOptions:
 ```python
 def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
     """Make final upgrade decision with full context."""
-    
+
     # Already have premium format
     if local.tier == 'ATMOS':
         return UpgradeDecision(
@@ -132,7 +132,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
             priority='met',
             reason='Already have Dolby Atmos'
         )
-    
+
     if local.tier == 'USAC':
         # USAC is high quality - only upgrade to Atmos
         if api.atmos_available:
@@ -146,12 +146,12 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
             priority='met',
             reason='USAC provides excellent quality'
         )
-    
+
     # Standard AAC - check upgrade options
     threshold = 128.0
     tolerance = 0.05  # 5%
     min_acceptable = threshold * (1 - tolerance)  # 121.6 kbps
-    
+
     if local.effective_quality >= min_acceptable:
         # Near threshold - only major upgrades
         if api.atmos_available:
@@ -165,7 +165,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
             priority='met',
             reason='Quality threshold met'
         )
-    
+
     # Below threshold - upgrade candidate
     if api.is_free:
         return UpgradeDecision(
@@ -173,7 +173,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
             priority='plus',
             reason='Plus Catalog - FREE!'
         )
-    
+
     deficit = (threshold - local.effective_quality) / threshold
     if deficit > 0.2:
         priority = 'high'
@@ -181,7 +181,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
         priority = 'medium'
     else:
         priority = 'low'
-    
+
     return UpgradeDecision(
         is_candidate=True,
         priority=priority,
@@ -287,7 +287,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
 @dataclass
 class Book:
     # Existing fields...
-    
+
     # New fields
     codec_tier: str | None = None  # 'ATMOS', 'USAC', 'AAC', 'MP3'
     effective_quality_kbps: float | None = None  # Quality-adjusted bitrate
@@ -322,9 +322,9 @@ def test_atmos_not_upgrade_candidate():
         bitrate_kbps=768,
         has_dolby_atmos=True  # From API
     )
-    
+
     result = is_upgrade_candidate(book)
-    
+
     assert result.is_candidate == False
     assert result.priority == 'met'
     assert 'Atmos' in result.reason
@@ -341,9 +341,9 @@ def test_usac_not_upgrade_candidate():
         bitrate_kbps=128,
         has_dolby_atmos=False
     )
-    
+
     result = is_upgrade_candidate(book)
-    
+
     assert result.is_candidate == False
     assert result.priority == 'met'
     assert 'USAC' in result.reason or 'quality' in result.reason
@@ -360,9 +360,9 @@ def test_near_threshold_not_candidate():
         bitrate_kbps=125.6,
         best_available_kbps=128  # Only +2.4 kbps available
     )
-    
+
     result = is_upgrade_candidate(book)
-    
+
     assert result.is_candidate == False
     assert result.priority == 'met'
 ```
@@ -378,9 +378,9 @@ def test_low_bitrate_usac_unknown():
         bitrate_kbps=64,
         api_best_bitrate=64  # API doesn't know about USAC!
     )
-    
+
     result = is_upgrade_candidate(book)
-    
+
     # This is tricky - API says no upgrade but USAC exists
     # We SHOULD flag it but note the uncertainty
     assert result.is_candidate == True
@@ -401,13 +401,13 @@ def get_true_quality_widevine(content_ref: dict) -> TrueQuality:
     """Parse ContentReference for true quality info."""
     codec = content_ref.get('codec', '')
     content_format = content_ref.get('content_format', '')
-    
+
     if codec == 'ec+3' or content_format == 'M4A_EC3':
         return TrueQuality(tier='ATMOS', bitrate=768)
-    
+
     if codec == 'mp4a.40.42' or content_format == 'M4A_XHE':
         return TrueQuality(tier='USAC', bitrate=128)
-    
+
     # Standard AAC
     return TrueQuality(tier='AAC', bitrate=None)
 ```
@@ -417,14 +417,14 @@ def get_true_quality_widevine(content_ref: dict) -> TrueQuality:
 ```python
 def get_upgrade_recommendation(book: Book) -> Recommendation:
     """Smart recommendation based on all factors."""
-    
+
     if book.codec_tier == 'ATMOS':
         return Recommendation(
             action='KEEP',
             message='Premium Dolby Atmos - Best available quality!',
             badge='🎧 ATMOS'
         )
-    
+
     if book.codec_tier == 'USAC':
         if book.has_atmos_available:
             return Recommendation(
@@ -437,7 +437,7 @@ def get_upgrade_recommendation(book: Book) -> Recommendation:
             message='xHE-AAC provides excellent efficiency and quality.',
             badge='✨ USAC'
         )
-    
+
     # Continue with standard logic...
 ```
 
@@ -456,7 +456,7 @@ def get_upgrade_recommendation(book: Book) -> Recommendation:
 
 ### Priority Order
 
-1. Plus Catalog items (FREE!) 
+1. Plus Catalog items (FREE!)
 2. Legacy codecs (MP3)
 3. Significantly below threshold (>20% deficit)
 4. Moderately below threshold (10-20% deficit)  
@@ -477,22 +477,22 @@ MP3_PATTERNS = ['MP3', 'MPEG AUDIO', 'LAYER 3']
 def detect_codec_tier(codec_string: str) -> CodecTier:
     """Detect codec tier from mediainfo codec string."""
     codec_upper = codec_string.upper()
-    
+
     for pattern in ATMOS_PATTERNS:
         if pattern in codec_upper:
             return CodecTier.ATMOS
-    
+
     for pattern in USAC_PATTERNS:
         if pattern in codec_upper:
             return CodecTier.USAC
-    
+
     for pattern in MP3_PATTERNS:
         if pattern in codec_upper:
             return CodecTier.MP3
-    
+
     for pattern in AAC_PATTERNS:
         if pattern in codec_upper:
             return CodecTier.AAC_HIGH  # Determine HQ/LQ by bitrate
-    
+
     return CodecTier.UNKNOWN
 ```
