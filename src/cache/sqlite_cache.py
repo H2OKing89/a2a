@@ -8,14 +8,13 @@ Provides efficient storage and retrieval of cached data with:
 - Cross-referencing between data sources
 """
 
-import json
 import sqlite3
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import orjson
 
