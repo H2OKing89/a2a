@@ -119,6 +119,8 @@ def status():
             console.print(f"  [green]✓[/green] {len(libraries)} libraries available")
     except Exception as e:
         console.print(f"  [red]✗[/red] Connection failed: {e}")
+        # Log full exception and stack trace for debugging while keeping concise CLI output
+        logger.exception("ABS connection failed")
         has_errors = True
 
     console.print()
