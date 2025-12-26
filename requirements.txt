@@ -1,0 +1,29 @@
+orjson
+sh
+typer
+rich
+pathvalidate
+pydantic
+pydantic-settings
+PyYAML
+
+# Audible API client (audible-cli backend)
+audible
+toml
+
+# Audible scraper dependencies
+httpx[http2]
+beautifulsoup4
+lxml
+tenacity
+
+# Text matching for title verification
+rapidfuzz
+
+# Environment variable loading
+python-dotenv
+
+# Jinja2 for report templates
+Jinja2
+
+# Note: mediainfo is a system dependency, install with your OS package manager (e.g., sudo apt install mediainfo)

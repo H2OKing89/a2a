@@ -1,0 +1,143 @@
+# Project .gitignore for audible_script
+# Generated: 2025-12-22
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+config.yaml
+# Byte-compiled / optimized / DLL files
+*.so
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+wheels/
+*.egg
+
+default-wheelhouse/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# -----------------------------
+# Virtualenvs and local env files
+# -----------------------------
+.venv/
+venv/
+.env
+.env.*
+
+# -----------------------------
+# Caches & test outputs
+# -----------------------------
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+htmlcov/
+.cache/
+.mypy_cache/
+.pyre/
+
+# -----------------------------
+# Project-specific caches & data
+# -----------------------------
+# All runtime data goes in data/ subdirectories
+data/cache/
+data/scans/
+data/reports/
+data/test/
+
+# Migration test data (large sample files)
+#migration/golden_samples/
+
+# Legacy locations (if any remain)
+*.db
+*.sqlite3
+*.sqlite
+data/
+# Old cache file locations (now in data/cache/)
+.mediainfo_cache.json
+.audible_api_cache.json
+.audible_price_cache.json
+
+# Audible cache directories & snapshots
+.audible_cache/
+.test_cache.json
+.integration_test_cache.json
+*_cache.json
+*_test_cache.json
+*.snapshot.html
+*_snapshot.html
+
+# Default output files
+low_bitrate_audiobooks.json
+*.csv
+
+# -----------------------------
+# Logs and runtime files
+# -----------------------------
+*.log
+logs/
+
+# -----------------------------
+# Editor & OS files
+# -----------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Vim
+*~
+*.swp
+*.swo
+
+# Emacs
+*~
+.#*
+
+# VSCode
+.vscode/
+.history/
+
+# JetBrains
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Other
+*.tmp
+*.bak
+
+# -----------------------------
+# Optional: local secrets & keys
+# -----------------------------
+secrets/
+keys/
+*.pem
+*.key
+
+# -----------------------------
+# End
+# -----------------------------
