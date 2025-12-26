@@ -257,6 +257,66 @@ class SeriesMatcher:
 
         return series_books
 
+    def get_series_books_by_asin(
+        self,
+        asins: list[str],
+        use_cache: bool = True,
+    ) -> tuple[list[AudibleSeriesBook], str | None]:
+        """
+        Look up books by ASIN and extract series info.
+
+        This is more reliable than search when we have ASINs from ABS.
+        Returns both the series books found and the detected series ASIN.
+
+        Args:
+            asins: List of ASINs to look up
+            use_cache: Use cached results
+
+        Returns:
+            Tuple of (list of AudibleSeriesBook, series_asin or None)
+        """
+        if not self._audible:
+            return [], None
+
+        series_asin: str | None = None
+        series_name: str | None = None
+        all_series_books: dict[str, AudibleSeriesBook] = {}  # keyed by ASIN to avoid duplicates
+
+        for asin in asins:
+            if not asin:
+                continue
+
+            try:
+                product = self._audible.get_catalog_product(asin, use_cache=use_cache)
+                if not product:
+                    continue
+
+                # Check if it's in a series
+                for ps in product.series or []:
+                    if series_asin is None:
+                        series_asin = ps.asin
+                        series_name = ps.title
+
+                    # Add this book
+                    all_series_books[product.asin] = AudibleSeriesBook(
+                        asin=product.asin,
+                        title=product.title,
+                        subtitle=product.subtitle,
+                        sequence=ps.sequence,
+                        author_name=product.primary_author,
+                        narrator_name=product.primary_narrator,
+                        runtime_minutes=product.runtime_length_min,
+                        release_date=product.release_date,
+                        is_in_library=False,
+                    )
+                    break  # Use first series match
+
+            except Exception as e:
+                logger.warning(f"Failed to look up ASIN {asin}: {e}")
+                continue
+
+        return list(all_series_books.values()), series_asin
+
     # -------------------------------------------------------------------------
     # Matching Logic
     # -------------------------------------------------------------------------
