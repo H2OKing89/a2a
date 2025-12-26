@@ -5,7 +5,6 @@ Quality analyzer for audiobook libraries.
 import logging
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Optional
 
 import httpx
 from pydantic import ValidationError
@@ -391,7 +390,7 @@ class QualityAnalyzer:
                 logger.warning(f"Item not found, skipping: {item_id}")
             except ValidationError as e:
                 # Data validation error - log details and continue
-                logger.error(f"Validation error for item {item_id}: {e}", exc_info=True)
+                logger.exception(f"Validation error for item {item_id}: {e}")
             except (ABSConnectionError, httpx.TimeoutException, httpx.ConnectError) as e:
                 # Transient network errors - log and continue
                 logger.error(f"Network error fetching item {item_id}: {e}")
@@ -449,13 +448,13 @@ class QualityAnalyzer:
                 continue
             except (ABSConnectionError, httpx.TimeoutException, httpx.ConnectError) as e:
                 # Transient network errors - log and skip
-                logger.error(f"Network error fetching item {item_id}: {e}")
+                logger.error(f"Network error fetching item {item_id}: {e}", exc_info=True)
                 continue
             except ABSError as e:
                 # Other ABS API errors - log and skip
-                logger.error(f"ABS API error for item {item_id}: {e}")
+                logger.error(f"ABS API error for item {item_id}: {e}", exc_info=True)
                 continue
-            except Exception as e:
+            except Exception:
                 # Unexpected errors (e.g., bugs in analyze_item) - log with full traceback
-                logger.exception(f"Unexpected error processing item {item_id}: {e}")
+                logger.exception(f"Unexpected error processing item {item_id}")
                 continue
