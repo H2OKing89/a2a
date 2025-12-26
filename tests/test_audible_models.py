@@ -194,9 +194,9 @@ class TestAudibleLibraryItem:
     def test_library_item_boolean_defaults(self):
         """Test boolean fields have correct defaults."""
         item = AudibleLibraryItem(asin="B00TEST123", title="Test Book")
-        # These should have sensible defaults
-        assert item.is_downloaded is False or item.is_downloaded is None
-        assert item.is_finished is False or item.is_finished is None
+        # These should default to False per the model definition
+        assert item.is_downloaded is False
+        assert item.is_finished is False
 
     def test_library_item_none_booleans(self):
         """Test library item accepts None for boolean fields (real API behavior)."""
