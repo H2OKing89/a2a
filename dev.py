@@ -109,9 +109,9 @@ def clean():
     print("🧹 Cleaning cache and build artifacts...")
 
     patterns = [
-        "**/__pycache__",
-        "**/*.pyc",
-        "**/*.pyo",
+        "__pycache__",
+        "*.pyc",
+        "*.pyo",
         ".pytest_cache",
         ".mypy_cache",
         "htmlcov",
@@ -119,7 +119,7 @@ def clean():
     ]
 
     for pattern in patterns:
-        for path in Path(".").rglob(pattern.replace("**/", "")):
+        for path in Path(".").rglob(pattern):
             if path.is_file():
                 path.unlink()
                 print(f"  Removed {path}")
