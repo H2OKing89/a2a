@@ -62,7 +62,7 @@ data/test/
 
 # Migration test data (large sample files)
 #migration/golden_samples/
-
+docs/audible-readthedocs-io-en-latest.pdf
 # Legacy locations (if any remain)
 *.db
 *.sqlite3
