@@ -99,7 +99,7 @@ def mock_abs_client_empty_and_rate_limited() -> ABSClient:
         response.text = "Rate limit exceeded"
         raise httpx.HTTPStatusError("429 Too Many Requests", request=MagicMock(), response=response)
 
-    client.get_libraries.side_effect = [[], rate_limited_libraries()]
+    client.get_libraries.side_effect = [[], rate_limited_libraries]
     client.get_library_items.return_value = []
     return client
 
@@ -199,7 +199,7 @@ def mock_audible_client_empty_and_rate_limited() -> AudibleClient:
         response.text = "Rate limit exceeded"
         raise httpx.HTTPStatusError("429 Too Many Requests", request=MagicMock(), response=response)
 
-    client.get_product.side_effect = [None, rate_limited()]
+    client.get_product.side_effect = [None, rate_limited]
     client.get_library.return_value = {"items": []}
     return client
 
