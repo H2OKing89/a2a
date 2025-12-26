@@ -95,7 +95,7 @@ Golden samples in `data/samples/` for testing without live APIs.
 Use `src/utils/samples.py` to generate new samples.
 
 ## Key Files for Reference
-- [cli.py](cli.py) - Typer CLI entry point with subcommands (`audible`, `quality`)
+- [cli.py](cli.py) - Typer CLI entry point with subcommands (`audible`, `quality`, `abs`)
 - [src/cache/sqlite_cache.py](src/cache/sqlite_cache.py) - Caching with TTL, namespaces, FTS
 - [src/quality/analyzer.py](src/quality/analyzer.py) - Quality tier calculation logic
 - [config.yaml](config.yaml) - Default configuration values
