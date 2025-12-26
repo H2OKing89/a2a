@@ -49,6 +49,25 @@ logger = logging.getLogger(__name__)
 _cache: SQLiteCache | None = None
 
 
+def get_default_library_id() -> str | None:
+    """Get the default library ID from settings."""
+    return get_settings().abs.library_id
+
+
+def resolve_library_id(library_id: str | None) -> str:
+    """Resolve library ID, using default if not provided."""
+    if library_id:
+        return library_id
+
+    default_id = get_default_library_id()
+    if default_id:
+        return default_id
+
+    console.print("[red]Error:[/red] No library ID provided and ABS_LIBRARY_ID not set in .env")
+    console.print("[dim]Hint: Set ABS_LIBRARY_ID in .env or pass --library/-l option[/dim]")
+    raise typer.Exit(1)
+
+
 def get_cache() -> SQLiteCache | None:
     """Get shared SQLite cache instance."""
     global _cache
@@ -283,8 +302,13 @@ def abs_libraries():
 
 
 @abs_app.command("stats")
-def abs_stats(library_id: str = typer.Argument(..., help="Library ID")):
+def abs_stats(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+):
     """Show library statistics."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             lib = client.get_library(library_id)
@@ -310,12 +334,15 @@ def abs_stats(library_id: str = typer.Argument(..., help="Library ID")):
 
 @abs_app.command("items")
 def abs_items(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-L", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of items to show"),
     sort: str | None = typer.Option(None, "--sort", "-s", help="Sort field"),
     desc: bool = typer.Option(False, "--desc", "-d", help="Sort descending"),
 ):
     """List library items."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             response = client.get_library_items(
@@ -409,10 +436,13 @@ def abs_item(
 
 @abs_app.command("search")
 def abs_search(
-    library_id: str = typer.Argument(..., help="Library ID"),
     query: str = typer.Argument(..., help="Search query"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
 ):
     """Search a library."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             results: dict[str, Any] = client.search_library(library_id, query)
@@ -454,12 +484,15 @@ def abs_search(
 
 @abs_app.command("export")
 def abs_export(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     output: Path = typer.Option(Path("library_export.json"), "--output", "-o", help="Output file"),
 ):
     """Export all library items to JSON."""
     import json
 
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             console.print(f"Fetching all items from library {library_id}...")
@@ -836,7 +869,9 @@ def audible_cache(
 
 @abs_app.command("sample")
 def abs_sample(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     item_id: str | None = typer.Option(None, "--item", "-i", help="Specific item ID"),
     output_dir: Path = typer.Option(Path("./data/samples"), "--output", "-o", help="Output directory"),
 ):
@@ -845,6 +880,7 @@ def abs_sample(
 
     Saves raw API responses for testing and documentation.
     """
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             console.print("\n[bold]Collecting ABS Golden Samples[/bold]\n")
@@ -1011,7 +1047,7 @@ def audible_sample(
 @quality_app.command("scan")
 def quality_scan(
     library_id: str | None = typer.Option(
-        None, "--library", "-l", help="Library ID (uses first library if not specified)"
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
     limit: int = typer.Option(0, "--limit", "-n", help="Limit number of items to scan (0 = all)"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Save report to JSON file"),
@@ -1024,7 +1060,9 @@ def quality_scan(
     """
     try:
         with get_abs_client() as client:
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
@@ -1161,7 +1199,9 @@ def quality_scan(
 
 @quality_app.command("low")
 def quality_low(
-    library_id: str | None = typer.Option(None, "--library", "-l", help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     threshold: int = typer.Option(110, "--threshold", "-t", help="Bitrate threshold in kbps"),
     limit: int = typer.Option(50, "--limit", "-n", help="Max items to show"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Export to JSON file"),
@@ -1173,7 +1213,9 @@ def quality_low(
     """
     try:
         with get_abs_client() as client:
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
@@ -1367,7 +1409,9 @@ def quality_item(
 
 @quality_app.command("upgrades")
 def quality_upgrades(
-    library_id: str | None = typer.Option(None, "--library", "-l", help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     threshold: int = typer.Option(110, "--threshold", "-t", help="Bitrate threshold in kbps"),
     limit: int = typer.Option(50, "--limit", "-n", help="Max items to show"),
     plus_only: bool = typer.Option(False, "--plus-only", "-p", help="Show only Plus Catalog items (FREE)"),
@@ -1394,7 +1438,9 @@ def quality_upgrades(
             audible_client = get_audible_client()
             cache = get_cache()  # Get shared cache for enrichment
 
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = abs_client.get_libraries()
                 if not libraries:
