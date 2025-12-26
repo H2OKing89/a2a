@@ -267,7 +267,7 @@ class TestGlobalStatus:
         result = runner.invoke(app, ["status"])
 
         # Should still show output with failure indicator
-        assert "Connection" in result.output or "failed" in result.output
+        assert "Connection failed" in result.output or "✗" in result.output
 
 
 class TestCacheCommand:
