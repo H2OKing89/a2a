@@ -2,7 +2,6 @@
 Audible API client module.
 """
 
-from .cache import AudibleCache
 from .client import AudibleAuthError, AudibleClient, AudibleError, AudibleNotFoundError
 from .models import (
     AudibleAuthor,
@@ -26,5 +25,4 @@ __all__ = [
     "AudibleLibraryItem",
     "AudibleLibraryResponse",
     "AudibleCatalogProduct",
-    "AudibleCache",
 ]

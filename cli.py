@@ -29,6 +29,10 @@ app = typer.Typer(
     help="Audiobook management tool using ABS and Audible APIs",
 )
 
+# Sub-app for ABS commands
+abs_app = typer.Typer(help="Audiobookshelf API commands")
+app.add_typer(abs_app, name="abs")
+
 # Sub-app for Audible commands
 audible_app = typer.Typer(help="Audible API commands")
 app.add_typer(audible_app, name="audible")
@@ -98,7 +102,71 @@ def get_audible_client() -> AudibleClient:
 
 @app.command()
 def status():
-    """Check connection status to ABS server."""
+    """Show global status for ABS, Audible, and cache."""
+    settings = get_settings()
+    has_errors = False
+
+    console.print("\n[bold cyan]═══ System Status ═══[/bold cyan]\n")
+
+    # ABS Status
+    console.print("[bold]Audiobookshelf[/bold]")
+    console.print(f"  Server: {settings.abs.host}")
+    try:
+        with get_abs_client() as client:
+            user = client.get_me()
+            libraries = client.get_libraries()
+            console.print(f"  [green]✓[/green] Connected as [bold]{user.username}[/bold]")
+            console.print(f"  [green]✓[/green] {len(libraries)} libraries available")
+    except Exception as e:
+        console.print(f"  [red]✗[/red] Connection failed: {e}")
+        # Log full exception and stack trace for debugging while keeping concise CLI output
+        logger.exception("ABS connection failed")
+        has_errors = True
+
+    console.print()
+
+    # Audible Status
+    console.print("[bold]Audible[/bold]")
+    console.print(f"  Auth file: {settings.audible.auth_file}")
+    if not settings.audible.auth_file.exists():
+        console.print("  [yellow]⚠[/yellow] Not authenticated (run 'audible login')")
+    else:
+        try:
+            with get_audible_client() as client:
+                client.get_library(num_results=1, use_cache=True)  # Verify connectivity
+                console.print(f"  [green]✓[/green] Connected to marketplace: [bold]{client.marketplace}[/bold]")
+                console.print("  [green]✓[/green] Library accessible")
+        except AudibleAuthError as e:
+            console.print(f"  [red]✗[/red] Auth failed: {e}")
+            has_errors = True
+        except Exception as e:
+            console.print(f"  [red]✗[/red] Error: {e}")
+            has_errors = True
+
+    console.print()
+
+    # Cache Status
+    console.print("[bold]Cache[/bold]")
+    if not settings.cache.enabled:
+        console.print("  [yellow]⚠[/yellow] Caching disabled")
+    else:
+        cache = get_cache()
+        if cache:
+            cache_stats: dict[str, Any] = cache.get_stats()
+            console.print(f"  [green]✓[/green] SQLite: {cache_stats.get('db_size_mb', 0):.1f} MB")
+            console.print(f"  [green]✓[/green] {cache_stats.get('total_entries', 0)} entries")
+        else:
+            console.print("  [yellow]⚠[/yellow] Not initialized")
+
+    console.print()
+
+    if has_errors:
+        raise typer.Exit(1)
+
+
+@abs_app.command("status")
+def abs_status():
+    """Check ABS connection status."""
     settings = get_settings()
 
     console.print(f"\n[bold]ABS Server:[/bold] {settings.abs.host}")
@@ -183,8 +251,8 @@ def cache_command(
         raise typer.Exit(1)
 
 
-@app.command()
-def libraries():
+@abs_app.command("libraries")
+def abs_libraries():
     """List all libraries."""
     try:
         with get_abs_client() as client:
@@ -214,8 +282,8 @@ def libraries():
         raise typer.Exit(1)
 
 
-@app.command()
-def stats(library_id: str = typer.Argument(..., help="Library ID")):
+@abs_app.command("stats")
+def abs_stats(library_id: str = typer.Argument(..., help="Library ID")):
     """Show library statistics."""
     try:
         with get_abs_client() as client:
@@ -240,8 +308,8 @@ def stats(library_id: str = typer.Argument(..., help="Library ID")):
         raise typer.Exit(1)
 
 
-@app.command()
-def items(
+@abs_app.command("items")
+def abs_items(
     library_id: str = typer.Argument(..., help="Library ID"),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of items to show"),
     sort: str | None = typer.Option(None, "--sort", "-s", help="Sort field"),
@@ -284,8 +352,8 @@ def items(
         raise typer.Exit(1)
 
 
-@app.command()
-def item(
+@abs_app.command("item")
+def abs_item(
     item_id: str = typer.Argument(..., help="Item ID"),
 ):
     """Show details for a specific item."""
@@ -339,8 +407,8 @@ def item(
         raise typer.Exit(1)
 
 
-@app.command()
-def search(
+@abs_app.command("search")
+def abs_search(
     library_id: str = typer.Argument(..., help="Library ID"),
     query: str = typer.Argument(..., help="Search query"),
 ):
@@ -384,8 +452,8 @@ def search(
         raise typer.Exit(1)
 
 
-@app.command()
-def export(
+@abs_app.command("export")
+def abs_export(
     library_id: str = typer.Argument(..., help="Library ID"),
     output: Path = typer.Option(Path("library_export.json"), "--output", "-o", help="Output file"),
 ):
@@ -766,8 +834,8 @@ def audible_cache(
 # =============================================================================
 
 
-@app.command("sample-abs")
-def sample_abs(
+@abs_app.command("sample")
+def abs_sample(
     library_id: str = typer.Argument(..., help="Library ID"),
     item_id: str | None = typer.Option(None, "--item", "-i", help="Specific item ID"),
     output_dir: Path = typer.Option(Path("./data/samples"), "--output", "-o", help="Output directory"),
@@ -852,8 +920,8 @@ def sample_abs(
         raise typer.Exit(1)
 
 
-@app.command("sample-audible")
-def sample_audible(
+@audible_app.command("sample")
+def audible_sample(
     asin: str | None = typer.Option(None, "--asin", "-a", help="Specific ASIN to sample"),
     output_dir: Path = typer.Option(Path("./data/samples"), "--output", "-o", help="Output directory"),
 ):

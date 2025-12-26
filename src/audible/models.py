@@ -43,9 +43,10 @@ class AudibleSeries(BaseModel):
 class AudibleRating(BaseModel):
     """Rating information."""
 
-    overall_distribution: dict[str, int] | None = Field(default=None, alias="overall_distribution")
-    performance_distribution: dict[str, int] | None = Field(default=None, alias="performance_distribution")
-    story_distribution: dict[str, int] | None = Field(default=None, alias="story_distribution")
+    # Distribution dicts can contain int, float, or string values
+    overall_distribution: dict[str, Any] | None = Field(default=None, alias="overall_distribution")
+    performance_distribution: dict[str, Any] | None = Field(default=None, alias="performance_distribution")
+    story_distribution: dict[str, Any] | None = Field(default=None, alias="story_distribution")
     num_reviews: int | None = Field(default=None, alias="num_reviews")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -110,11 +111,11 @@ class AudibleBook(BaseModel):
     # Language
     language: str | None = None
 
-    # Series
-    series: list[AudibleSeries] = Field(default_factory=list)
+    # Series (can be None from API, defaults to empty list)
+    series: list[AudibleSeries] | None = Field(default_factory=list)
 
-    # Categories
-    category_ladders: list[AudibleCategoryLadder] = Field(default_factory=list)
+    # Categories (can be None from API, defaults to empty list)
+    category_ladders: list[AudibleCategoryLadder] | None = Field(default_factory=list)
 
     # Ratings
     rating: AudibleRating | None = None
@@ -184,14 +185,14 @@ class AudibleLibraryItem(AudibleBook):
     purchase_date: str | None = None
     origin_type: str | None = None
 
-    # Status flags
-    is_downloaded: bool = Field(default=False, alias="is_downloaded")
-    is_finished: bool = Field(default=False, alias="is_finished")
-    is_playable: bool = Field(default=True, alias="is_playable")
-    is_archived: bool = Field(default=False, alias="is_archived")
-    is_visible: bool = Field(default=True, alias="is_visible")
-    is_removable: bool = Field(default=False, alias="is_removable")
-    is_returnable: bool = Field(default=False, alias="is_returnable")
+    # Status flags (can be None from API)
+    is_downloaded: bool | None = Field(default=False, alias="is_downloaded")
+    is_finished: bool | None = Field(default=False, alias="is_finished")
+    is_playable: bool | None = Field(default=True, alias="is_playable")
+    is_archived: bool | None = Field(default=False, alias="is_archived")
+    is_visible: bool | None = Field(default=True, alias="is_visible")
+    is_removable: bool | None = Field(default=False, alias="is_removable")
+    is_returnable: bool | None = Field(default=False, alias="is_returnable")
 
     # Listening progress
     percent_complete: float | None = Field(default=None, alias="percent_complete")
