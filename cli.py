@@ -524,6 +524,241 @@ def abs_export(
         raise typer.Exit(1)
 
 
+@abs_app.command("authors")
+def abs_authors(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+    limit: int = typer.Option(50, "--limit", "-n", help="Number of authors to show"),
+    sort: str = typer.Option("numBooks", "--sort", "-s", help="Sort by: name, numBooks, addedAt"),
+    reverse: bool = typer.Option(True, "--reverse/--no-reverse", help="Reverse sort order"),
+):
+    """List authors in the library."""
+    library_id = resolve_library_id(library_id)
+    try:
+        with get_abs_client() as client:
+            authors = client.get_library_authors(library_id)
+
+            # Sort authors
+            if sort == "name":
+                authors.sort(key=lambda a: a.name.lower() if a.name else "", reverse=reverse)
+            elif sort == "numBooks":
+                authors.sort(key=lambda a: a.num_books or 0, reverse=reverse)
+            elif sort == "addedAt":
+                authors.sort(key=lambda a: a.added_at or 0, reverse=reverse)
+
+            # Limit results
+            authors = authors[:limit]
+
+            table = Table(
+                title=f"📚 Authors ({len(authors)} shown)",
+                show_header=True,
+                header_style="bold cyan",
+            )
+            table.add_column("#", style="dim", width=4)
+            table.add_column("Name", style="bold", max_width=35)
+            table.add_column("Books", justify="right", style="green")
+            table.add_column("ID", style="dim cyan", max_width=20)
+
+            for i, author in enumerate(authors, 1):
+                table.add_row(
+                    str(i),
+                    author.name or "Unknown",
+                    str(author.num_books or 0),
+                    author.id[:20] if author.id else "",
+                )
+
+            console.print(table)
+
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@abs_app.command("series")
+def abs_series(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+    limit: int = typer.Option(50, "--limit", "-n", help="Number of series to show"),
+    sort: str = typer.Option("numBooks", "--sort", "-s", help="Sort by: name, numBooks, addedAt"),
+    reverse: bool = typer.Option(True, "--reverse/--no-reverse", help="Reverse sort order"),
+):
+    """List series in the library."""
+    library_id = resolve_library_id(library_id)
+    try:
+        with get_abs_client() as client:
+            series_list = client.get_library_series(library_id, limit=500)
+
+            # Sort series
+            if sort == "name":
+                series_list.sort(key=lambda s: s.get("name", "").lower(), reverse=reverse)
+            elif sort == "numBooks":
+                series_list.sort(key=lambda s: s.get("numBooks", 0), reverse=reverse)
+            elif sort == "addedAt":
+                series_list.sort(key=lambda s: s.get("addedAt", 0), reverse=reverse)
+
+            # Limit results
+            series_list = series_list[:limit]
+
+            table = Table(
+                title=f"📖 Series ({len(series_list)} shown)",
+                show_header=True,
+                header_style="bold cyan",
+            )
+            table.add_column("#", style="dim", width=4)
+            table.add_column("Series Name", style="bold", max_width=40)
+            table.add_column("Books", justify="right", style="green")
+            table.add_column("ID", style="dim cyan", max_width=20)
+
+            for i, series in enumerate(series_list, 1):
+                table.add_row(
+                    str(i),
+                    series.get("name", "Unknown"),
+                    str(series.get("numBooks", 0)),
+                    (series.get("id") or "")[:20],
+                )
+
+            console.print(table)
+
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@abs_app.command("collections")
+def abs_collections(
+    action: str = typer.Argument("list", help="Action: list, show, create, add, remove"),
+    collection_id: str | None = typer.Option(None, "--id", "-i", help="Collection ID (for show/add/remove)"),
+    name: str | None = typer.Option(None, "--name", "-n", help="Collection name (for create)"),
+    book_id: str | None = typer.Option(None, "--book", "-b", help="Book ID (for add/remove)"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (for create, default: ABS_LIBRARY_ID from .env)"
+    ),
+    description: str | None = typer.Option(None, "--desc", "-d", help="Description (for create)"),
+):
+    """Manage ABS collections.
+
+    \b
+    Actions:
+      list   - List all collections
+      show   - Show collection details (requires --id)
+      create - Create new collection (requires --name, --library)
+      add    - Add book to collection (requires --id, --book)
+      remove - Remove book from collection (requires --id, --book)
+
+    \b
+    Examples:
+      abs collections list
+      abs collections show --id abc123
+      abs collections create --name "Favorites" --library lib123
+      abs collections add --id abc123 --book book456
+    """
+    try:
+        with get_abs_client() as client:
+            if action == "list":
+                collections = client.get_collections()
+
+                if not collections:
+                    console.print("[yellow]No collections found[/yellow]")
+                    return
+
+                table = Table(
+                    title="📁 Collections",
+                    show_header=True,
+                    header_style="bold cyan",
+                )
+                table.add_column("Name", style="bold", max_width=30)
+                table.add_column("Books", justify="right", style="green")
+                table.add_column("Library", max_width=20)
+                table.add_column("ID", style="dim cyan", max_width=24)
+
+                for coll in collections:
+                    books = coll.get("books", [])
+                    table.add_row(
+                        coll.get("name", "?"),
+                        str(len(books)),
+                        (coll.get("libraryId") or "")[:20],
+                        coll.get("id", ""),
+                    )
+
+                console.print(table)
+
+            elif action == "show":
+                if not collection_id:
+                    console.print("[red]Error:[/red] --id required for 'show'")
+                    raise typer.Exit(1)
+
+                coll = client.get_collection(collection_id)
+                books = coll.get("books", [])
+
+                # Header panel
+                console.print(
+                    Panel(
+                        f"[bold]{coll.get('name', 'Unknown')}[/bold]\n\n"
+                        f"ID: [cyan]{coll.get('id')}[/cyan]\n"
+                        f"Library: {coll.get('libraryId', 'N/A')}\n"
+                        f"Description: {coll.get('description') or '(none)'}\n"
+                        f"Books: [green]{len(books)}[/green]",
+                        title="📁 Collection Details",
+                    )
+                )
+
+                if books:
+                    book_table = Table(show_header=True, header_style="bold")
+                    book_table.add_column("#", style="dim", width=4)
+                    book_table.add_column("Title", style="bold", max_width=50)
+                    book_table.add_column("ID", style="dim cyan", max_width=24)
+
+                    for i, book in enumerate(books, 1):
+                        # Handle both expanded and non-expanded book data
+                        title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
+                        book_id_val = book.get("id", "")
+                        book_table.add_row(str(i), title[:50], book_id_val)
+
+                    console.print(book_table)
+
+            elif action == "create":
+                if not name:
+                    console.print("[red]Error:[/red] --name required for 'create'")
+                    raise typer.Exit(1)
+
+                lib_id = library_id or resolve_library_id(None)
+                result = client.create_collection(
+                    library_id=lib_id,
+                    name=name,
+                    description=description,
+                )
+
+                console.print(f"[green]✓[/green] Created collection '[bold]{name}[/bold]'")
+                console.print(f"  ID: [cyan]{result.get('id')}[/cyan]")
+
+            elif action == "add":
+                if not collection_id or not book_id:
+                    console.print("[red]Error:[/red] --id and --book required for 'add'")
+                    raise typer.Exit(1)
+
+                client.add_book_to_collection(collection_id, book_id)
+                console.print(f"[green]✓[/green] Added book [cyan]{book_id}[/cyan] to collection")
+
+            elif action == "remove":
+                if not collection_id or not book_id:
+                    console.print("[red]Error:[/red] --id and --book required for 'remove'")
+                    raise typer.Exit(1)
+
+                client.remove_book_from_collection(collection_id, book_id)
+                console.print(f"[green]✓[/green] Removed book [cyan]{book_id}[/cyan] from collection")
+
+            else:
+                console.print(f"[red]Error:[/red] Unknown action '{action}'")
+                console.print("Valid actions: list, show, create, add, remove")
+                raise typer.Exit(1)
+
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
 # =============================================================================
 # Audible Commands
 # =============================================================================
@@ -863,6 +1098,246 @@ def audible_cache(
                 )
             )
 
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@audible_app.command("wishlist")
+def audible_wishlist(
+    action: str = typer.Argument("list", help="Action: list, add, remove"),
+    asin: str | None = typer.Option(None, "--asin", "-a", help="ASIN (for add/remove)"),
+    limit: int = typer.Option(50, "--limit", "-l", help="Number of items to show"),
+    no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
+):
+    """Manage your Audible wishlist.
+
+    \b
+    Actions:
+      list   - Show wishlist items (default)
+      add    - Add book to wishlist (requires --asin)
+      remove - Remove book from wishlist (requires --asin)
+
+    \b
+    Examples:
+      audible wishlist
+      audible wishlist add --asin B08G9PRS1K
+      audible wishlist remove --asin B08G9PRS1K
+    """
+    try:
+        with get_audible_client() as client:
+            if action == "list":
+                items = client.get_all_wishlist(use_cache=not no_cache)
+
+                if not items:
+                    console.print("[yellow]Your wishlist is empty[/yellow]")
+                    console.print("[dim]Add books with: audible wishlist add --asin <ASIN>[/dim]")
+                    return
+
+                # Limit results
+                display_items = items[:limit]
+
+                table = Table(
+                    title=f"💜 Wishlist ({len(items)} items)",
+                    show_header=True,
+                    header_style="bold magenta",
+                )
+                table.add_column("ASIN", style="cyan", width=12)
+                table.add_column("Title", style="bold", max_width=40)
+                table.add_column("Author", max_width=25)
+                table.add_column("Duration", justify="right")
+                table.add_column("Price", justify="right", style="green")
+                table.add_column("Rating", justify="right")
+
+                for item in display_items:
+                    # Format duration
+                    duration = f"{item.runtime_hours:.1f}h" if item.runtime_hours else "-"
+
+                    # Format price
+                    price = "-"
+                    if item.list_price:
+                        price = f"${item.list_price:.2f}"
+
+                    # Format rating
+                    rating = "-"
+                    if item.rating:
+                        stars = "★" * int(item.rating) + "☆" * (5 - int(item.rating))
+                        rating = f"{stars[:5]} {item.rating:.1f}"
+
+                    table.add_row(
+                        item.asin,
+                        (item.title or "?")[:40],
+                        (item.primary_author or "?")[:25],
+                        duration,
+                        price,
+                        rating,
+                    )
+
+                console.print(table)
+
+                if len(items) > limit:
+                    console.print(f"[dim]Showing {limit} of {len(items)} items. Use --limit to show more.[/dim]")
+
+            elif action == "add":
+                if not asin:
+                    console.print("[red]Error:[/red] --asin required for 'add'")
+                    raise typer.Exit(1)
+
+                # First verify the book exists
+                book = client.get_catalog_product(asin)
+                if not book:
+                    console.print(f"[red]Error:[/red] Book not found: {asin}")
+                    raise typer.Exit(1)
+
+                success = client.add_to_wishlist(asin)
+                if success:
+                    console.print(f"[green]✓[/green] Added to wishlist: [bold]{book.title}[/bold]")
+                    console.print(f"  Author: {book.primary_author or 'Unknown'}")
+                else:
+                    console.print(f"[yellow]Could not add {asin} (may already be in wishlist)[/yellow]")
+
+            elif action == "remove":
+                if not asin:
+                    console.print("[red]Error:[/red] --asin required for 'remove'")
+                    raise typer.Exit(1)
+
+                success = client.remove_from_wishlist(asin)
+                if success:
+                    console.print(f"[green]✓[/green] Removed [cyan]{asin}[/cyan] from wishlist")
+                else:
+                    console.print(f"[yellow]Could not remove {asin} (may not be in wishlist)[/yellow]")
+
+            else:
+                console.print(f"[red]Error:[/red] Unknown action '{action}'")
+                console.print("Valid actions: list, add, remove")
+                raise typer.Exit(1)
+
+    except AudibleAuthError as e:
+        console.print(f"[red]✗[/red] Auth failed: {e}")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@audible_app.command("stats")
+def audible_stats():
+    """Show your Audible listening statistics and account info."""
+    try:
+        with get_audible_client() as client:
+            console.print("\n[bold cyan]═══ Audible Statistics ═══[/bold cyan]\n")
+
+            # Get listening stats
+            stats = client.get_listening_stats()
+            if stats:
+                listening_hours = (
+                    stats.total_listening_time_ms / (1000 * 60 * 60) if stats.total_listening_time_ms else 0
+                )
+
+                console.print(
+                    Panel(
+                        f"[bold]📊 Listening Activity[/bold]\n\n"
+                        f"Total Listening Time: [green]{listening_hours:.1f} hours[/green]\n"
+                        f"Books Listened: [green]{stats.distinct_titles_listened or 0}[/green]\n"
+                        f"Authors Explored: [green]{stats.distinct_authors_listened or 0}[/green]\n"
+                        f"Listening Streak: [yellow]{stats.current_listening_streak or 0}[/yellow] days\n"
+                        f"Longest Streak: [yellow]{stats.longest_listening_streak or 0}[/yellow] days",
+                        title="📈 Listening Stats",
+                        border_style="cyan",
+                    )
+                )
+            else:
+                console.print("[yellow]Listening stats not available[/yellow]")
+
+            # Get account info
+            account = client.get_account_info()
+            if account:
+                console.print()
+
+                # Format subscription info
+                sub_status = "[green]Active[/green]" if account.is_active_member else "[dim]Inactive[/dim]"
+
+                benefits_list = []
+                if account.benefits:
+                    benefits_list = [b.benefit_id for b in account.benefits[:5]]
+                benefits_str = ", ".join(benefits_list) if benefits_list else "(none)"
+
+                console.print(
+                    Panel(
+                        f"[bold]👤 Account Details[/bold]\n\n"
+                        f"Membership: {sub_status}\n"
+                        f"Plan: [bold]{account.plan_name or 'N/A'}[/bold]\n"
+                        f"Credits: [yellow]{account.credits_available or 0}[/yellow]\n"
+                        f"Benefits: {benefits_str}",
+                        title="💳 Account Info",
+                        border_style="magenta",
+                    )
+                )
+            else:
+                console.print("[yellow]Account info not available[/yellow]")
+
+    except AudibleAuthError as e:
+        console.print(f"[red]✗[/red] Auth failed: {e}")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@audible_app.command("recommendations")
+def audible_recommendations(
+    limit: int = typer.Option(20, "--limit", "-l", help="Number of recommendations to show"),
+    no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
+):
+    """Show personalized book recommendations."""
+    try:
+        with get_audible_client() as client:
+            items = client.get_recommendations(num_results=min(limit, 50), use_cache=not no_cache)
+
+            if not items:
+                console.print("[yellow]No recommendations available[/yellow]")
+                return
+
+            table = Table(
+                title=f"✨ Recommended For You ({len(items)} books)",
+                show_header=True,
+                header_style="bold yellow",
+            )
+            table.add_column("ASIN", style="cyan", width=12)
+            table.add_column("Title", style="bold", max_width=35)
+            table.add_column("Author", max_width=25)
+            table.add_column("Duration", justify="right")
+            table.add_column("Rating", justify="right")
+            table.add_column("In Library", justify="center")
+
+            for item in items:
+                # Format duration
+                duration = f"{item.runtime_hours:.1f}h" if item.runtime_hours else "-"
+
+                # Format rating with stars
+                rating = "-"
+                if item.rating:
+                    full_stars = int(item.rating)
+                    rating = f"{'★' * full_stars}{'☆' * (5 - full_stars)} {item.rating:.1f}"
+
+                # Check if in library (if we have that info)
+                in_lib = "[green]✓[/green]" if getattr(item, "is_downloaded", False) else "[dim]-[/dim]"
+
+                table.add_row(
+                    item.asin,
+                    (item.title or "?")[:35],
+                    (item.primary_author or "?")[:25],
+                    duration,
+                    rating,
+                    in_lib,
+                )
+
+            console.print(table)
+            console.print("\n[dim]💡 Add to wishlist: audible wishlist add --asin <ASIN>[/dim]")
+
+    except AudibleAuthError as e:
+        console.print(f"[red]✗[/red] Auth failed: {e}")
+        raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise typer.Exit(1)
