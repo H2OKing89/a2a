@@ -8,7 +8,7 @@ Based on the Audible API response structures with response_groups:
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -417,6 +417,33 @@ class AudibleRating(BaseModel):
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
+    @property
+    def overall(self) -> float | None:
+        """Get overall average rating (0-5 scale)."""
+        if self.overall_distribution:
+            avg = self.overall_distribution.get("average_rating")
+            if avg is not None:
+                return float(avg)
+        return None
+
+    @property
+    def performance(self) -> float | None:
+        """Get performance average rating (0-5 scale)."""
+        if self.performance_distribution:
+            avg = self.performance_distribution.get("average_rating")
+            if avg is not None:
+                return float(avg)
+        return None
+
+    @property
+    def story(self) -> float | None:
+        """Get story average rating (0-5 scale)."""
+        if self.story_distribution:
+            avg = self.story_distribution.get("average_rating")
+            if avg is not None:
+                return float(avg)
+        return None
+
 
 class AudibleCategory(BaseModel):
     """Category/genre information."""
@@ -537,6 +564,22 @@ class AudibleBook(BaseModel):
         """Get primary series."""
         if self.series:
             return self.series[0]
+        return None
+
+    @property
+    def list_price(self) -> float | None:
+        """Get list price from price dict."""
+        if self.price:
+            list_price_data = self.price.get("list_price", {})
+            if list_price_data:
+                return list_price_data.get("base")
+        return None
+
+    @property
+    def overall_rating(self) -> float | None:
+        """Get overall rating value (0-5 scale)."""
+        if self.rating:
+            return self.rating.overall
         return None
 
 
