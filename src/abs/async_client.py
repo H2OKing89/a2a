@@ -82,6 +82,7 @@ class AsyncABSClient:
 
         # Concurrency control
         self._semaphore = asyncio.Semaphore(max_concurrent_requests)
+        self._rate_lock = asyncio.Lock()
         self._client: httpx.AsyncClient | None = None
 
     async def _ensure_client(self) -> httpx.AsyncClient:
@@ -113,13 +114,14 @@ class AsyncABSClient:
         await self.close()
 
     async def _rate_limit(self) -> None:
-        """Apply rate limiting between requests."""
-        loop = asyncio.get_running_loop()
-        now = loop.time()
-        elapsed = now - self._last_request_time
-        if elapsed < self._rate_limit_delay:
-            await asyncio.sleep(self._rate_limit_delay - elapsed)
-        self._last_request_time = loop.time()
+        """Apply rate limiting between requests with proper serialization."""
+        async with self._rate_lock:
+            loop = asyncio.get_running_loop()
+            now = loop.time()
+            elapsed = now - self._last_request_time
+            if elapsed < self._rate_limit_delay:
+                await asyncio.sleep(self._rate_limit_delay - elapsed)
+            self._last_request_time = loop.time()
 
     async def _request(
         self,

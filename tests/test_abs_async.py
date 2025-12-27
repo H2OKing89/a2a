@@ -41,6 +41,18 @@ class TestAsyncABSClient:
 
         assert client._semaphore._value == 10
 
+    def test_client_has_rate_lock(self):
+        """Test client initializes with rate lock for thread safety."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        import asyncio
+
+        assert hasattr(client, "_rate_lock")
+        assert isinstance(client._rate_lock, asyncio.Lock)
+
     @pytest.mark.asyncio
     async def test_context_manager(self):
         """Test async context manager."""
