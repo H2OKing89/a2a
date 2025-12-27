@@ -732,12 +732,11 @@ def abs_collections(
                 table.add_column("ID", style="dim cyan", max_width=24)
 
                 for coll in collections:
-                    books = coll.get("books", [])
                     table.add_row(
-                        coll.get("name", "?"),
-                        str(len(books)),
-                        (coll.get("libraryId") or "")[:20],
-                        coll.get("id", ""),
+                        coll.name or "?",
+                        str(coll.book_count),
+                        (coll.library_id or "")[:20],
+                        coll.id or "",
                     )
 
                 console.print(table)
@@ -748,27 +747,26 @@ def abs_collections(
                     raise typer.Exit(1)
 
                 coll = client.get_collection(collection_id)
-                books = coll.get("books", [])
 
                 # Header panel
                 console.print(
                     Panel(
-                        f"[bold]{coll.get('name', 'Unknown')}[/bold]\n\n"
-                        f"ID: [cyan]{coll.get('id')}[/cyan]\n"
-                        f"Library: {coll.get('libraryId', 'N/A')}\n"
-                        f"Description: {coll.get('description') or '(none)'}\n"
-                        f"Books: [green]{len(books)}[/green]",
+                        f"[bold]{coll.name or 'Unknown'}[/bold]\\n\\n"
+                        f"ID: [cyan]{coll.id}[/cyan]\\n"
+                        f"Library: {coll.library_id or 'N/A'}\\n"
+                        f"Description: {coll.description or '(none)'}\\n"
+                        f"Books: [green]{coll.book_count}[/green]",
                         title="📁 Collection Details",
                     )
                 )
 
-                if books:
+                if coll.books:
                     book_table = Table(show_header=True, header_style="bold")
                     book_table.add_column("#", style="dim", width=4)
                     book_table.add_column("Title", style="bold", max_width=50)
                     book_table.add_column("ID", style="dim cyan", max_width=24)
 
-                    for i, book in enumerate(books, 1):
+                    for i, book in enumerate(coll.books, 1):
                         # Handle both expanded and non-expanded book data
                         title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
                         book_id_val = book.get("id", "")
@@ -789,7 +787,7 @@ def abs_collections(
                 )
 
                 console.print(f"[green]✓[/green] Created collection '[bold]{name}[/bold]'")
-                console.print(f"  ID: [cyan]{result.get('id')}[/cyan]")
+                console.print(f"  ID: [cyan]{result.id}[/cyan]")
 
             elif action == "add":
                 if not collection_id or not book_id:
