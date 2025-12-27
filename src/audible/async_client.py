@@ -178,11 +178,12 @@ class AsyncAudibleClient:
 
     async def _rate_limit(self) -> None:
         """Apply rate limiting between requests."""
-        now = asyncio.get_event_loop().time()
+        loop = asyncio.get_running_loop()
+        now = loop.time()
         elapsed = now - self._last_request_time
         if elapsed < self._request_delay:
             await asyncio.sleep(self._request_delay - elapsed)
-        self._last_request_time = asyncio.get_event_loop().time()
+        self._last_request_time = loop.time()
 
     async def _request(
         self,
