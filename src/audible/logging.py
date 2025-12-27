@@ -134,6 +134,10 @@ def configure_logging(
     # Remove existing handlers to avoid duplicates
     logger.handlers.clear()
 
+    # Initialize handler variables for potential reuse in fallback
+    console_handler: logging.Handler | None = None
+    file_handler: logging.Handler | None = None
+
     # Console handler
     if console:
         console_handler = logging.StreamHandler(sys.stdout)
@@ -168,9 +172,9 @@ def configure_logging(
             audible_logger = logging.getLogger("audible")
             audible_logger.setLevel(log_level)
             if not audible_logger.handlers:
-                if console:
+                if console_handler is not None:
                     audible_logger.addHandler(console_handler)
-                if file_path:
+                if file_handler is not None:
                     audible_logger.addHandler(file_handler)
 
     # Capture warnings
