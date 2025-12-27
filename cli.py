@@ -22,6 +22,7 @@ from src.audible import AudibleAuthError, AudibleBook, AudibleClient
 from src.cache import SQLiteCache
 from src.config import get_settings
 from src.quality import AudibleEnrichmentService, QualityAnalyzer, QualityReport, QualityTier
+from src.series import ABSSeriesInfo, MatchConfidence, SeriesAnalysisReport, SeriesComparisonResult, SeriesMatcher
 from src.utils import save_golden_sample
 
 app = typer.Typer(
@@ -41,12 +42,35 @@ app.add_typer(audible_app, name="audible")
 quality_app = typer.Typer(help="Audio quality analysis commands")
 app.add_typer(quality_app, name="quality")
 
+# Sub-app for Series commands
+series_app = typer.Typer(help="Series tracking and collection management")
+app.add_typer(series_app, name="series")
+
 console = Console()
 logger = logging.getLogger(__name__)
 
 
 # Global cache instance (lazy-loaded)
 _cache: SQLiteCache | None = None
+
+
+def get_default_library_id() -> str | None:
+    """Get the default library ID from settings."""
+    return get_settings().abs.library_id
+
+
+def resolve_library_id(library_id: str | None) -> str:
+    """Resolve library ID, using default if not provided."""
+    if library_id:
+        return library_id
+
+    default_id = get_default_library_id()
+    if default_id:
+        return default_id
+
+    console.print("[red]Error:[/red] No library ID provided and ABS_LIBRARY_ID not set in .env")
+    console.print("[dim]Hint: Set ABS_LIBRARY_ID in .env or pass --library/-l option[/dim]")
+    raise typer.Exit(1)
 
 
 def get_cache() -> SQLiteCache | None:
@@ -283,8 +307,13 @@ def abs_libraries():
 
 
 @abs_app.command("stats")
-def abs_stats(library_id: str = typer.Argument(..., help="Library ID")):
+def abs_stats(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+):
     """Show library statistics."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             lib = client.get_library(library_id)
@@ -310,12 +339,15 @@ def abs_stats(library_id: str = typer.Argument(..., help="Library ID")):
 
 @abs_app.command("items")
 def abs_items(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-L", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     limit: int = typer.Option(20, "--limit", "-l", help="Number of items to show"),
     sort: str | None = typer.Option(None, "--sort", "-s", help="Sort field"),
     desc: bool = typer.Option(False, "--desc", "-d", help="Sort descending"),
 ):
     """List library items."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             response = client.get_library_items(
@@ -409,10 +441,13 @@ def abs_item(
 
 @abs_app.command("search")
 def abs_search(
-    library_id: str = typer.Argument(..., help="Library ID"),
     query: str = typer.Argument(..., help="Search query"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
 ):
     """Search a library."""
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             results: dict[str, Any] = client.search_library(library_id, query)
@@ -454,12 +489,15 @@ def abs_search(
 
 @abs_app.command("export")
 def abs_export(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     output: Path = typer.Option(Path("library_export.json"), "--output", "-o", help="Output file"),
 ):
     """Export all library items to JSON."""
     import json
 
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             console.print(f"Fetching all items from library {library_id}...")
@@ -836,7 +874,9 @@ def audible_cache(
 
 @abs_app.command("sample")
 def abs_sample(
-    library_id: str = typer.Argument(..., help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     item_id: str | None = typer.Option(None, "--item", "-i", help="Specific item ID"),
     output_dir: Path = typer.Option(Path("./data/samples"), "--output", "-o", help="Output directory"),
 ):
@@ -845,6 +885,7 @@ def abs_sample(
 
     Saves raw API responses for testing and documentation.
     """
+    library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             console.print("\n[bold]Collecting ABS Golden Samples[/bold]\n")
@@ -1011,7 +1052,7 @@ def audible_sample(
 @quality_app.command("scan")
 def quality_scan(
     library_id: str | None = typer.Option(
-        None, "--library", "-l", help="Library ID (uses first library if not specified)"
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
     limit: int = typer.Option(0, "--limit", "-n", help="Limit number of items to scan (0 = all)"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Save report to JSON file"),
@@ -1024,7 +1065,9 @@ def quality_scan(
     """
     try:
         with get_abs_client() as client:
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
@@ -1161,7 +1204,9 @@ def quality_scan(
 
 @quality_app.command("low")
 def quality_low(
-    library_id: str | None = typer.Option(None, "--library", "-l", help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     threshold: int = typer.Option(110, "--threshold", "-t", help="Bitrate threshold in kbps"),
     limit: int = typer.Option(50, "--limit", "-n", help="Max items to show"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Export to JSON file"),
@@ -1173,7 +1218,9 @@ def quality_low(
     """
     try:
         with get_abs_client() as client:
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
@@ -1367,7 +1414,9 @@ def quality_item(
 
 @quality_app.command("upgrades")
 def quality_upgrades(
-    library_id: str | None = typer.Option(None, "--library", "-l", help="Library ID"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
     threshold: int = typer.Option(110, "--threshold", "-t", help="Bitrate threshold in kbps"),
     limit: int = typer.Option(50, "--limit", "-n", help="Max items to show"),
     plus_only: bool = typer.Option(False, "--plus-only", "-p", help="Show only Plus Catalog items (FREE)"),
@@ -1394,7 +1443,9 @@ def quality_upgrades(
             audible_client = get_audible_client()
             cache = get_cache()  # Get shared cache for enrichment
 
-            # Get library ID if not specified
+            # Get library ID from settings or pick first if not specified
+            if not library_id:
+                library_id = get_default_library_id()
             if not library_id:
                 libraries = abs_client.get_libraries()
                 if not libraries:
@@ -1666,6 +1717,492 @@ def quality_upgrades(
 
         traceback.print_exc()
         raise typer.Exit(1)
+
+
+# ============================================================================
+# SERIES COMMANDS
+# ============================================================================
+
+
+@series_app.command("list")
+def series_list(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+    limit: int = typer.Option(None, "--limit", "-n", help="Max series to show"),
+):
+    """List all series in a library."""
+    library_id = resolve_library_id(library_id)
+    try:
+        with get_abs_client() as abs_client:
+            matcher = SeriesMatcher(abs_client=abs_client, audible_client=None)
+            series_list_data = matcher.get_abs_series(library_id)
+
+            if not series_list_data:
+                console.print("[yellow]No series found in library[/yellow]")
+                return
+
+            # Sort by book count (descending)
+            series_list_data.sort(key=lambda s: len(s.books), reverse=True)
+
+            if limit:
+                series_list_data = series_list_data[:limit]
+
+            table = Table(title=f"Series in Library ({len(series_list_data)} total)")
+            table.add_column("#", style="dim")
+            table.add_column("Series Name", style="bold")
+            table.add_column("Books", justify="right")
+            table.add_column("Duration", justify="right")
+            table.add_column("With ASIN", justify="right")
+
+            for i, series in enumerate(series_list_data, 1):
+                total_duration = sum(b.duration or 0 for b in series.books)
+                hours = total_duration / 3600
+                with_asin = sum(1 for b in series.books if b.asin)
+
+                table.add_row(
+                    str(i),
+                    series.name,
+                    str(len(series.books)),
+                    f"{hours:.1f}h",
+                    f"{with_asin}/{len(series.books)}",
+                )
+
+            console.print(table)
+
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@series_app.command("analyze")
+def series_analyze(
+    series_name: str = typer.Argument(..., help="Series name to analyze"),
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: table or json"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file (default: stdout for json)"),
+):
+    """Analyze a specific series and find missing books."""
+    library_id = resolve_library_id(library_id)
+    try:
+        with get_abs_client() as abs_client, get_audible_client() as audible_client:
+            matcher = SeriesMatcher(abs_client=abs_client, audible_client=audible_client)
+
+            # Find the series
+            all_series = matcher.get_abs_series(library_id)
+
+            if not all_series:
+                console.print("[yellow]No series found in this library[/yellow]")
+                console.print(
+                    "[dim]Hint: Series are detected from book metadata. Make sure your books have series information.[/dim]"
+                )
+                raise typer.Exit(1)
+
+            target_series = None
+
+            for s in all_series:
+                if s.name.lower() == series_name.lower():
+                    target_series = s
+                    break
+
+            if not target_series:
+                # Try fuzzy match
+                from rapidfuzz import fuzz
+
+                best_match = None
+                best_score = 0
+                similar_series: list[tuple[str, int]] = []
+
+                for s in all_series:
+                    score = fuzz.ratio(s.name.lower(), series_name.lower())
+                    if score > best_score:
+                        best_score = score
+                        best_match = s
+                    if score > 50:
+                        similar_series.append((s.name, score))
+
+                if best_match and best_score > 70:
+                    console.print(
+                        f"[yellow]Exact match not found. Using '{best_match.name}' (score: {best_score})[/yellow]"
+                    )
+                    target_series = best_match
+                else:
+                    console.print(f"[red]Series '{series_name}' not found in library[/red]")
+
+                    # Show similar matches if any
+                    if similar_series:
+                        similar_series.sort(key=lambda x: x[1], reverse=True)
+                        console.print("\n[yellow]Did you mean one of these?[/yellow]")
+                        for name, score in similar_series[:5]:
+                            console.print(f"  • {name} [dim](similarity: {score:.0f}%)[/dim]")
+
+                    console.print(
+                        "\n[dim]Hint: Run [cyan]python cli.py series list[/cyan] to see all available series[/dim]"
+                    )
+                    raise typer.Exit(1)
+
+            # Analyze the series
+            console.print(f"\n[bold]Analyzing:[/bold] {target_series.name}")
+            console.print(f"  Books in ABS: {len(target_series.books)}")
+
+            result = matcher.compare_series(target_series)
+
+            # JSON output format
+            if format.lower() == "json":
+                import json
+
+                export_data = {
+                    "series_name": result.series_match.abs_series.name,
+                    "audible_series_asin": (
+                        result.series_match.audible_series.asin if result.series_match.audible_series else None
+                    ),
+                    "match_confidence": result.series_match.confidence.value,
+                    "in_library": result.abs_book_count,
+                    "on_audible": result.audible_book_count,
+                    "completion_percentage": result.completion_percentage,
+                    "is_complete": result.is_complete,
+                    "matched_books": [
+                        {
+                            "title": m.abs_book.title,
+                            "asin": m.abs_book.asin,
+                            "sequence": m.abs_book.sequence,
+                            "audible_asin": m.audible_book.asin if m.audible_book else None,
+                            "match_confidence": m.confidence.value,
+                            "matched_by": m.matched_by,
+                        }
+                        for m in result.matched_books
+                    ],
+                    "missing_books": [
+                        {
+                            "title": b.title,
+                            "asin": b.asin,
+                            "sequence": b.sequence,
+                            "runtime_hours": b.runtime_hours,
+                            "release_date": b.release_date,
+                            "author": b.author_name,
+                            "narrator": b.narrator_name,
+                            "price": b.price,
+                            "is_in_plus_catalog": b.is_in_plus_catalog,
+                            "audible_url": b.audible_url,
+                        }
+                        for b in result.missing_books
+                    ],
+                }
+
+                json_output = json.dumps(export_data, indent=2)
+                if output:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output, "w") as f:
+                        f.write(json_output)
+                    console.print(f"[green]✓[/green] Exported to {output}")
+                else:
+                    print(json_output)
+                return
+
+            # Table output format (default)
+            series_name = result.series_match.abs_series.name
+            match_confidence = result.series_match.confidence
+            audible_series = result.series_match.audible_series
+
+            console.print(f"\n[bold cyan]═══ {series_name} ═══[/bold cyan]")
+            console.print(f"Match Confidence: {match_confidence.value}")
+
+            if audible_series and audible_series.asin:
+                console.print(f"Audible Series ASIN: {audible_series.asin}")
+
+            console.print("\n[bold]Collection Status:[/bold]")
+            console.print(f"  Your Library: {result.abs_book_count} books")
+            console.print(f"  On Audible: {result.audible_book_count} books")
+            console.print(f"  Completion: {result.completion_percentage:.1f}%")
+
+            # Matched books
+            if result.matched_books and verbose:
+                console.print(f"\n[bold green]Matched Books ({len(result.matched_books)}):[/bold green]")
+                for match in result.matched_books:
+                    confidence_color = {
+                        MatchConfidence.EXACT: "green",
+                        MatchConfidence.HIGH: "cyan",
+                        MatchConfidence.MEDIUM: "yellow",
+                        MatchConfidence.LOW: "red",
+                    }.get(match.confidence, "white")
+
+                    seq = f"#{match.abs_book.sequence}" if match.abs_book.sequence else ""
+                    console.print(f"  [{confidence_color}]✓[/{confidence_color}] {match.abs_book.title} {seq}")
+
+            # Missing books
+            if result.missing_books:
+                console.print(f"\n[bold red]Missing Books ({len(result.missing_books)}):[/bold red]")
+                for book in result.missing_books:
+                    seq = f"#{book.sequence}" if book.sequence else ""
+                    duration = f"({book.runtime_hours:.1f}h)" if book.runtime_hours else ""
+                    console.print(f"  [red]✗[/red] {book.title} {seq} {duration}")
+
+            # Unmatched ABS books (in ABS but couldn't match to any Audible book)
+            # Find them by comparing matched books with all ABS books
+            matched_abs_ids = {m.abs_book.id for m in result.matched_books}
+            unmatched_abs = [b for b in target_series.books if b.id not in matched_abs_ids]
+
+            if unmatched_abs and verbose:
+                console.print(f"\n[bold yellow]Unmatched ABS Books ({len(unmatched_abs)}):[/bold yellow]")
+                for book in unmatched_abs:
+                    seq = f"#{book.sequence}" if book.sequence else ""
+                    console.print(f"  [yellow]?[/yellow] {book.title} {seq}")
+
+    except typer.Exit:
+        raise  # Re-raise typer exits without catching
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise typer.Exit(1) from e
+
+
+@series_app.command("report")
+def series_report(
+    library_id: str | None = typer.Option(
+        None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
+    ),
+    min_books: int = typer.Option(2, "--min-books", "-m", help="Minimum books in series to analyze"),
+    limit: int = typer.Option(None, "--limit", "-n", help="Max series to analyze"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: table or json"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file (default: stdout for json)"),
+    incomplete_only: bool = typer.Option(False, "--incomplete", "-i", help="Only show incomplete series"),
+):
+    """Generate a full series analysis report for a library."""
+    import json
+    import time
+
+    library_id = resolve_library_id(library_id)
+    start_time = time.time()
+
+    try:
+        with get_abs_client() as abs_client, get_audible_client() as audible_client:
+            matcher = SeriesMatcher(abs_client=abs_client, audible_client=audible_client)
+
+            console.print(f"\n[bold]Analyzing library series...[/bold]")
+
+            # Get all series
+            all_series = matcher.get_abs_series(library_id)
+            all_series = [s for s in all_series if len(s.books) >= min_books]
+            all_series.sort(key=lambda s: len(s.books), reverse=True)
+
+            if limit:
+                all_series = all_series[:limit]
+
+            console.print(f"Found {len(all_series)} series with {min_books}+ books")
+
+            # Analyze each series
+            results: list[SeriesComparisonResult] = []
+
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TaskProgressColumn(),
+                console=console,
+            ) as progress:
+                task = progress.add_task("Analyzing series...", total=len(all_series))
+
+                for series in all_series:
+                    progress.update(task, description=f"Analyzing: {series.name[:30]}...")
+
+                    try:
+                        result = matcher.compare_series(series)
+                        results.append(result)
+                    except Exception as e:
+                        logger.warning(f"Failed to analyze series '{series.name}': {e}")
+
+                    progress.advance(task)
+
+            # Calculate summary stats BEFORE filtering
+            all_results = results  # Keep reference for summary
+            total_in_library = sum(r.abs_book_count for r in all_results)
+            total_on_audible = sum(r.audible_book_count for r in all_results if r.audible_book_count)
+            total_missing = sum(len(r.missing_books) for r in all_results)
+            complete_series_count = sum(1 for r in all_results if r.is_complete)
+
+            # Detect warnings for data quality issues
+            asin_to_series: dict[str, list[str]] = {}
+            for r in all_results:
+                if r.series_match.audible_series and r.series_match.audible_series.asin:
+                    asin = r.series_match.audible_series.asin
+                    series_name = r.series_match.abs_series.name
+                    if asin not in asin_to_series:
+                        asin_to_series[asin] = []
+                    asin_to_series[asin].append(series_name)
+
+            # Add warnings to each result
+            for r in all_results:
+                warnings = []
+
+                # Check for duplicate ASIN (multiple ABS series → same Audible series)
+                if r.series_match.audible_series and r.series_match.audible_series.asin:
+                    asin = r.series_match.audible_series.asin
+                    if len(asin_to_series.get(asin, [])) > 1:
+                        other_series = [s for s in asin_to_series[asin] if s != r.series_match.abs_series.name]
+                        warnings.append(f"DUPLICATE_ASIN: Also matched by '{other_series[0]}'")
+
+                # Check for missing metadata (no Audible match)
+                if not r.series_match.audible_series or not r.series_match.audible_series.asin:
+                    warnings.append("MISSING_METADATA: No Audible series found (check ABS metadata)")
+
+                # Check for potential duplicates in library (>100% completion)
+                if r.completion_percentage > 100:
+                    warnings.append(
+                        f"POTENTIAL_DUPES: Library has {r.abs_book_count} books but Audible shows {r.audible_book_count}"
+                    )
+
+                r.warnings = warnings
+
+            # Filter if needed
+            if incomplete_only:
+                results = [r for r in results if not r.is_complete]
+
+            # Sort by completion percentage
+            results.sort(key=lambda r: r.completion_percentage)
+
+            elapsed = time.time() - start_time
+
+            # Build export data (used for both JSON format and file export)
+            export_data = {
+                "summary": {
+                    "series_analyzed": len(all_results),
+                    "series_shown": len(results),
+                    "complete_series": complete_series_count,
+                    "total_in_library": total_in_library,
+                    "total_on_audible": total_on_audible,
+                    "total_missing": total_missing,
+                    "analysis_time_seconds": elapsed,
+                },
+                "series": [
+                    {
+                        "name": (
+                            r.series_match.audible_series.title
+                            if r.series_match.audible_series and r.series_match.audible_series.title
+                            else r.series_match.abs_series.name
+                        ),
+                        "abs_name": r.series_match.abs_series.name,
+                        "audible_asin": (r.series_match.audible_series.asin if r.series_match.audible_series else None),
+                        "in_library": r.abs_book_count,
+                        "on_audible": r.audible_book_count,
+                        "completion_percentage": r.completion_percentage,
+                        "is_complete": r.is_complete,
+                        "match_confidence": r.series_match.confidence.value,
+                        "warnings": r.warnings,
+                        "matched_books": [
+                            {
+                                "title": m.abs_book.title,
+                                "sequence": m.abs_book.sequence,
+                                "asin": m.audible_book.asin if m.audible_book else None,
+                                "confidence": m.confidence.value,
+                            }
+                            for m in r.matched_books
+                        ],
+                        "missing_books": [
+                            {
+                                "title": b.title,
+                                "sequence": b.sequence,
+                                "asin": b.asin,
+                                "runtime_hours": b.runtime_hours,
+                                "release_date": b.release_date,
+                                "author": b.author_name,
+                                "narrator": b.narrator_name,
+                                "price": b.price,
+                                "is_in_plus_catalog": b.is_in_plus_catalog,
+                                "audible_url": b.audible_url,
+                            }
+                            for b in r.missing_books
+                        ],
+                    }
+                    for r in results
+                ],
+            }
+
+            # JSON output format
+            if format.lower() == "json":
+                json_output = json.dumps(export_data, indent=2)
+                if output:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output, "w") as f:
+                        f.write(json_output)
+                    console.print(f"[green]✓[/green] Exported to {output}")
+                else:
+                    print(json_output)
+                return
+
+            # Table output format (default)
+            table = Table(title=f"Series Analysis Report ({len(results)} series)")
+            table.add_column("Series", style="bold")
+            table.add_column("In Library", justify="right")
+            table.add_column("On Audible", justify="right")
+            table.add_column("Complete", justify="right")
+            table.add_column("Missing", justify="right")
+            table.add_column("Warnings", style="yellow")
+
+            for result in results:
+                # Use Audible series name as source of truth
+                if result.series_match.audible_series and result.series_match.audible_series.title:
+                    series_name = result.series_match.audible_series.title
+                else:
+                    series_name = result.series_match.abs_series.name
+
+                completion_style = (
+                    "green"
+                    if result.completion_percentage >= 100
+                    else "yellow" if result.completion_percentage >= 75 else "red"
+                )
+
+                # Build warning indicators
+                warning_indicators = []
+                for w in result.warnings:
+                    if w.startswith("DUPLICATE_ASIN"):
+                        warning_indicators.append("⚠️ DUP")
+                    elif w.startswith("MISSING_METADATA"):
+                        warning_indicators.append("⚠️ META")
+                    elif w.startswith("POTENTIAL_DUPES"):
+                        warning_indicators.append("🔍 DUPE?")
+                warning_str = " ".join(warning_indicators)
+
+                table.add_row(
+                    series_name[:40],
+                    str(result.abs_book_count),
+                    str(result.audible_book_count) if result.audible_book_count else "?",
+                    f"[{completion_style}]{result.completion_percentage:.0f}%[/{completion_style}]",
+                    str(len(result.missing_books)),
+                    warning_str,
+                )
+
+            console.print(table)
+
+            # Summary stats (use pre-calculated values from all_results)
+            console.print(f"\n[bold]Summary:[/bold]")
+            console.print(f"  Total series analyzed: {len(all_results)}")
+            if incomplete_only:
+                console.print(f"  Incomplete series shown: {len(results)}")
+            console.print(f"  Complete series: [green]{complete_series_count}[/green]")
+            console.print(f"  Books in library: {total_in_library}")
+            console.print(f"  Books on Audible: {total_on_audible}")
+            console.print(f"  Missing books: [red]{total_missing}[/red]")
+
+            console.print(f"\n[dim]Analysis completed in {elapsed:.1f}s[/dim]")
+
+            # Export to file if requested (for table format)
+            if output:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                with open(output, "w") as f:
+                    json.dump(export_data, f, indent=2)
+                console.print(f"\n[green]✓[/green] Exported report to {output}")
+
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

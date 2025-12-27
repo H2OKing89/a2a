@@ -6,6 +6,7 @@ for common operations like library retrieval and catalog lookups.
 """
 
 import hashlib
+import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -739,6 +740,105 @@ class AudibleClient:
             )
 
         return products
+
+    # -------------------------------------------------------------------------
+    # Similar Products / Series Discovery
+    # -------------------------------------------------------------------------
+
+    def get_similar_products(
+        self,
+        asin: str,
+        similarity_type: str = "InTheSameSeries",
+        num_results: int = 50,
+        response_groups: str | None = None,
+        use_cache: bool = True,
+    ) -> list[AudibleCatalogProduct]:
+        """
+        Get similar products for an ASIN using the /sims endpoint.
+
+        This is especially useful for discovering ALL books in a series,
+        even ones we don't own yet.
+
+        Args:
+            asin: Product ASIN to find similar products for
+            similarity_type: Type of similarity. Options:
+                - "InTheSameSeries" - Other books in the same series (best for series discovery)
+                - "AuthorBasedSims" - Other books by the same author
+                - "ListenerAlsoLiked" - Listener recommendations
+                - "ClubPickRecommendation" - Book club picks
+            num_results: Maximum results to return
+            response_groups: Override default response groups
+            use_cache: Whether to use cached results
+
+        Returns:
+            List of similar products
+        """
+        cache_key = f"sims_{asin}_{similarity_type}"
+
+        # Check cache
+        if use_cache and self._cache:
+            cached = self._cache.get("catalog", cache_key)
+            if cached:
+                return [AudibleCatalogProduct.model_validate(p) for p in cached]
+
+        try:
+            response = self._request(
+                "GET",
+                f"1.0/catalog/products/{asin}/sims",
+                similarity_type=similarity_type,
+                num_results=min(num_results, 50),
+                response_groups=response_groups or CATALOG_RESPONSE_GROUPS,
+            )
+
+            # Parse similar products
+            products_data = response.get("similar_products", [])
+            products = []
+            for prod_data in products_data:
+                try:
+                    products.append(AudibleCatalogProduct.model_validate(prod_data))
+                except ValidationError:
+                    pass
+
+            # Cache results
+            if self._cache:
+                self._cache.set(
+                    "catalog", cache_key, [p.model_dump() for p in products], ttl_seconds=self._cache_ttl_seconds
+                )
+
+            return products
+
+        except AudibleNotFoundError:
+            return []
+        except AudibleError as e:
+            # Log but don't fail - return empty list
+            logging.getLogger(__name__).warning("Failed to get similar products for %s: %s", asin, e)
+            return []
+
+    def get_series_books_from_sims(
+        self,
+        asin: str,
+        use_cache: bool = True,
+    ) -> list[AudibleCatalogProduct]:
+        """
+        Discover all books in a series using the /sims endpoint.
+
+        This is the most reliable way to find ALL books in a series,
+        including ones not in your library. Uses "InTheSameSeries"
+        similarity type.
+
+        Args:
+            asin: ASIN of any book in the series
+            use_cache: Whether to use cached results
+
+        Returns:
+            List of all books in the series (as catalog products)
+        """
+        return self.get_similar_products(
+            asin=asin,
+            similarity_type="InTheSameSeries",
+            num_results=50,  # Most series have fewer than 50 books
+            use_cache=use_cache,
+        )
 
     # -------------------------------------------------------------------------
     # Account & Stats Methods

@@ -25,6 +25,7 @@ class ABSSettings(BaseSettings):
 
     host: str = Field(default="http://localhost:13378", description="ABS server URL")
     api_key: str = Field(default="", description="ABS API key/token")
+    library_id: str | None = Field(default=None, description="Default library ID")
 
     # Caching settings
     cache_enabled: bool = Field(default=True, description="Enable response caching")
