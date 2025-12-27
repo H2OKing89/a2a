@@ -12,8 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import typer
-from rich.box import DOUBLE, HEAVY, ROUNDED
-from rich.columns import Columns
+from rich.box import ROUNDED
 from rich.padding import Padding
 from rich.text import Text
 from rich.tree import Tree
@@ -26,20 +25,17 @@ from src.audible import AudibleAuthError, AudibleBook, AudibleClient, AudibleEnr
 from src.cache import SQLiteCache
 from src.config import get_settings
 from src.quality import QualityAnalyzer, QualityReport, QualityTier
-from src.series import ABSSeriesInfo, MatchConfidence, SeriesAnalysisReport, SeriesComparisonResult, SeriesMatcher
+from src.series import MatchConfidence, SeriesComparisonResult, SeriesMatcher
 from src.utils import save_golden_sample
 from src.utils.ui import (
     BarColumn,
     Icons,
-    MofNCompleteColumn,
     Panel,
     Progress,
     SpinnerColumn,
     Table,
     TaskProgressColumn,
     TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
     console,
     ui,
 )

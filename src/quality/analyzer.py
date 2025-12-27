@@ -4,12 +4,11 @@ Quality analyzer for audiobook libraries.
 
 import logging
 from collections.abc import Callable, Iterator
-from pathlib import Path
 
 import httpx
 from pydantic import ValidationError
 
-from ..abs import ABSAuthError, ABSClient, ABSConnectionError, ABSError, ABSNotFoundError
+from ..abs import ABSAuthError, ABSConnectionError, ABSError, ABSNotFoundError
 from .models import AudioQuality, FormatRank, QualityReport, QualityTier
 
 logger = logging.getLogger(__name__)

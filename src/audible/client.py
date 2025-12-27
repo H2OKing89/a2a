@@ -13,17 +13,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import ValidationError
-
-import audible
 from audible import Authenticator, Client
 
 from .models import (
     AudibleAccountInfo,
-    AudibleBook,
     AudibleCatalogProduct,
-    AudibleCatalogResponse,
     AudibleLibraryItem,
-    AudibleLibraryResponse,
     AudibleListeningStats,
     CatalogSortBy,
     ChapterInfo,
@@ -35,7 +30,6 @@ from .models import (
     ResponseGroups,
     SimilarityType,
     WishlistItem,
-    WishlistResponse,
     WishlistSortBy,
 )
 

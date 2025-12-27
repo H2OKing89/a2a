@@ -7,10 +7,8 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
-from urllib.parse import urljoin
 
 import httpx
-from pydantic import ValidationError
 
 from .models import (
     Author,
@@ -18,12 +16,10 @@ from .models import (
     CollectionExpanded,
     LibrariesResponse,
     Library,
-    LibraryItem,
     LibraryItemExpanded,
     LibraryItemMinified,
     LibraryItemsResponse,
     LibraryStats,
-    Series,
     User,
 )
 

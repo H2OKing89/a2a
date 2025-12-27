@@ -21,11 +21,9 @@ Usage:
 
 import asyncio
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 import httpx
-from pydantic import ValidationError
 
 from .client import ABSAuthError, ABSConnectionError, ABSError, ABSNotFoundError
 from .models import (
