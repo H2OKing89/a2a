@@ -325,3 +325,61 @@ class User(BaseModel):
     created_at: int = Field(alias="createdAt")
     permissions: UserPermissions = Field(default_factory=UserPermissions)
     libraries_accessible: list[str] = Field(default_factory=list, alias="librariesAccessible")
+
+
+class Collection(BaseModel):
+    """ABS Collection model."""
+
+    id: str
+    library_id: str = Field(alias="libraryId")
+    user_id: str = Field(alias="userId")
+    name: str
+    description: str | None = None
+    books: list[str] = Field(default_factory=list)  # List of library item IDs
+    last_update: int = Field(alias="lastUpdate")
+    created_at: int = Field(alias="createdAt")
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def book_count(self) -> int:
+        """Number of books in collection."""
+        return len(self.books)
+
+
+class CollectionExpanded(Collection):
+    """Collection with expanded book data."""
+
+    books: list[dict] = Field(default_factory=list)  # Full library item dicts
+
+    @property
+    def book_ids(self) -> list[str]:
+        """Get book IDs from expanded books."""
+        return [b.get("id", "") for b in self.books if isinstance(b, dict)]
+
+
+class SeriesProgress(BaseModel):
+    """Series progress tracking."""
+
+    library_item_ids: list[str] = Field(default_factory=list, alias="libraryItemIds")
+    library_item_ids_finished: list[str] = Field(default_factory=list, alias="libraryItemIdsFinished")
+    is_finished: bool = Field(default=False, alias="isFinished")
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def total_books(self) -> int:
+        """Total number of books in series."""
+        return len(self.library_item_ids)
+
+    @property
+    def finished_count(self) -> int:
+        """Number of finished books."""
+        return len(self.library_item_ids_finished)
+
+    @property
+    def progress_percent(self) -> float:
+        """Completion percentage."""
+        if not self.library_item_ids:
+            return 0.0
+        return (len(self.library_item_ids_finished) / len(self.library_item_ids)) * 100

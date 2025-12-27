@@ -768,3 +768,311 @@ class ABSClient:
             Author dict or None
         """
         return self._get("/search/authors", params={"q": query})
+
+    # =====================
+    # Enhanced Author Methods
+    # =====================
+
+    def get_author_with_items(
+        self,
+        author_id: str,
+        include_series: bool = True,
+        use_cache: bool = True,
+    ) -> dict:
+        """
+        Get an author with their library items and series.
+
+        This is useful for tracking favorite authors and finding
+        all their books in your library.
+
+        Args:
+            author_id: Author ID
+            include_series: Include series information
+            use_cache: Use cached results
+
+        Returns:
+            Author dict with libraryItems and series arrays
+
+        Example:
+            author = client.get_author_with_items(author_id)
+            print(f"{author['name']} has {len(author['libraryItems'])} books")
+            for series in author.get('series', []):
+                print(f"  Series: {series['name']}")
+        """
+        cache_key = f"author_items_{author_id}_{include_series}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_authors", cache_key)
+            if cached:
+                logger.debug("Cache hit for author %s", author_id)
+                return cached
+
+        include_parts = ["items"]
+        if include_series:
+            include_parts.append("series")
+
+        params = {"include": ",".join(include_parts)}
+        result = self._get(f"/authors/{author_id}", params=params)
+
+        if self._cache:
+            self._cache.set("abs_authors", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
+
+        logger.debug(
+            "Fetched author %s with %d items",
+            result.get("name", author_id),
+            len(result.get("libraryItems", [])),
+        )
+        return result
+
+    # =====================
+    # Enhanced Series Methods
+    # =====================
+
+    def get_series_with_progress(
+        self,
+        series_id: str,
+        use_cache: bool = True,
+    ) -> dict:
+        """
+        Get a series with progress information.
+
+        Args:
+            series_id: Series ID
+            use_cache: Use cached results
+
+        Returns:
+            Series dict with progress info
+
+        Example:
+            series = client.get_series_with_progress(series_id)
+            progress = series.get('progress', {})
+            print(f"Finished: {len(progress.get('libraryItemIdsFinished', []))}")
+        """
+        cache_key = f"series_progress_{series_id}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_series", cache_key)
+            if cached:
+                logger.debug("Cache hit for series %s", series_id)
+                return cached
+
+        result = self._get(f"/series/{series_id}", params={"include": "progress"})
+
+        if self._cache:
+            self._cache.set("abs_series", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
+
+        logger.debug("Fetched series %s", result.get("name", series_id))
+        return result
+
+    # =====================
+    # Collection Management
+    # =====================
+
+    def get_collections(self) -> list[dict]:
+        """
+        Get all collections.
+
+        Returns:
+            List of collection dicts
+        """
+        result = self._get("/collections")
+        collections = result.get("collections", [])
+        logger.debug("Fetched %d collections", len(collections))
+        return collections
+
+    def get_collection(self, collection_id: str) -> dict:
+        """
+        Get a collection by ID.
+
+        Args:
+            collection_id: Collection ID
+
+        Returns:
+            Collection dict with books array
+        """
+        return self._get(f"/collections/{collection_id}")
+
+    def create_collection(
+        self,
+        library_id: str,
+        name: str,
+        description: str | None = None,
+        book_ids: list[str] | None = None,
+    ) -> dict:
+        """
+        Create a new collection.
+
+        Args:
+            library_id: Library ID the collection belongs to
+            name: Collection name
+            description: Optional description
+            book_ids: Optional list of book IDs to add
+
+        Returns:
+            Created collection dict
+
+        Example:
+            collection = client.create_collection(
+                library_id="lib_xxx",
+                name="Quality Upgrades Needed",
+                description="Books that need quality upgrades from Audible"
+            )
+        """
+        payload: dict[str, Any] = {
+            "libraryId": library_id,
+            "name": name,
+        }
+        if description:
+            payload["description"] = description
+        if book_ids:
+            payload["books"] = book_ids
+
+        result = self._post("/collections", json=payload)
+        logger.info("Created collection '%s' (id=%s)", name, result.get("id"))
+        return result
+
+    def update_collection(
+        self,
+        collection_id: str,
+        name: str | None = None,
+        description: str | None = None,
+        book_ids: list[str] | None = None,
+    ) -> dict:
+        """
+        Update a collection.
+
+        Args:
+            collection_id: Collection ID
+            name: New name (optional)
+            description: New description (optional)
+            book_ids: Replace book list (optional)
+
+        Returns:
+            Updated collection dict
+        """
+        payload: dict[str, Any] = {}
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if book_ids is not None:
+            payload["books"] = book_ids
+
+        result = self._request("PATCH", f"/collections/{collection_id}", json=payload)
+        logger.info("Updated collection %s", collection_id)
+        return result
+
+    def delete_collection(self, collection_id: str) -> bool:
+        """
+        Delete a collection.
+
+        Args:
+            collection_id: Collection ID
+
+        Returns:
+            True if deleted successfully
+        """
+        self._request("DELETE", f"/collections/{collection_id}")
+        logger.info("Deleted collection %s", collection_id)
+        return True
+
+    def add_book_to_collection(self, collection_id: str, book_id: str) -> dict:
+        """
+        Add a single book to a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_id: Library item ID to add
+
+        Returns:
+            Updated collection dict
+        """
+        result = self._post(f"/collections/{collection_id}/book", json={"id": book_id})
+        logger.debug("Added book %s to collection %s", book_id, collection_id)
+        return result
+
+    def remove_book_from_collection(self, collection_id: str, book_id: str) -> dict:
+        """
+        Remove a book from a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_id: Library item ID to remove
+
+        Returns:
+            Updated collection dict
+        """
+        result = self._request("DELETE", f"/collections/{collection_id}/book/{book_id}")
+        logger.debug("Removed book %s from collection %s", book_id, collection_id)
+        return result
+
+    def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+        """
+        Add multiple books to a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_ids: List of library item IDs to add
+
+        Returns:
+            Updated collection dict
+        """
+        result = self._post(f"/collections/{collection_id}/batch/add", json={"books": book_ids})
+        logger.info("Added %d books to collection %s", len(book_ids), collection_id)
+        return result
+
+    def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+        """
+        Remove multiple books from a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_ids: List of library item IDs to remove
+
+        Returns:
+            Updated collection dict
+        """
+        result = self._post(f"/collections/{collection_id}/batch/remove", json={"books": book_ids})
+        logger.info("Removed %d books from collection %s", len(book_ids), collection_id)
+        return result
+
+    # =====================
+    # Utility Methods
+    # =====================
+
+    def find_or_create_collection(
+        self,
+        library_id: str,
+        name: str,
+        description: str | None = None,
+    ) -> dict:
+        """
+        Find a collection by name or create it if it doesn't exist.
+
+        Useful for ensuring a collection exists before adding books.
+
+        Args:
+            library_id: Library ID
+            name: Collection name to find or create
+            description: Description if creating new
+
+        Returns:
+            Collection dict (existing or newly created)
+
+        Example:
+            collection = client.find_or_create_collection(
+                library_id,
+                "Upgrade Candidates - Low Quality"
+            )
+            client.batch_add_to_collection(collection['id'], book_ids)
+        """
+        collections = self.get_collections()
+
+        # Find existing collection with same name in this library
+        for col in collections:
+            if col.get("name") == name and col.get("libraryId") == library_id:
+                logger.debug("Found existing collection '%s'", name)
+                return col
+
+        # Create new collection
+        return self.create_collection(library_id, name, description)
