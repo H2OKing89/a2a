@@ -12,6 +12,7 @@ This module is used by multiple features:
 - Any feature needing rich Audible metadata
 """
 
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Optional, cast
 
@@ -22,6 +23,9 @@ from .models import PlusCatalogInfo, PricingInfo
 
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
+
+
+logger = logging.getLogger(__name__)
 
 
 class AudibleEnrichment(BaseModel):
@@ -233,7 +237,12 @@ class AudibleEnrichmentService:
         try:
             response = self._get_catalog_product(asin)
             product = response.get("product", response)
-        except Exception:
+        except Exception as e:
+            logger.debug(
+                "Failed to get catalog product for ASIN %s: %s",
+                asin,
+                str(e),
+            )
             return None
 
         if not product:
