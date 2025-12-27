@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 CLI for audiobook management tool.
+
+Features beautiful rich console output with spinners, progress bars,
+styled tables, and visual feedback.
 """
 
 import logging
@@ -9,10 +12,11 @@ from pathlib import Path
 from typing import Any
 
 import typer
-from rich.console import Console
-from rich.panel import Panel
-from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
-from rich.table import Table
+from rich.box import DOUBLE, HEAVY, ROUNDED
+from rich.columns import Columns
+from rich.padding import Padding
+from rich.text import Text
+from rich.tree import Tree
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -24,29 +28,44 @@ from src.config import get_settings
 from src.quality import QualityAnalyzer, QualityReport, QualityTier
 from src.series import ABSSeriesInfo, MatchConfidence, SeriesAnalysisReport, SeriesComparisonResult, SeriesMatcher
 from src.utils import save_golden_sample
+from src.utils.ui import (
+    BarColumn,
+    Icons,
+    MofNCompleteColumn,
+    Panel,
+    Progress,
+    SpinnerColumn,
+    Table,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    console,
+    ui,
+)
 
 app = typer.Typer(
     name="audiobook-tool",
-    help="Audiobook management tool using ABS and Audible APIs",
+    help="🎧 Audiobook management tool using ABS and Audible APIs",
+    rich_markup_mode="rich",
 )
 
 # Sub-app for ABS commands
-abs_app = typer.Typer(help="Audiobookshelf API commands")
+abs_app = typer.Typer(help="📚 Audiobookshelf API commands")
 app.add_typer(abs_app, name="abs")
 
 # Sub-app for Audible commands
-audible_app = typer.Typer(help="Audible API commands")
+audible_app = typer.Typer(help="🎧 Audible API commands")
 app.add_typer(audible_app, name="audible")
 
 # Sub-app for Quality commands
-quality_app = typer.Typer(help="Audio quality analysis commands")
+quality_app = typer.Typer(help="💎 Audio quality analysis commands")
 app.add_typer(quality_app, name="quality")
 
 # Sub-app for Series commands
-series_app = typer.Typer(help="Series tracking and collection management")
+series_app = typer.Typer(help="📖 Series tracking and collection management")
 app.add_typer(series_app, name="series")
 
-console = Console()
 logger = logging.getLogger(__name__)
 
 
@@ -130,57 +149,53 @@ def status():
     settings = get_settings()
     has_errors = False
 
-    console.print("\n[bold cyan]═══ System Status ═══[/bold cyan]\n")
+    # Header
+    ui.header("Audiobook Manager", subtitle="System Status", icon=Icons.AUDIOBOOK)
 
     # ABS Status
-    console.print("[bold]Audiobookshelf[/bold]")
-    console.print(f"  Server: {settings.abs.host}")
+    ui.section("Audiobookshelf", icon=Icons.SERVER)
+    console.print(f"  {Icons.LINK} Server: [accent]{settings.abs.host}[/accent]")
     try:
-        with get_abs_client() as client:
+        with ui.spinner("Connecting to ABS server..."), get_abs_client() as client:
             user = client.get_me()
             libraries = client.get_libraries()
-            console.print(f"  [green]✓[/green] Connected as [bold]{user.username}[/bold]")
-            console.print(f"  [green]✓[/green] {len(libraries)} libraries available")
+        ui.success(f"Connected as [bold]{user.username}[/bold]")
+        ui.success(f"{len(libraries)} libraries available")
     except Exception as e:
-        console.print(f"  [red]✗[/red] Connection failed: {e}")
-        # Log full exception and stack trace for debugging while keeping concise CLI output
+        ui.error("Connection failed", details=str(e))
         logger.exception("ABS connection failed")
         has_errors = True
 
-    console.print()
-
     # Audible Status
-    console.print("[bold]Audible[/bold]")
-    console.print(f"  Auth file: {settings.audible.auth_file}")
+    ui.section("Audible", icon=Icons.AUDIOBOOK)
+    console.print(f"  {Icons.FILE} Auth file: [accent]{settings.audible.auth_file}[/accent]")
     if not settings.audible.auth_file.exists():
-        console.print("  [yellow]⚠[/yellow] Not authenticated (run 'audible login')")
+        ui.warning("Not authenticated", details="Run 'audible login' to authenticate")
     else:
         try:
-            with get_audible_client() as client:
-                client.get_library(num_results=1, use_cache=True)  # Verify connectivity
-                console.print(f"  [green]✓[/green] Connected to marketplace: [bold]{client.marketplace}[/bold]")
-                console.print("  [green]✓[/green] Library accessible")
+            with ui.spinner("Connecting to Audible..."), get_audible_client() as client:
+                client.get_library(num_results=1, use_cache=True)
+            ui.success(f"Connected to marketplace: [bold]{client.marketplace}[/bold]")
+            ui.success("Library accessible")
         except AudibleAuthError as e:
-            console.print(f"  [red]✗[/red] Auth failed: {e}")
+            ui.error("Auth failed", details=str(e))
             has_errors = True
         except Exception as e:
-            console.print(f"  [red]✗[/red] Error: {e}")
+            ui.error("Error", details=str(e))
             has_errors = True
 
-    console.print()
-
     # Cache Status
-    console.print("[bold]Cache[/bold]")
+    ui.section("Cache", icon=Icons.CACHE)
     if not settings.cache.enabled:
-        console.print("  [yellow]⚠[/yellow] Caching disabled")
+        ui.warning("Caching disabled")
     else:
         cache = get_cache()
         if cache:
             cache_stats: dict[str, Any] = cache.get_stats()
-            console.print(f"  [green]✓[/green] SQLite: {cache_stats.get('db_size_mb', 0):.1f} MB")
-            console.print(f"  [green]✓[/green] {cache_stats.get('total_entries', 0)} entries")
+            ui.success(f"SQLite: [bold]{cache_stats.get('db_size_mb', 0):.1f} MB[/bold]")
+            ui.success(f"{cache_stats.get('total_entries', 0)} entries cached")
         else:
-            console.print("  [yellow]⚠[/yellow] Not initialized")
+            ui.warning("Not initialized")
 
     console.print()
 
@@ -193,25 +208,27 @@ def abs_status():
     """Check ABS connection status."""
     settings = get_settings()
 
-    console.print(f"\n[bold]ABS Server:[/bold] {settings.abs.host}")
+    ui.header("Audiobookshelf", subtitle=settings.abs.host, icon=Icons.SERVER)
 
     try:
-        with get_abs_client() as client:
+        with ui.spinner("Connecting...") as status, get_abs_client() as client:
             user = client.get_me()
-
-            console.print(f"[green]✓[/green] Connected as: [bold]{user.username}[/bold] ({user.type})")
-            console.print(f"  Active: {user.is_active}, Locked: {user.is_locked}")
-
-            # Get libraries
+            status.update("Fetching libraries...")
             libraries = client.get_libraries()
-            console.print(f"\n[bold]Libraries:[/bold] {len(libraries)}")
 
-            for lib in libraries:
-                icon = "📚" if lib.is_book_library else "🎙️"
-                console.print(f"  {icon} {lib.name} ({lib.id}) - {lib.media_type}")
+        ui.success(f"Connected as: [bold]{user.username}[/bold] ({user.type})")
+        console.print(f"    {Icons.BULLET} Active: {user.is_active}, Locked: {user.is_locked}")
+
+        # Libraries tree
+        ui.subsection(f"{Icons.BOOK} Libraries ({len(libraries)})")
+        tree = ui.tree("Available Libraries")
+        for lib in libraries:
+            icon = Icons.BOOK if lib.is_book_library else Icons.MIC
+            tree.add(f"{icon} [bold]{lib.name}[/bold] [dim]({lib.id})[/dim] - {lib.media_type}")
+        console.print(Padding(tree, (0, 4)))
 
     except Exception as e:
-        console.print(f"[red]✗[/red] Connection failed: {e}")
+        ui.error("Connection failed", details=str(e))
         raise typer.Exit(1)
 
 
@@ -226,52 +243,65 @@ def cache_command(
     settings = get_settings()
 
     if not settings.cache.enabled:
-        console.print("[yellow]Caching is disabled in settings[/yellow]")
+        ui.warning("Caching is disabled in settings")
         raise typer.Exit(1)
 
     cache = get_cache()
     if not cache:
-        console.print("[yellow]Cache not initialized[/yellow]")
+        ui.warning("Cache not initialized")
         raise typer.Exit(1)
 
     try:
         if clear:
-            if namespace:
-                count = cache.clear_namespace(namespace)
-                console.print(f"[green]✓[/green] Cleared {count} items from '{namespace}'")
-            else:
-                count = cache.clear_all()
-                console.print(f"[green]✓[/green] Cleared {count} total cached items")
+            with ui.spinner("Clearing cache..."):
+                if namespace:
+                    count = cache.clear_namespace(namespace)
+                    ui.success(f"Cleared {count} items from '{namespace}'")
+                else:
+                    count = cache.clear_all()
+                    ui.success(f"Cleared {count} total cached items")
         elif cleanup:
-            count = cache.cleanup_expired()
-            console.print(f"[green]✓[/green] Removed {count} expired items")
+            with ui.spinner("Cleaning up expired entries..."):
+                count = cache.cleanup_expired()
+            ui.success(f"Removed {count} expired items")
         elif stats:
             cache_stats: dict[str, Any] = cache.get_stats()
 
-            # Format namespaces display
-            namespaces_display = (
-                "\n".join(f"  {k}: {v}" for k, v in cache_stats.get("namespaces", {}).items()) or "  (none)"
-            )
+            # Build namespace tree
+            namespace_tree = Tree(f"[bold cyan]{Icons.FOLDER} Namespaces[/bold cyan]")
+            for k, v in cache_stats.get("namespaces", {}).items():
+                namespace_tree.add(f"[cyan]{k}[/cyan]: {v} entries")
+
+            # Stats panel
+            stats_content = Text()
+            stats_content.append(f"📂 DB Path: ", style="bold")
+            stats_content.append(f"{cache_stats.get('db_path', 'N/A')}\n\n")
+
+            stats_content.append(f"💾 DB Size: ", style="bold")
+            stats_content.append(f"{cache_stats.get('db_size_mb', 0):.2f} MB\n\n", style="size")
+
+            stats_content.append(f"📊 Entries\n", style="bold")
+            stats_content.append(f"   Total: {cache_stats.get('total_entries', 0)}\n")
+            stats_content.append(f"   In Memory: {cache_stats.get('memory_entries', 0)}\n")
+            stats_content.append(f"   Expired: ", style="")
+            stats_content.append(f"{cache_stats.get('expired_entries', 0)}\n", style="warning")
+
+            stats_content.append(f"\n🔗 ASIN Mappings\n", style="bold")
+            stats_content.append(f"   Total: {cache_stats.get('asin_mappings', 0)}\n")
+            stats_content.append(f"   With Audible Match: {cache_stats.get('matched_items', 0)}\n")
 
             console.print(
                 Panel(
-                    f"[bold cyan]SQLite Cache[/bold cyan]\n\n"
-                    f"DB Path: {cache_stats.get('db_path', 'N/A')}\n"
-                    f"DB Size: {cache_stats.get('db_size_mb', 0):.2f} MB\n\n"
-                    f"[bold]Entries:[/bold]\n"
-                    f"  Total: {cache_stats.get('total_entries', 0)}\n"
-                    f"  In Memory: {cache_stats.get('memory_entries', 0)}\n"
-                    f"  Expired: {cache_stats.get('expired_entries', 0)}\n\n"
-                    f"[bold]ASIN Mappings:[/bold]\n"
-                    f"  Total: {cache_stats.get('asin_mappings', 0)}\n"
-                    f"  With Audible Match: {cache_stats.get('matched_items', 0)}\n\n"
-                    f"[bold]Namespaces:[/bold]\n{namespaces_display}",
-                    title="Cache Statistics",
+                    stats_content,
+                    title=f"{Icons.CACHE} Cache Statistics",
+                    border_style="cyan",
+                    box=ROUNDED,
                 )
             )
+            console.print(Padding(namespace_tree, (1, 4)))
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -279,30 +309,36 @@ def cache_command(
 def abs_libraries():
     """List all libraries."""
     try:
-        with get_abs_client() as client:
+        with ui.spinner("Fetching libraries..."), get_abs_client() as client:
             libs = client.get_libraries()
 
-            table = Table(title="Libraries")
-            table.add_column("ID", style="cyan")
-            table.add_column("Name", style="bold")
-            table.add_column("Type")
-            table.add_column("Provider")
-            table.add_column("Folders")
+        table = ui.create_table(
+            title=f"{Icons.BOOK} Libraries",
+            show_lines=False,
+            box_style=ROUNDED,
+        )
+        table.add_column("ID", style="cyan", no_wrap=True)
+        table.add_column("Name", style="bold white")
+        table.add_column("Type", style="accent")
+        table.add_column("Provider")
+        table.add_column("Folders", style="muted")
 
-            for lib in libs:
-                folders = ", ".join(f.full_path for f in lib.folders)
-                table.add_row(
-                    lib.id,
-                    lib.name,
-                    lib.media_type,
-                    lib.provider,
-                    folders,
-                )
+        for lib in libs:
+            icon = Icons.BOOK if lib.is_book_library else Icons.MIC
+            folders = ", ".join(f.full_path for f in lib.folders)
+            table.add_row(
+                lib.id,
+                f"{icon} {lib.name}",
+                lib.media_type,
+                lib.provider,
+                folders[:50] + "..." if len(folders) > 50 else folders,
+            )
 
-            console.print(table)
+        console.print()
+        console.print(table)
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -315,25 +351,43 @@ def abs_stats(
     """Show library statistics."""
     library_id = resolve_library_id(library_id)
     try:
-        with get_abs_client() as client:
+        with ui.spinner("Fetching library statistics..."), get_abs_client() as client:
             lib = client.get_library(library_id)
             stats = client.get_library_stats(library_id)
 
-            console.print(
-                Panel(
-                    f"[bold]{lib.name}[/bold]\n\n"
-                    f"Total Items: {stats.total_items}\n"
-                    f"Total Authors: {stats.total_authors}\n"
-                    f"Total Genres: {stats.total_genres}\n"
-                    f"Total Duration: {stats.total_duration / 3600:.1f} hours\n"
-                    f"Audio Tracks: {stats.num_audio_tracks}\n"
-                    f"Total Size: {stats.total_size / (1024**3):.2f} GB",
-                    title="Library Statistics",
-                )
+        # Build stats display
+        stats_text = Text()
+        stats_text.append(f"\n{Icons.BOOK} Total Items: ", style="bold")
+        stats_text.append(f"{stats.total_items}\n", style="accent")
+
+        stats_text.append(f"{Icons.AUTHOR} Total Authors: ", style="bold")
+        stats_text.append(f"{stats.total_authors}\n", style="accent")
+
+        stats_text.append(f"🏷️  Total Genres: ", style="bold")
+        stats_text.append(f"{stats.total_genres}\n", style="accent")
+
+        stats_text.append(f"\n{Icons.CLOCK} Total Duration: ", style="bold")
+        stats_text.append(f"{stats.total_duration / 3600:.1f} hours\n", style="duration")
+
+        stats_text.append(f"{Icons.MUSIC} Audio Tracks: ", style="bold")
+        stats_text.append(f"{stats.num_audio_tracks}\n", style="accent")
+
+        stats_text.append(f"\n{Icons.DATABASE} Total Size: ", style="bold")
+        stats_text.append(f"{stats.total_size / (1024**3):.2f} GB\n", style="size")
+
+        console.print(
+            Panel(
+                stats_text,
+                title=f"{Icons.BOOK} [bold]{lib.name}[/bold]",
+                subtitle="Library Statistics",
+                border_style="cyan",
+                box=ROUNDED,
+                padding=(1, 2),
             )
+        )
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -349,7 +403,7 @@ def abs_items(
     """List library items."""
     library_id = resolve_library_id(library_id)
     try:
-        with get_abs_client() as client:
+        with ui.spinner("Fetching library items..."), get_abs_client() as client:
             response = client.get_library_items(
                 library_id=library_id,
                 limit=limit,
@@ -357,30 +411,35 @@ def abs_items(
                 desc=desc,
             )
 
-            table = Table(title=f"Library Items ({response.total} total)")
-            table.add_column("ID", style="cyan", max_width=25)
-            table.add_column("Title", style="bold", max_width=40)
-            table.add_column("Author", max_width=25)
-            table.add_column("Duration", justify="right")
-            table.add_column("Size", justify="right")
+        table = ui.create_table(
+            title=f"{Icons.BOOK} Library Items ({response.total} total)",
+            box_style=ROUNDED,
+        )
+        table.add_column("ID", style="cyan", max_width=25, no_wrap=True)
+        table.add_column("Title", style="bold white", max_width=40)
+        table.add_column("Author", style="author", max_width=25)
+        table.add_column("Duration", justify="right", style="duration")
+        table.add_column("Size", justify="right", style="size")
 
-            for item in response.results:
-                meta = item.media.metadata
-                duration_hrs = item.media.duration / 3600 if item.media.duration else 0
-                size_mb = (item.size or 0) / (1024**2)
+        for item in response.results:
+            meta = item.media.metadata
+            duration_hrs = item.media.duration / 3600 if item.media.duration else 0
+            size_mb = (item.size or 0) / (1024**2)
 
-                table.add_row(
-                    item.id,
-                    meta.title[:40],
-                    (meta.author_name or "")[:25],
-                    f"{duration_hrs:.1f}h",
-                    f"{size_mb:.0f} MB",
-                )
+            table.add_row(
+                item.id,
+                meta.title[:40] if meta.title else "?",
+                (meta.author_name or "Unknown")[:25],
+                f"{duration_hrs:.1f}h",
+                f"{size_mb:.0f} MB",
+            )
 
-            console.print(table)
+        console.print()
+        console.print(table)
+        console.print(f"\n[muted]Showing {len(response.results)} of {response.total} items[/muted]")
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -821,38 +880,42 @@ def audible_status():
     """Check Audible connection status."""
     settings = get_settings()
 
-    console.print("\n[bold]Audible Status[/bold]")
-    console.print(f"Auth file: {settings.audible.auth_file}")
-    console.print(f"Locale: {settings.audible.locale}")
+    ui.header("Audible", subtitle="Connection Status", icon=Icons.AUDIOBOOK)
+
+    console.print(f"  {Icons.FILE} Auth file: [accent]{settings.audible.auth_file}[/accent]")
+    console.print(f"  {Icons.LINK} Locale: [accent]{settings.audible.locale}[/accent]")
 
     if not settings.audible.auth_file.exists():
-        console.print("\n[yellow]⚠[/yellow] Auth file not found. Run 'audible login' first.")
+        ui.warning("Auth file not found", details="Run 'audible login' first")
         raise typer.Exit(1)
 
     try:
-        with get_audible_client() as client:
-            console.print(f"[green]✓[/green] Connected to marketplace: [bold]{client.marketplace}[/bold]")
-
-            # Get library count
+        with ui.spinner("Connecting to Audible...") as status, get_audible_client() as client:
+            status.update("Verifying library access...")
             items = client.get_library(num_results=1, use_cache=False)
             library_count = len(items)
-            console.print("\n[bold]Account Status:[/bold]")
-            console.print(f"  Library accessible: [green]Yes[/green] ({library_count}+ items)")
-
-            # Cache stats
             cache_stats: dict[str, Any] = client.get_cache_stats()
-            if cache_stats.get("enabled"):
-                console.print("\n[bold]Cache:[/bold] SQLite")
-                console.print(f"  Total entries: {cache_stats.get('total_entries', 0)}")
-                console.print(f"  Memory entries: {cache_stats.get('memory_entries', 0)}")
-                console.print(f"  DB size: {cache_stats.get('db_size_mb', 0):.2f} MB")
+
+        ui.success(f"Connected to marketplace: [bold]{client.marketplace}[/bold]")
+
+        console.print()
+        ui.subsection(f"{Icons.USER} Account Status")
+        console.print(f"    {Icons.BOOK} Library accessible: [success]Yes[/success] ({library_count}+ items)")
+
+        # Cache stats with nice formatting
+        if cache_stats.get("enabled"):
+            console.print()
+            ui.subsection(f"{Icons.CACHE} Cache Status")
+            console.print(f"    {Icons.BULLET} Total entries: [accent]{cache_stats.get('total_entries', 0)}[/accent]")
+            console.print(f"    {Icons.BULLET} Memory entries: [accent]{cache_stats.get('memory_entries', 0)}[/accent]")
+            console.print(f"    {Icons.BULLET} DB size: [size]{cache_stats.get('db_size_mb', 0):.2f} MB[/size]")
 
     except AudibleAuthError as e:
-        console.print(f"[red]✗[/red] Auth failed: {e}")
-        console.print("Try running 'audible login' to refresh credentials.")
+        ui.error("Auth failed", details=str(e))
+        console.print("[muted]Try running 'audible login' to refresh credentials.[/muted]")
         raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]✗[/red] Error: {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -864,39 +927,51 @@ def audible_library(
 ):
     """List your Audible library."""
     try:
-        with get_audible_client() as client:
+        with ui.spinner("Fetching Audible library..."), get_audible_client() as client:
             items = client.get_library(
                 num_results=limit,
                 sort_by=sort,
                 use_cache=not no_cache,
             )
 
-            table = Table(title=f"Audible Library ({len(items)} items)")
-            table.add_column("ASIN", style="cyan", max_width=12)
-            table.add_column("Title", style="bold", max_width=40)
-            table.add_column("Author", max_width=25)
-            table.add_column("Duration", justify="right")
-            table.add_column("Progress", justify="right")
+        table = ui.create_table(
+            title=f"{Icons.AUDIOBOOK} Audible Library ({len(items)} items)",
+            box_style=ROUNDED,
+        )
+        table.add_column("ASIN", style="asin", max_width=12, no_wrap=True)
+        table.add_column("Title", style="title", max_width=40)
+        table.add_column("Author", style="author", max_width=25)
+        table.add_column("Duration", justify="right", style="duration")
+        table.add_column("Progress", justify="right")
 
-            for item in items:
-                duration = f"{item.runtime_hours:.1f}h" if item.runtime_hours else "?"
-                progress = f"{item.percent_complete:.0f}%" if item.percent_complete else "-"
+        for item in items:
+            duration = f"{item.runtime_hours:.1f}h" if item.runtime_hours else "-"
 
-                table.add_row(
-                    item.asin,
-                    (item.title or "?")[:40],
-                    (item.primary_author or "?")[:25],
-                    duration,
-                    progress,
-                )
+            # Progress with visual bar
+            if item.percent_complete:
+                pct = item.percent_complete
+                bar_filled = int(pct / 10)
+                bar = f"[green]{'█' * bar_filled}[/green][dim]{'░' * (10 - bar_filled)}[/dim]"
+                progress = f"{bar} {pct:.0f}%"
+            else:
+                progress = "[dim]-[/dim]"
 
-            console.print(table)
+            table.add_row(
+                item.asin,
+                (item.title or "?")[:40],
+                (item.primary_author or "?")[:25],
+                duration,
+                progress,
+            )
+
+        console.print()
+        console.print(table)
 
     except AudibleAuthError as e:
-        console.print(f"[red]✗[/red] Auth failed: {e}")
+        ui.error("Auth failed", details=str(e))
         raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
@@ -1223,63 +1298,87 @@ def audible_wishlist(
 def audible_stats():
     """Show your Audible listening statistics and account info."""
     try:
-        with get_audible_client() as client:
-            console.print("\n[bold cyan]═══ Audible Statistics ═══[/bold cyan]\n")
-
-            # Get listening stats
+        with ui.spinner("Fetching Audible statistics...") as status, get_audible_client() as client:
             stats = client.get_listening_stats()
-            if stats:
-                listening_hours = (
-                    stats.total_listening_time_ms / (1000 * 60 * 60) if stats.total_listening_time_ms else 0
-                )
-
-                console.print(
-                    Panel(
-                        f"[bold]📊 Listening Activity[/bold]\n\n"
-                        f"Total Listening Time: [green]{listening_hours:.1f} hours[/green]\n"
-                        f"Books Listened: [green]{stats.distinct_titles_listened or 0}[/green]\n"
-                        f"Authors Explored: [green]{stats.distinct_authors_listened or 0}[/green]\n"
-                        f"Listening Streak: [yellow]{stats.current_listening_streak or 0}[/yellow] days\n"
-                        f"Longest Streak: [yellow]{stats.longest_listening_streak or 0}[/yellow] days",
-                        title="📈 Listening Stats",
-                        border_style="cyan",
-                    )
-                )
-            else:
-                console.print("[yellow]Listening stats not available[/yellow]")
-
-            # Get account info
+            status.update("Fetching account info...")
             account = client.get_account_info()
-            if account:
-                console.print()
 
-                # Format subscription info
-                sub_status = "[green]Active[/green]" if account.is_active_member else "[dim]Inactive[/dim]"
+        ui.header("Audible Statistics", icon=Icons.AUDIOBOOK)
 
-                benefits_list = []
-                if account.benefits:
-                    benefits_list = [b.benefit_id for b in account.benefits[:5]]
-                benefits_str = ", ".join(benefits_list) if benefits_list else "(none)"
+        # Listening Stats Panel
+        if stats:
+            listening_hours = stats.total_listening_time_ms / (1000 * 60 * 60) if stats.total_listening_time_ms else 0
 
-                console.print(
-                    Panel(
-                        f"[bold]👤 Account Details[/bold]\n\n"
-                        f"Membership: {sub_status}\n"
-                        f"Plan: [bold]{account.plan_name or 'N/A'}[/bold]\n"
-                        f"Credits: [yellow]{account.credits_available or 0}[/yellow]\n"
-                        f"Benefits: {benefits_str}",
-                        title="💳 Account Info",
-                        border_style="magenta",
-                    )
+            stats_text = Text()
+            stats_text.append(f"\n{Icons.CLOCK} Total Listening Time: ", style="bold")
+            stats_text.append(f"{listening_hours:.1f} hours\n", style="duration")
+
+            stats_text.append(f"{Icons.BOOK} Books Listened: ", style="bold")
+            stats_text.append(f"{stats.distinct_titles_listened or 0}\n", style="accent")
+
+            stats_text.append(f"{Icons.AUTHOR} Authors Explored: ", style="bold")
+            stats_text.append(f"{stats.distinct_authors_listened or 0}\n", style="accent")
+
+            stats_text.append(f"\n{Icons.FIRE} Current Streak: ", style="bold")
+            stats_text.append(f"{stats.current_listening_streak or 0} days\n", style="warning")
+
+            stats_text.append(f"{Icons.TROPHY} Longest Streak: ", style="bold")
+            stats_text.append(f"{stats.longest_listening_streak or 0} days\n", style="warning")
+
+            console.print(
+                Panel(
+                    stats_text,
+                    title=f"📊 Listening Activity",
+                    border_style="cyan",
+                    box=ROUNDED,
+                    padding=(0, 2),
                 )
-            else:
-                console.print("[yellow]Account info not available[/yellow]")
+            )
+        else:
+            ui.warning("Listening stats not available")
+
+        # Account Info Panel
+        if account:
+            console.print()
+
+            sub_status = "[success]✓ Active[/success]" if account.is_active_member else "[dim]Inactive[/dim]"
+
+            benefits_list = []
+            if account.benefits:
+                benefits_list = [b.benefit_id for b in account.benefits[:5]]
+            benefits_str = ", ".join(benefits_list) if benefits_list else "[dim](none)[/dim]"
+
+            account_text = Text()
+            account_text.append(f"\n{Icons.USER} Membership: ", style="bold")
+            account_text.append_text(Text.from_markup(sub_status))
+            account_text.append("\n")
+
+            account_text.append(f"{Icons.CREDIT} Plan: ", style="bold")
+            account_text.append(f"{account.plan_name or 'N/A'}\n", style="accent")
+
+            account_text.append(f"{Icons.GIFT} Credits: ", style="bold")
+            account_text.append(f"{account.credits_available or 0}\n", style="warning")
+
+            account_text.append(f"\n{Icons.SPARKLE} Benefits:\n", style="bold")
+            account_text.append(f"    {benefits_str}\n")
+
+            console.print(
+                Panel(
+                    account_text,
+                    title=f"💳 Account Info",
+                    border_style="magenta",
+                    box=ROUNDED,
+                    padding=(0, 2),
+                )
+            )
+        else:
+            ui.warning("Account info not available")
 
     except AudibleAuthError as e:
-        console.print(f"[red]✗[/red] Auth failed: {e}")
+        ui.error("Auth failed", details=str(e))
         raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Error", details=str(e))
         raise typer.Exit(1)
 
 
