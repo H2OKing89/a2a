@@ -1,6 +1,6 @@
 """Tests for Audible enrichment module."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -207,7 +207,7 @@ class TestPlusCatalogInfoIntegration:
 
     def test_plus_catalog_expiration(self):
         """Test Plus Catalog expiration tracking."""
-        future_date = datetime.now() + timedelta(days=30)
+        future_date = datetime.now(timezone.utc) + timedelta(days=30)
 
         plus_info = PlusCatalogInfo(is_plus_catalog=True, plan_name="US_MINERVA", expiration_date=future_date)
 
@@ -216,7 +216,6 @@ class TestPlusCatalogInfoIntegration:
 
     def test_plus_catalog_is_expiring_soon(self):
         """Test is_expiring_soon property."""
-        from datetime import timezone
 
         # Expiring in 5 days (timezone-aware) - should be "soon"
         soon_date = datetime.now(timezone.utc) + timedelta(days=5)
