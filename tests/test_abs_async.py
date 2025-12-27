@@ -193,3 +193,245 @@ class TestAsyncABSClientExceptions:
         """Test ABSNotFoundError."""
         error = ABSNotFoundError("Not found")
         assert str(error) == "Not found"
+
+
+class TestAsyncABSClientCaching:
+    """Test async client caching behavior."""
+
+    @pytest.mark.asyncio
+    async def test_get_library_stats_uses_cache(self):
+        """Test get_library_stats uses cache."""
+        mock_cache = MagicMock()
+        mock_cache.get.return_value = {
+            "totalItems": 100,
+            "totalAuthors": 50,
+            "totalGenres": 10,
+            "totalDuration": 360000,
+            "numAudioTracks": 100,
+            "totalSize": 1024000000,
+        }
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        stats = await client.get_library_stats("lib_1", use_cache=True)
+
+        assert stats.total_items == 100
+        mock_cache.get.assert_called_once_with("abs_stats", "stats_lib_1")
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_library_stats_bypasses_cache(self):
+        """Test get_library_stats can bypass cache."""
+        mock_cache = MagicMock()
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        with patch.object(client, "_get", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = {
+                "totalItems": 100,
+                "totalAuthors": 50,
+                "totalGenres": 10,
+                "totalDuration": 360000,
+                "numAudioTracks": 100,
+                "totalSize": 1024000000,
+            }
+
+            stats = await client.get_library_stats("lib_1", use_cache=False)
+
+            assert stats.total_items == 100
+            mock_cache.get.assert_not_called()
+            mock_get.assert_called_once()
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_library_stats_sets_cache(self):
+        """Test get_library_stats sets cache after fetch."""
+        mock_cache = MagicMock()
+        mock_cache.get.return_value = None  # Cache miss
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+            cache_ttl_hours=2.0,
+        )
+
+        with patch.object(client, "_get", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = {
+                "totalItems": 100,
+                "totalAuthors": 50,
+                "totalGenres": 10,
+                "totalDuration": 360000,
+                "numAudioTracks": 100,
+                "totalSize": 1024000000,
+            }
+
+            await client.get_library_stats("lib_1", use_cache=True)
+
+            # Check cache.set was called with TTL
+            mock_cache.set.assert_called_once()
+            call_args = mock_cache.set.call_args
+            assert call_args[0][0] == "abs_stats"
+            assert call_args[0][1] == "stats_lib_1"
+            assert call_args[1]["ttl_seconds"] == 7200  # 2 hours
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_item_uses_cache(self):
+        """Test get_item uses cache."""
+        mock_cache = MagicMock()
+        mock_cache.get.return_value = {
+            "id": "item_1",
+            "ino": "123",
+            "libraryId": "lib_1",
+            "folderId": "folder_1",
+            "path": "/audiobooks/test",
+            "relPath": "test",
+            "isFile": False,
+            "mtimeMs": 1234567890000,
+            "ctimeMs": 1234567890000,
+            "birthtimeMs": 1234567890000,
+            "addedAt": 1234567890000,
+            "updatedAt": 1234567890000,
+            "mediaType": "book",
+            "media": {
+                "id": "media_1",
+                "metadata": {"title": "Test Book"},
+                "coverPath": None,
+                "tags": [],
+            },
+        }
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        item = await client.get_item("item_1", use_cache=True)
+
+        assert item.id == "item_1"
+        mock_cache.get.assert_called_once_with("abs_items", "item_item_1_expTrue")
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_item_no_cache_when_include(self):
+        """Test get_item doesn't use cache when include is specified."""
+        mock_cache = MagicMock()
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        with patch.object(client, "_get", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = {
+                "id": "item_1",
+                "ino": "123",
+                "libraryId": "lib_1",
+                "folderId": "folder_1",
+                "path": "/audiobooks/test",
+                "relPath": "test",
+                "isFile": False,
+                "mtimeMs": 1234567890000,
+                "ctimeMs": 1234567890000,
+                "birthtimeMs": 1234567890000,
+                "addedAt": 1234567890000,
+                "updatedAt": 1234567890000,
+                "mediaType": "book",
+                "media": {
+                    "id": "media_1",
+                    "metadata": {"title": "Test Book"},
+                    "coverPath": None,
+                    "tags": [],
+                },
+            }
+
+            await client.get_item("item_1", include="progress", use_cache=True)
+
+            # Cache should not be used when include is specified
+            mock_cache.get.assert_not_called()
+            mock_cache.set.assert_not_called()
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_author_with_items_uses_cache(self):
+        """Test get_author_with_items uses cache."""
+        mock_cache = MagicMock()
+        mock_cache.get.return_value = {
+            "id": "author_1",
+            "name": "Test Author",
+            "libraryItems": [{"id": "item_1"}],
+            "series": [{"id": "series_1"}],
+        }
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        author = await client.get_author_with_items("author_1", use_cache=True)
+
+        assert author["id"] == "author_1"
+        mock_cache.get.assert_called_once_with("abs_authors", "author_items_author_1_True")
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_get_series_with_progress_uses_cache(self):
+        """Test get_series_with_progress uses cache."""
+        mock_cache = MagicMock()
+        mock_cache.get.return_value = {
+            "id": "series_1",
+            "name": "Test Series",
+            "progress": {"finishedCount": 5},
+        }
+
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=mock_cache,
+        )
+
+        series = await client.get_series_with_progress("series_1", use_cache=True)
+
+        assert series["id"] == "series_1"
+        mock_cache.get.assert_called_once_with("abs_series", "series_progress_series_1")
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_no_cache_when_none(self):
+        """Test methods work without cache."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+            cache=None,  # No cache
+        )
+
+        with patch.object(client, "_get", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = {
+                "totalItems": 100,
+                "totalAuthors": 50,
+                "totalGenres": 10,
+                "totalDuration": 360000,
+                "numAudioTracks": 100,
+                "totalSize": 1024000000,
+            }
+
+            # Should not raise, just fetch directly
+            stats = await client.get_library_stats("lib_1")
+            assert stats.total_items == 100
+
+        await client.close()

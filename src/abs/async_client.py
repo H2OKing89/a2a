@@ -215,10 +215,34 @@ class AsyncABSClient:
         data = await self._get(f"/libraries/{library_id}")
         return Library.model_validate(data)
 
-    async def get_library_stats(self, library_id: str) -> LibraryStats:
-        """Get library statistics."""
+    async def get_library_stats(self, library_id: str, use_cache: bool = True) -> LibraryStats:
+        """
+        Get library statistics.
+
+        Args:
+            library_id: Library ID
+            use_cache: Whether to use cached results
+
+        Returns:
+            LibraryStats
+        """
+        cache_key = f"stats_{library_id}"
+
+        # Check cache
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_stats", cache_key)
+            if cached:
+                logger.debug("Cache hit for library stats %s", library_id)
+                return LibraryStats.model_validate(cached)
+
         data = await self._get(f"/libraries/{library_id}/stats")
-        return LibraryStats.model_validate(data)
+        stats = LibraryStats.model_validate(data)
+
+        # Cache result
+        if self._cache:
+            self._cache.set("abs_stats", cache_key, stats.model_dump(), ttl_seconds=self._cache_ttl_seconds)
+
+        return stats
 
     async def get_library_items(
         self,
@@ -271,10 +295,36 @@ class AsyncABSClient:
         params = {"limit": limit, "page": page}
         return await self._get(f"/libraries/{library_id}/series", params=params)
 
-    async def get_library_authors(self, library_id: str) -> list[Author]:
-        """Get all authors in a library."""
+    async def get_library_authors(self, library_id: str, use_cache: bool = True) -> list[Author]:
+        """
+        Get all authors in a library.
+
+        Args:
+            library_id: Library ID
+            use_cache: Whether to use cached results
+
+        Returns:
+            List of authors
+        """
+        cache_key = f"authors_{library_id}"
+
+        # Check cache
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_authors", cache_key)
+            if cached:
+                logger.debug("Cache hit for library authors %s", library_id)
+                return [Author.model_validate(a) for a in cached]
+
         data = await self._get(f"/libraries/{library_id}/authors")
-        return [Author.model_validate(a) for a in data.get("authors", [])]
+        authors = [Author.model_validate(a) for a in data.get("authors", [])]
+
+        # Cache result
+        if self._cache:
+            self._cache.set(
+                "abs_authors", cache_key, [a.model_dump() for a in authors], ttl_seconds=self._cache_ttl_seconds
+            )
+
+        return authors
 
     # =====================
     # Library Items
@@ -285,6 +335,7 @@ class AsyncABSClient:
         item_id: str,
         expanded: bool = True,
         include: str | None = None,
+        use_cache: bool = True,
     ) -> LibraryItemExpanded:
         """
         Get a library item.
@@ -293,10 +344,20 @@ class AsyncABSClient:
             item_id: Item ID
             expanded: Return expanded item
             include: Additional data to include
+            use_cache: Whether to use cached results
 
         Returns:
             LibraryItemExpanded
         """
+        cache_key = f"item_{item_id}_exp{expanded}"
+
+        # Check cache (only cache if no special includes)
+        if use_cache and self._cache and not include:
+            cached = self._cache.get("abs_items", cache_key)
+            if cached:
+                logger.debug("Cache hit for item %s", item_id)
+                return LibraryItemExpanded.model_validate(cached)
+
         params: dict[str, Any] = {}
         if expanded:
             params["expanded"] = 1
@@ -304,12 +365,19 @@ class AsyncABSClient:
             params["include"] = include
 
         data = await self._get(f"/items/{item_id}", params=params)
-        return LibraryItemExpanded.model_validate(data)
+        item = LibraryItemExpanded.model_validate(data)
+
+        # Cache result (only if no special includes)
+        if self._cache and not include:
+            self._cache.set("abs_items", cache_key, item.model_dump(), ttl_seconds=self._cache_ttl_seconds)
+
+        return item
 
     async def batch_get_items(
         self,
         item_ids: list[str],
         expanded: bool = True,
+        use_cache: bool = True,
     ) -> list[LibraryItemExpanded]:
         """
         Fetch multiple items concurrently.
@@ -317,11 +385,12 @@ class AsyncABSClient:
         Args:
             item_ids: List of item IDs
             expanded: Return expanded items
+            use_cache: Whether to use cached results
 
         Returns:
             List of items (in order, with None for failures filtered out)
         """
-        tasks = [self.get_item(item_id, expanded=expanded) for item_id in item_ids]
+        tasks = [self.get_item(item_id, expanded=expanded, use_cache=use_cache) for item_id in item_ids]
 
         results = []
         for coro in asyncio.as_completed(tasks):
@@ -349,6 +418,7 @@ class AsyncABSClient:
         self,
         author_id: str,
         include_series: bool = True,
+        use_cache: bool = True,
     ) -> dict:
         """
         Get an author with their library items and series.
@@ -356,15 +426,34 @@ class AsyncABSClient:
         Args:
             author_id: Author ID
             include_series: Include series info
+            use_cache: Whether to use cached results
 
         Returns:
             Author dict with libraryItems and series
         """
+        cache_key = f"author_items_{author_id}_{include_series}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_authors", cache_key)
+            if cached:
+                logger.debug("Cache hit for author %s", author_id)
+                return cached
+
         include_parts = ["items"]
         if include_series:
             include_parts.append("series")
 
-        return await self.get_author(author_id, include=",".join(include_parts))
+        result = await self.get_author(author_id, include=",".join(include_parts))
+
+        if self._cache:
+            self._cache.set("abs_authors", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
+
+        logger.debug(
+            "Fetched author %s with %d items",
+            result.get("name", author_id),
+            len(result.get("libraryItems", [])),
+        )
+        return result
 
     # =====================
     # Series
@@ -375,9 +464,32 @@ class AsyncABSClient:
         params = {"include": include} if include else None
         return await self._get(f"/series/{series_id}", params=params)
 
-    async def get_series_with_progress(self, series_id: str) -> dict:
-        """Get a series with progress info."""
-        return await self.get_series(series_id, include="progress")
+    async def get_series_with_progress(self, series_id: str, use_cache: bool = True) -> dict:
+        """
+        Get a series with progress info.
+
+        Args:
+            series_id: Series ID
+            use_cache: Whether to use cached results
+
+        Returns:
+            Series dict with progress info
+        """
+        cache_key = f"series_progress_{series_id}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("abs_series", cache_key)
+            if cached:
+                logger.debug("Cache hit for series %s", series_id)
+                return cached
+
+        result = await self.get_series(series_id, include="progress")
+
+        if self._cache:
+            self._cache.set("abs_series", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
+
+        logger.debug("Fetched series %s", result.get("name", series_id))
+        return result
 
     # =====================
     # Collections
