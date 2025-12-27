@@ -2,6 +2,7 @@
 Audiobookshelf API client.
 """
 
+import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -27,6 +28,8 @@ from .models import (
 # Import from cache module (SQLite-based)
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
+
+logger = logging.getLogger(__name__)
 
 
 class ABSError(Exception):
@@ -147,6 +150,8 @@ class ABSClient:
 
         url = f"/api{endpoint}" if not endpoint.startswith("/api") else endpoint
 
+        logger.debug("ABS API request: %s %s params=%s", method, url, params)
+
         try:
             response = self._client.request(
                 method=method,
@@ -155,22 +160,30 @@ class ABSClient:
                 json=json,
             )
         except httpx.ConnectError as e:
+            logger.error("ABS connection error: %s", e)
             raise ABSConnectionError(f"Failed to connect to {self.host}: {e}")
         except httpx.TimeoutException as e:
+            logger.error("ABS timeout: %s", e)
             raise ABSConnectionError(f"Request timed out: {e}")
 
         if response.status_code == 401:
+            logger.error("ABS auth error: 401 Unauthorized")
             raise ABSAuthError("Authentication failed. Check your API key.")
         elif response.status_code == 403:
+            logger.error("ABS auth error: 403 Forbidden")
             raise ABSAuthError("Access forbidden. Insufficient permissions.")
         elif response.status_code == 404:
+            logger.debug("ABS resource not found: %s", endpoint)
             raise ABSNotFoundError(f"Resource not found: {endpoint}")
         elif response.status_code >= 400:
+            logger.error("ABS API error: %d for %s", response.status_code, endpoint)
             raise ABSError(
                 f"API error: {response.status_code}",
                 status_code=response.status_code,
                 response=response.json() if response.content else None,
             )
+
+        logger.debug("ABS API response: %d", response.status_code)
 
         if not response.content:
             return {}
