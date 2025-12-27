@@ -369,6 +369,157 @@ class SQLiteCache:
             cursor = conn.execute("DELETE FROM cache WHERE namespace = ?", (namespace,))
             return cursor.rowcount
 
+    def delete_by_pattern(self, namespace: str, key_pattern: str) -> int:
+        """
+        Delete cache entries matching a key pattern.
+
+        Args:
+            namespace: Cache namespace
+            key_pattern: SQL LIKE pattern (use % for wildcard)
+                        Example: "wishlist_%" deletes all wishlist entries
+                        Example: "item_B08%_%" deletes items starting with B08
+
+        Returns:
+            Number of entries deleted
+        """
+        # Clear matching entries from memory cache
+        prefix = f"{namespace}:"
+        # Convert SQL pattern to simple prefix matching for memory cache
+        simple_prefix = key_pattern.rstrip("%")
+        keys_to_delete = [
+            k for k in self._memory_cache if k.startswith(prefix) and k[len(prefix) :].startswith(simple_prefix)
+        ]
+        for k in keys_to_delete:
+            del self._memory_cache[k]
+
+        # Delete from database using LIKE pattern
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                "DELETE FROM cache WHERE namespace = ? AND key LIKE ?",
+                (namespace, key_pattern),
+            )
+            return cursor.rowcount
+
+    def delete_by_asin(self, asin: str, namespaces: list[str] | None = None) -> int:
+        """
+        Delete all cache entries for a specific ASIN.
+
+        Useful when data for an item has changed (e.g., added to library,
+        price changed, etc.) and all related cache entries should be invalidated.
+
+        Args:
+            asin: The ASIN to invalidate
+            namespaces: Optional list of namespaces to clear (None = all)
+
+        Returns:
+            Number of entries deleted
+        """
+        # Clear from memory cache
+        deleted_count = 0
+        keys_to_check = list(self._memory_cache.keys())
+        for mem_key in keys_to_check:
+            ns, key = mem_key.split(":", 1)
+            if namespaces and ns not in namespaces:
+                continue
+            # Check if key contains the ASIN
+            if asin in key:
+                del self._memory_cache[mem_key]
+                deleted_count += 1
+
+        # Delete from database
+        with self._get_connection() as conn:
+            if namespaces:
+                # Use multiple OR conditions instead of IN with dynamic placeholders
+                # This avoids potential SQL injection flagged by bandit
+                for ns in namespaces:
+                    cursor = conn.execute(
+                        "DELETE FROM cache WHERE asin = ? AND namespace = ?",  # nosec B608
+                        (asin, ns),
+                    )
+                    deleted_count += cursor.rowcount
+            else:
+                cursor = conn.execute("DELETE FROM cache WHERE asin = ?", (asin,))
+                deleted_count += cursor.rowcount
+
+        return deleted_count
+
+    def invalidate_related(self, asin: str) -> dict[str, int]:
+        """
+        Invalidate all cache entries related to an ASIN across all namespaces.
+
+        This is the recommended way to invalidate data when something changes
+        (e.g., book added to library, price changed, wishlist modified).
+
+        Args:
+            asin: The ASIN whose related entries should be invalidated
+
+        Returns:
+            Dict with counts per namespace: {"audible_enrichment": 1, "library": 1, ...}
+        """
+        invalidated: dict[str, int] = {}
+
+        with self._get_connection() as conn:
+            # Find all related entries
+            rows = conn.execute(
+                """
+                SELECT DISTINCT namespace FROM cache
+                WHERE asin = ? OR key LIKE ?
+                """,
+                (asin, f"%{asin}%"),
+            ).fetchall()
+
+            namespaces = [row["namespace"] for row in rows]
+
+            for ns in namespaces:
+                # Delete from this namespace
+                cursor = conn.execute(
+                    """
+                    DELETE FROM cache
+                    WHERE namespace = ? AND (asin = ? OR key LIKE ?)
+                    """,
+                    (ns, asin, f"%{asin}%"),
+                )
+                if cursor.rowcount > 0:
+                    invalidated[ns] = cursor.rowcount
+
+        # Also clear memory cache
+        keys_to_delete = [k for k in self._memory_cache if asin in k]
+        for k in keys_to_delete:
+            del self._memory_cache[k]
+
+        return invalidated
+
+    def touch(self, namespace: str, key: str, extend_ttl_seconds: float | None = None) -> bool:
+        """
+        Refresh the TTL of a cached item without modifying its data.
+
+        Args:
+            namespace: Cache namespace
+            key: Cache key
+            extend_ttl_seconds: New TTL in seconds (default: use default_ttl_seconds)
+
+        Returns:
+            True if item was found and updated
+        """
+        if extend_ttl_seconds is None:
+            extend_ttl_seconds = self.default_ttl_seconds
+
+        new_expires_at = time.time() + extend_ttl_seconds
+
+        # Update memory cache
+        mem_key = self._memory_key(namespace, key)
+        if mem_key in self._memory_cache:
+            data, _ = self._memory_cache[mem_key]
+            self._memory_cache[mem_key] = (data, new_expires_at)
+
+        # Update database
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                "UPDATE cache SET expires_at = ? WHERE namespace = ? AND key = ?",
+                (new_expires_at, namespace, key),
+            )
+            return cursor.rowcount > 0
+
     def clear_all(self) -> int:
         """Clear all cached items."""
         self._memory_cache.clear()
