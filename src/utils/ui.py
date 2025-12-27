@@ -38,15 +38,12 @@ Usage:
 
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Generator, Literal
+from typing import Any, Generator
 
-from rich.box import DOUBLE, HEAVY, MINIMAL, ROUNDED, SIMPLE
-from rich.columns import Columns
-from rich.console import Console, Group
-from rich.live import Live
+from rich.box import DOUBLE, ROUNDED, SIMPLE
+from rich.console import Console
 from rich.logging import RichHandler
 from rich.markdown import Markdown
-from rich.padding import Padding
 from rich.panel import Panel
 from rich.progress import (
     BarColumn,
@@ -55,7 +52,6 @@ from rich.progress import (
     Progress,
     ProgressColumn,
     SpinnerColumn,
-    TaskID,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
@@ -63,9 +59,7 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 from rich.rule import Rule
-from rich.spinner import Spinner
 from rich.status import Status
-from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
@@ -220,7 +214,7 @@ class UIHelper:
         """Print a success message."""
         text = Text()
         text.append(f"{prefix} ", style="success")
-        text.append(message)
+        text.append_text(Text.from_markup(message))
         if details:
             text.append(f"\n   {details}", style="muted")
         self.console.print(text)
@@ -229,7 +223,7 @@ class UIHelper:
         """Print an error message."""
         text = Text()
         text.append(f"{prefix} ", style="error")
-        text.append(message, style="error")
+        text.append_text(Text.from_markup(f"[error]{message}[/error]"))
         if details:
             text.append(f"\n   {details}", style="muted")
         self.console.print(text)
@@ -238,7 +232,7 @@ class UIHelper:
         """Print a warning message."""
         text = Text()
         text.append(f"{prefix} ", style="warning")
-        text.append(message)
+        text.append_text(Text.from_markup(message))
         if details:
             text.append(f"\n   {details}", style="muted")
         self.console.print(text)
@@ -247,7 +241,7 @@ class UIHelper:
         """Print an info message."""
         text = Text()
         text.append(f"{prefix} ", style="info")
-        text.append(message)
+        text.append_text(Text.from_markup(message))
         if details:
             text.append(f"\n   {details}", style="muted")
         self.console.print(text)
