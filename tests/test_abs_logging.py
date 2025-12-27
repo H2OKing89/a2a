@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from src.abs.logging import (
+    MODULE_LOGGER_NAME,
     LogContext,
     configure_logging,
     enable_debug_logging,
@@ -19,7 +20,7 @@ def cleanup_abs_logger():
     """Clean up ABS logger handlers after each test."""
     yield
     # Remove all handlers from the abs logger after test
-    logger = logging.getLogger("abs")
+    logger = logging.getLogger(MODULE_LOGGER_NAME)
     for handler in logger.handlers[:]:
         handler.close()
         logger.removeHandler(handler)

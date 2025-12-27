@@ -82,15 +82,6 @@ class TestAsyncABSClient:
 class TestAsyncABSClientRequests:
     """Test async request handling."""
 
-    @pytest.fixture
-    def mock_response(self):
-        """Create a mock response."""
-        response = MagicMock()
-        response.status_code = 200
-        response.content = b'{"test": "data"}'
-        response.json.return_value = {"test": "data"}
-        return response
-
     @pytest.mark.asyncio
     async def test_get_libraries(self):
         """Test get_libraries returns list."""

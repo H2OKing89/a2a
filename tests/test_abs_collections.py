@@ -189,14 +189,15 @@ class TestABSClientCollections:
             createdAt=0,
         )
         mock_client.get_collections = MagicMock(return_value=[existing_collection])
+        # Mock create_collection before the call to verify it's not invoked
+        mock_client.create_collection = MagicMock()
 
         result = mock_client.find_or_create_collection("lib_1", "Existing")
 
         assert result.id == "col_1"
         assert isinstance(result, Collection)
         # create_collection should not be called
-        mock_client._post = MagicMock()
-        assert not mock_client._post.called
+        mock_client.create_collection.assert_not_called()
 
     def test_find_or_create_collection_new(self, mock_client):
         """Test find_or_create_collection creates new."""
