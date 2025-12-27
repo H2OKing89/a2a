@@ -158,11 +158,11 @@ class AsyncABSClient:
                     json=json,
                 )
             except httpx.ConnectError as e:
-                logger.error("ABS async connection error: %s", e)
-                raise ABSConnectionError(f"Failed to connect to {self.host}: {e}")
+                logger.exception("ABS async connection error: %s", e)
+                raise ABSConnectionError(f"Failed to connect to {self.host}: {e}") from e
             except httpx.TimeoutException as e:
-                logger.error("ABS async timeout: %s", e)
-                raise ABSConnectionError(f"Request timed out: {e}")
+                logger.exception("ABS async timeout: %s", e)
+                raise ABSConnectionError(f"Request timed out: {e}") from e
 
             if response.status_code == 401:
                 raise ABSAuthError("Authentication failed. Check your API key.")
