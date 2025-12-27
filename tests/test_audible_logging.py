@@ -19,6 +19,17 @@ from src.audible.logging import (
 )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_audible_logger():
+    """Clean up audible logger handlers after each test."""
+    yield
+    # Remove all handlers from the audible_tool logger after test
+    logger = logging.getLogger(MODULE_LOGGER_NAME)
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)
+
+
 class TestConfigureLogging:
     """Test logging configuration."""
 
@@ -54,19 +65,26 @@ class TestConfigureLogging:
     def test_configure_logging_with_file(self, tmp_path):
         """Test file logging configuration."""
         log_file = tmp_path / "test.log"
+        parent_logger = logging.getLogger(MODULE_LOGGER_NAME)
 
-        configure_logging(level="info", console=False, file_path=str(log_file))
+        try:
+            configure_logging(level="info", console=False, file_path=str(log_file))
 
-        logger = get_logger("test_file")
-        logger.info("File test message")
+            logger = get_logger("test_file")
+            logger.info("File test message")
 
-        # Ensure handlers are flushed
-        for handler in logging.getLogger(MODULE_LOGGER_NAME).handlers:
-            if hasattr(handler, "flush"):
-                handler.flush()
+            # Ensure handlers are flushed
+            for handler in parent_logger.handlers:
+                if hasattr(handler, "flush"):
+                    handler.flush()
 
-        # File should exist
-        assert log_file.exists()
+            # File should exist
+            assert log_file.exists()
+        finally:
+            # Explicitly close handlers to avoid ResourceWarning
+            for handler in parent_logger.handlers[:]:
+                handler.close()
+                parent_logger.removeHandler(handler)
 
     def test_get_logger_returns_logger(self):
         """Test get_logger returns a logger instance."""

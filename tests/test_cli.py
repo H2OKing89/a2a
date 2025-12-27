@@ -66,7 +66,19 @@ class TestABSSubApp:
         result = runner.invoke(app, ["abs", "--help"])
         assert result.exit_code == 0
         # Check all expected commands are present
-        expected_commands = ["status", "libraries", "stats", "items", "item", "search", "export", "sample"]
+        expected_commands = [
+            "status",
+            "libraries",
+            "stats",
+            "items",
+            "item",
+            "search",
+            "export",
+            "sample",
+            "authors",
+            "series",
+            "collections",
+        ]
         for cmd in expected_commands:
             assert cmd in result.output, f"Command '{cmd}' not found in abs --help"
 
@@ -127,7 +139,19 @@ class TestAudibleSubApp:
         """Test audible --help shows all expected commands."""
         result = runner.invoke(app, ["audible", "--help"])
         assert result.exit_code == 0
-        expected_commands = ["login", "status", "library", "item", "search", "export", "cache", "sample"]
+        expected_commands = [
+            "login",
+            "status",
+            "library",
+            "item",
+            "search",
+            "export",
+            "cache",
+            "sample",
+            "wishlist",
+            "stats",
+            "recommendations",
+        ]
         for cmd in expected_commands:
             assert cmd in result.output, f"Command '{cmd}' not found in audible --help"
 
@@ -319,3 +343,96 @@ class TestCommandSymmetry:
         audible_result = runner.invoke(app, ["audible", "sample", "--help"])
         assert abs_result.exit_code == 0
         assert audible_result.exit_code == 0
+
+
+class TestNewABSCommands:
+    """Test new ABS commands (authors, series, collections)."""
+
+    def test_abs_authors_command_exists(self):
+        """Test abs authors command is accessible."""
+        result = runner.invoke(app, ["abs", "authors", "--help"])
+        assert result.exit_code == 0
+        assert "authors" in result.output.lower()
+        assert "--limit" in result.output
+        assert "--sort" in result.output
+
+    def test_abs_series_command_exists(self):
+        """Test abs series command is accessible."""
+        result = runner.invoke(app, ["abs", "series", "--help"])
+        assert result.exit_code == 0
+        assert "series" in result.output.lower()
+        assert "--limit" in result.output
+        assert "--sort" in result.output
+
+    def test_abs_collections_command_exists(self):
+        """Test abs collections command is accessible."""
+        result = runner.invoke(app, ["abs", "collections", "--help"])
+        assert result.exit_code == 0
+        assert "collections" in result.output.lower()
+        # Check for all actions mentioned
+        assert "list" in result.output
+        assert "show" in result.output
+        assert "create" in result.output
+        assert "add" in result.output
+        assert "remove" in result.output
+
+    def test_abs_collections_has_required_options(self):
+        """Test abs collections has all required options."""
+        result = runner.invoke(app, ["abs", "collections", "--help"])
+        assert result.exit_code == 0
+        assert "--id" in result.output
+        assert "--name" in result.output
+        assert "--book" in result.output
+        assert "--library" in result.output
+
+
+class TestNewAudibleCommands:
+    """Test new Audible commands (wishlist, stats, recommendations)."""
+
+    def test_audible_wishlist_command_exists(self):
+        """Test audible wishlist command is accessible."""
+        result = runner.invoke(app, ["audible", "wishlist", "--help"])
+        assert result.exit_code == 0
+        assert "wishlist" in result.output.lower()
+        # Check for all actions mentioned
+        assert "list" in result.output
+        assert "add" in result.output
+        assert "remove" in result.output
+
+    def test_audible_wishlist_has_required_options(self):
+        """Test audible wishlist has required options."""
+        result = runner.invoke(app, ["audible", "wishlist", "--help"])
+        assert result.exit_code == 0
+        assert "--asin" in result.output
+        assert "--limit" in result.output
+        assert "--no-cache" in result.output
+
+    def test_audible_stats_command_exists(self):
+        """Test audible stats command is accessible."""
+        result = runner.invoke(app, ["audible", "stats", "--help"])
+        assert result.exit_code == 0
+        assert "listening statistics" in result.output.lower() or "statistics" in result.output.lower()
+
+    def test_audible_recommendations_command_exists(self):
+        """Test audible recommendations command is accessible."""
+        result = runner.invoke(app, ["audible", "recommendations", "--help"])
+        assert result.exit_code == 0
+        assert "recommendation" in result.output.lower()
+        assert "--limit" in result.output
+        assert "--no-cache" in result.output
+
+    def test_audible_help_includes_new_commands(self):
+        """Test audible --help includes all new commands."""
+        result = runner.invoke(app, ["audible", "--help"])
+        assert result.exit_code == 0
+        new_commands = ["wishlist", "stats", "recommendations"]
+        for cmd in new_commands:
+            assert cmd in result.output, f"New command '{cmd}' not found in audible --help"
+
+    def test_abs_help_includes_new_commands(self):
+        """Test abs --help includes all new commands."""
+        result = runner.invoke(app, ["abs", "--help"])
+        assert result.exit_code == 0
+        new_commands = ["authors", "series", "collections"]
+        for cmd in new_commands:
+            assert cmd in result.output, f"New command '{cmd}' not found in abs --help"
