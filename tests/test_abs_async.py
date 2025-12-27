@@ -187,6 +187,126 @@ class TestAsyncABSClientRequests:
 
         await client.close()
 
+    @pytest.mark.asyncio
+    async def test_update_collection(self):
+        """Test update_collection."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
+            mock_request.return_value = {
+                "id": "col_1",
+                "name": "Updated Name",
+                "description": "Updated description",
+            }
+
+            result = await client.update_collection(
+                collection_id="col_1",
+                name="Updated Name",
+                description="Updated description",
+            )
+
+            assert result["name"] == "Updated Name"
+            mock_request.assert_called_once_with(
+                "PATCH",
+                "/collections/col_1",
+                json={"name": "Updated Name", "description": "Updated description"},
+            )
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_delete_collection(self):
+        """Test delete_collection."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
+            mock_request.return_value = {}
+
+            result = await client.delete_collection("col_1")
+
+            assert result is True
+            mock_request.assert_called_once_with("DELETE", "/collections/col_1")
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_add_book_to_collection(self):
+        """Test add_book_to_collection."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        with patch.object(client, "_post", new_callable=AsyncMock) as mock_post:
+            mock_post.return_value = {
+                "id": "col_1",
+                "books": ["book_1"],
+            }
+
+            result = await client.add_book_to_collection("col_1", "book_1")
+
+            assert "book_1" in result["books"]
+            mock_post.assert_called_once_with(
+                "/collections/col_1/book",
+                json={"id": "book_1"},
+            )
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_remove_book_from_collection(self):
+        """Test remove_book_from_collection."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
+            mock_request.return_value = {
+                "id": "col_1",
+                "books": [],
+            }
+
+            result = await client.remove_book_from_collection("col_1", "book_1")
+
+            assert result["books"] == []
+            mock_request.assert_called_once_with(
+                "DELETE",
+                "/collections/col_1/book/book_1",
+            )
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_batch_remove_from_collection(self):
+        """Test batch_remove_from_collection."""
+        client = AsyncABSClient(
+            host="https://abs.example.com",
+            api_key="test_key",
+        )
+
+        with patch.object(client, "_post", new_callable=AsyncMock) as mock_post:
+            mock_post.return_value = {
+                "id": "col_1",
+                "books": [],
+            }
+
+            result = await client.batch_remove_from_collection("col_1", ["book_1", "book_2"])
+
+            assert result["books"] == []
+            mock_post.assert_called_once_with(
+                "/collections/col_1/batch/remove",
+                json={"books": ["book_1", "book_2"]},
+            )
+
+        await client.close()
+
 
 class TestAsyncABSClientExceptions:
     """Test async exception classes."""

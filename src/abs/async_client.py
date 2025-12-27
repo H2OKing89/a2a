@@ -538,6 +538,96 @@ class AsyncABSClient:
         logger.info("Added %d books to collection %s", len(book_ids), collection_id)
         return result
 
+    async def update_collection(
+        self,
+        collection_id: str,
+        name: str | None = None,
+        description: str | None = None,
+        book_ids: list[str] | None = None,
+    ) -> dict:
+        """
+        Update a collection.
+
+        Args:
+            collection_id: Collection ID
+            name: New name (optional)
+            description: New description (optional)
+            book_ids: Replace book list (optional)
+
+        Returns:
+            Updated collection dict
+        """
+        payload: dict[str, Any] = {}
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if book_ids is not None:
+            payload["books"] = book_ids
+
+        result = await self._request("PATCH", f"/collections/{collection_id}", json=payload)
+        logger.info("Updated collection %s", collection_id)
+        return result
+
+    async def delete_collection(self, collection_id: str) -> bool:
+        """
+        Delete a collection.
+
+        Args:
+            collection_id: Collection ID
+
+        Returns:
+            True if deleted successfully
+        """
+        await self._request("DELETE", f"/collections/{collection_id}")
+        logger.info("Deleted collection %s", collection_id)
+        return True
+
+    async def add_book_to_collection(self, collection_id: str, book_id: str) -> dict:
+        """
+        Add a single book to a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_id: Library item ID to add
+
+        Returns:
+            Updated collection dict
+        """
+        result = await self._post(f"/collections/{collection_id}/book", json={"id": book_id})
+        logger.debug("Added book %s to collection %s", book_id, collection_id)
+        return result
+
+    async def remove_book_from_collection(self, collection_id: str, book_id: str) -> dict:
+        """
+        Remove a book from a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_id: Library item ID to remove
+
+        Returns:
+            Updated collection dict
+        """
+        result = await self._request("DELETE", f"/collections/{collection_id}/book/{book_id}")
+        logger.debug("Removed book %s from collection %s", book_id, collection_id)
+        return result
+
+    async def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+        """
+        Remove multiple books from a collection.
+
+        Args:
+            collection_id: Collection ID
+            book_ids: List of library item IDs to remove
+
+        Returns:
+            Updated collection dict
+        """
+        result = await self._post(f"/collections/{collection_id}/batch/remove", json={"books": book_ids})
+        logger.info("Removed %d books from collection %s", len(book_ids), collection_id)
+        return result
+
     async def find_or_create_collection(
         self,
         library_id: str,
