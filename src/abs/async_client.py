@@ -253,7 +253,7 @@ class AsyncABSClient:
         page: int = 0,
         sort: str | None = None,
         desc: bool = False,
-        filter_str: str | None = None,
+        filter_by: str | None = None,
         minified: bool = False,
         expanded: bool = False,
     ) -> dict:
@@ -266,7 +266,7 @@ class AsyncABSClient:
             page: Page number
             sort: Sort field
             desc: Sort descending
-            filter_str: Filter expression
+            filter_by: Filter expression
             minified: Return minified items
             expanded: Return expanded items
 
@@ -278,8 +278,8 @@ class AsyncABSClient:
             params["sort"] = sort
         if desc:
             params["desc"] = 1
-        if filter_str:
-            params["filter"] = filter_str
+        if filter_by:
+            params["filter"] = filter_by
         if minified:
             params["minified"] = 1
         if expanded:
