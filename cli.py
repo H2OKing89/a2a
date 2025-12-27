@@ -270,19 +270,19 @@ def cache_command(
 
             # Stats panel
             stats_content = Text()
-            stats_content.append(f"📂 DB Path: ", style="bold")
+            stats_content.append("📂 DB Path: ", style="bold")
             stats_content.append(f"{cache_stats.get('db_path', 'N/A')}\n\n")
 
-            stats_content.append(f"💾 DB Size: ", style="bold")
+            stats_content.append("💾 DB Size: ", style="bold")
             stats_content.append(f"{cache_stats.get('db_size_mb', 0):.2f} MB\n\n", style="size")
 
-            stats_content.append(f"📊 Entries\n", style="bold")
+            stats_content.append("📊 Entries\n", style="bold")
             stats_content.append(f"   Total: {cache_stats.get('total_entries', 0)}\n")
             stats_content.append(f"   In Memory: {cache_stats.get('memory_entries', 0)}\n")
-            stats_content.append(f"   Expired: ", style="")
+            stats_content.append("   Expired: ", style="")
             stats_content.append(f"{cache_stats.get('expired_entries', 0)}\n", style="warning")
 
-            stats_content.append(f"\n🔗 ASIN Mappings\n", style="bold")
+            stats_content.append("\n🔗 ASIN Mappings\n", style="bold")
             stats_content.append(f"   Total: {cache_stats.get('asin_mappings', 0)}\n")
             stats_content.append(f"   With Audible Match: {cache_stats.get('matched_items', 0)}\n")
 
@@ -359,7 +359,7 @@ def abs_stats(
         stats_text.append(f"{Icons.AUTHOR} Total Authors: ", style="bold")
         stats_text.append(f"{stats.total_authors}\n", style="accent")
 
-        stats_text.append(f"🏷️  Total Genres: ", style="bold")
+        stats_text.append("🏷️  Total Genres: ", style="bold")
         stats_text.append(f"{stats.total_genres}\n", style="accent")
 
         stats_text.append(f"\n{Icons.CLOCK} Total Duration: ", style="bold")
@@ -1322,7 +1322,7 @@ def audible_stats():
             console.print(
                 Panel(
                     stats_text,
-                    title=f"📊 Listening Activity",
+                    title="📊 Listening Activity",
                     border_style="cyan",
                     box=ROUNDED,
                     padding=(0, 2),
@@ -1359,7 +1359,7 @@ def audible_stats():
             console.print(
                 Panel(
                     account_text,
-                    title=f"💳 Account Info",
+                    title="💳 Account Info",
                     border_style="magenta",
                     box=ROUNDED,
                     padding=(0, 2),
@@ -1682,7 +1682,7 @@ def quality_scan(
                             quality = analyzer.analyze_item(full_item)
                             report.add_item(quality)
                         except Exception as e:
-                            ui.warning(f"Failed to analyze item", details=str(e))
+                            ui.warning("Failed to analyze item", details=str(e))
 
             report.finalize()
 
@@ -2592,7 +2592,7 @@ def series_report(
         with get_abs_client() as abs_client, get_audible_client() as audible_client:
             matcher = SeriesMatcher(abs_client=abs_client, audible_client=audible_client)
 
-            console.print(f"\n[bold]Analyzing library series...[/bold]")
+            console.print("\n[bold]Analyzing library series...[/bold]")
 
             # Get all series
             all_series = matcher.get_abs_series(library_id)
@@ -2788,7 +2788,7 @@ def series_report(
             console.print(table)
 
             # Summary stats (use pre-calculated values from all_results)
-            console.print(f"\n[bold]Summary:[/bold]")
+            console.print("\n[bold]Summary:[/bold]")
             console.print(f"  Total series analyzed: {len(all_results)}")
             if incomplete_only:
                 console.print(f"  Incomplete series shown: {len(results)}")
