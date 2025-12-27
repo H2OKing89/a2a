@@ -28,6 +28,9 @@ Usage:
 
     # Styled headers
     ui.header("Audiobook Manager", subtitle="v1.0.0")
+
+    # Rich layout components (re-exported for convenience)
+    from src.utils.ui import Columns, Group, Padding, Live
     ui.section("Library Status")
 
     # Tables
@@ -36,14 +39,18 @@ Usage:
     console.print(table)
 """
 
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Generator
+from typing import Any
 
 from rich.box import DOUBLE, ROUNDED, SIMPLE
-from rich.console import Console
+from rich.columns import Columns
+from rich.console import Console, Group
+from rich.live import Live
 from rich.logging import RichHandler
 from rich.markdown import Markdown
+from rich.padding import Padding
 from rich.panel import Panel
 from rich.progress import (
     BarColumn,
@@ -314,7 +321,7 @@ class UIHelper:
         message: str,
         spinner_name: str = "dots",
         style: str = "info",
-    ) -> Generator[Status, None, None]:
+    ) -> Generator[Status]:
         """Context manager for spinner with status updates."""
         with self.console.status(f"[{style}]{message}[/{style}]", spinner=spinner_name) as status:
             yield status
