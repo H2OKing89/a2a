@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from rapidfuzz import fuzz, process
 
-from ..audible.models import PlusCatalogInfo, PricingInfo
+from ..audible import PlusCatalogInfo, PricingInfo
 from .models import (
     ABSSeriesBook,
     ABSSeriesInfo,

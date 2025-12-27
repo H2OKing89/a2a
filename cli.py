@@ -18,8 +18,7 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.abs import ABSClient
-from src.audible import AudibleAuthError, AudibleBook, AudibleClient
-from src.audible.enrichment import AudibleEnrichmentService
+from src.audible import AudibleAuthError, AudibleBook, AudibleClient, AudibleEnrichmentService
 from src.cache import SQLiteCache
 from src.config import get_settings
 from src.quality import QualityAnalyzer, QualityReport, QualityTier

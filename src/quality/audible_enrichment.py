@@ -12,8 +12,7 @@ Please update imports to use:
 import warnings
 
 # Re-export from new locations for backwards compatibility
-from ..audible.enrichment import AudibleEnrichment, AudibleEnrichmentService
-from ..audible.models import PlusCatalogInfo, PricingInfo
+from ..audible import AudibleEnrichment, AudibleEnrichmentService, PlusCatalogInfo, PricingInfo
 
 __all__ = [
     "PricingInfo",
