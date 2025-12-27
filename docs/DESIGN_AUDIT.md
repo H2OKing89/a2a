@@ -95,7 +95,7 @@ ABS Library → QualityAnalyzer → AudioQuality → EnrichmentService → Audib
 ```python
 # Current (inconsistent)
 def get_library_series(self, library_id: str, ...) -> dict:
-    
+
 # Recommended
 def get_library_series(self, library_id: str, ...) -> SeriesListResponse:
 ```
@@ -236,7 +236,7 @@ class CollectionExpanded(CollectionBase):
 ```python
 class CollectionExpanded(CollectionBase):
     expanded_books: list[dict[str, Any]] = Field(alias="books")
-    
+
     @property
     def book_ids(self) -> list[str]:
         return [b.get("id", "") for b in self.expanded_books]
@@ -538,26 +538,30 @@ def _get_catalog_product(self, asin: str) -> dict:
 
 ## 🛠️ Recommended Improvements
 
-### Priority 1: High Impact, Low Effort
+### Priority 1: High Impact, Low Effort ✅ COMPLETED
 
-1. **Split `cli.py` into modules** - Improves maintainability
-2. **Standardize API client return types** - All public methods return models
-3. **Extract shared text normalization** - DRY principle
+1. **Split `cli.py` into modules** ✅ - CLI modularized into `src/cli/` with domain-specific modules
+2. **Standardize API client return types** ✅ - Added `*_parsed()` methods returning Pydantic models
+3. **Extract shared text normalization** - DRY principle (deferred - lower priority)
 
-### Priority 2: Medium Impact, Medium Effort
+### Priority 2: Medium Impact, Medium Effort ✅ COMPLETED
 
-4. **Create service layer for business operations**
-   ```python
-   class UpgradeFinderService:
-       def __init__(self, abs_client, audible_client, enrichment_service):
-           ...
-       
-       def find_upgrades(self, library_id: str, threshold: int) -> UpgradeReport:
-           # Encapsulates the entire upgrade finding workflow
-   ```
+4. **Create service layer for business operations** ✅
+   - Added `src/quality/services.py` with `UpgradeFinderService`
+   - Encapsulates quality scanning and Audible enrichment workflows
+   - New models: `EnrichedUpgradeCandidate`, `UpgradeFinderResult`
 
-5. **Add response models for all ABS endpoints**
-6. **Implement granular cache invalidation**
+5. **Add response models for all ABS endpoints** ✅
+   - Added `SeriesListResponse`, `SearchResponse`, `SeriesResponse`
+   - Added `AuthorSearchResponse`, `BookSearchResult`
+   - New `*_parsed()` methods on `ABSClient`
+
+6. **Implement granular cache invalidation** ✅
+   - Added `delete_by_pattern()` for wildcard key deletion
+   - Added `delete_by_asin()` for ASIN-specific invalidation
+   - Added `invalidate_related()` for cross-namespace invalidation
+   - Added `touch()` for TTL refresh
+   - Updated Audible client to use granular invalidation
 
 ### Priority 3: Nice to Have
 
