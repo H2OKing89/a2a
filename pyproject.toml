@@ -13,6 +13,11 @@ markers = [
     "integration: marks tests requiring external services",
 ]
 asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    # Ignore third-party audible library's datetime.utcnow() deprecation (Python 3.13)
+    "ignore:datetime.datetime.utcnow\\(\\) is deprecated:DeprecationWarning:audible",
+]
 
 [tool.coverage.run]
 source = ["src", "cli"]
