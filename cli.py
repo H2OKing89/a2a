@@ -95,14 +95,14 @@ def get_abs_client() -> ABSClient:
     """Get configured ABS client."""
     settings = get_settings()
 
-    cache = get_cache() if settings.abs.cache_enabled else None
+    cache = get_cache() if settings.cache.enabled else None
 
     return ABSClient(
         host=settings.abs.host,
         api_key=settings.abs.api_key,
-        rate_limit_delay=settings.rate_limit.base_delay,
+        rate_limit_delay=settings.abs.rate_limit_delay,
         cache=cache,
-        cache_ttl_hours=settings.cache.abs_ttl_hours if cache else settings.abs.cache_ttl_hours,
+        cache_ttl_hours=settings.cache.abs_ttl_hours,
     )
 
 
@@ -110,12 +110,12 @@ def get_audible_client() -> AudibleClient:
     """Get configured Audible client."""
     settings = get_settings()
 
-    cache = get_cache() if settings.audible.cache_enabled else None
+    cache = get_cache() if settings.cache.enabled else None
 
     return AudibleClient.from_file(
         auth_file=settings.audible.auth_file,
         cache=cache,
-        cache_ttl_hours=settings.cache.audible_ttl_hours if cache else settings.audible.cache_ttl_days * 24,
+        cache_ttl_hours=settings.cache.audible_ttl_hours,
         rate_limit_delay=settings.audible.rate_limit_delay,
         requests_per_minute=settings.audible.requests_per_minute,
         burst_size=settings.audible.burst_size,
@@ -785,7 +785,7 @@ def audible_login(
             client = AudibleClient.from_login_external(
                 locale=locale,
                 auth_file=auth_file,
-                cache_dir=settings.paths.cache_dir / "audible" if settings.audible.cache_enabled else None,
+                cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
             )
         else:
             email = typer.prompt("Email")
@@ -802,7 +802,7 @@ def audible_login(
                 password=password,
                 locale=locale,
                 auth_file=auth_file,
-                cache_dir=settings.paths.cache_dir / "audible" if settings.audible.cache_enabled else None,
+                cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
                 otp_callback=otp_callback,
                 cvf_callback=cvf_callback,
             )

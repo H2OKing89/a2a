@@ -40,8 +40,7 @@ class TestABSSettings:
         settings = ABSSettings()
         # Note: May be overridden by environment variables
         assert settings.api_key == "" or isinstance(settings.api_key, str)
-        assert settings.cache_enabled is True
-        assert settings.cache_ttl_hours == 2.0
+        assert settings.rate_limit_delay == 0.0
 
     def test_custom_host(self):
         """Test setting custom ABS host."""
@@ -53,11 +52,10 @@ class TestABSSettings:
         settings = ABSSettings(api_key="test_key_12345")
         assert settings.api_key == "test_key_12345"
 
-    def test_cache_settings(self):
-        """Test ABS cache configuration."""
-        settings = ABSSettings(cache_enabled=False, cache_ttl_hours=4.0)
-        assert settings.cache_enabled is False
-        assert settings.cache_ttl_hours == 4.0
+    def test_rate_limit_settings(self):
+        """Test ABS rate limit configuration."""
+        settings = ABSSettings(rate_limit_delay=0.5)
+        assert settings.rate_limit_delay == 0.5
 
 
 class TestAudibleSettings:
@@ -75,8 +73,6 @@ class TestAudibleSettings:
         assert settings.burst_size == 5
         assert settings.backoff_multiplier == 2.0
         assert settings.max_backoff_seconds == 60.0
-        assert settings.cache_enabled is True
-        assert settings.cache_ttl_days == 10
 
     def test_custom_auth_file(self):
         """Test custom auth file path."""
@@ -258,7 +254,6 @@ class TestEnrichmentSettings:
         assert settings.burst_size == 5
         assert settings.backoff_multiplier == 2.0
         assert settings.max_backoff_s == 60.0
-        assert settings.cache_ttl_days == 10
 
     def test_disabled_enrichment(self):
         """Test disabling enrichment."""
@@ -268,13 +263,12 @@ class TestEnrichmentSettings:
     def test_custom_settings(self):
         """Test custom enrichment settings."""
         settings = EnrichmentSettings(
-            requests_per_minute=30.0, burst_size=10, backoff_multiplier=3.0, max_backoff_s=120.0, cache_ttl_days=20
+            requests_per_minute=30.0, burst_size=10, backoff_multiplier=3.0, max_backoff_s=120.0
         )
         assert settings.requests_per_minute == 30.0
         assert settings.burst_size == 10
         assert settings.backoff_multiplier == 3.0
         assert settings.max_backoff_s == 120.0
-        assert settings.cache_ttl_days == 20
 
 
 class TestSettings:

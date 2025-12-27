@@ -26,10 +26,7 @@ class ABSSettings(BaseSettings):
     host: str = Field(default="http://localhost:13378", description="ABS server URL")
     api_key: str = Field(default="", description="ABS API key/token")
     library_id: str | None = Field(default=None, description="Default library ID")
-
-    # Caching settings
-    cache_enabled: bool = Field(default=True, description="Enable response caching")
-    cache_ttl_hours: float = Field(default=2.0, description="Cache TTL in hours")
+    rate_limit_delay: float = Field(default=0.0, description="Delay between requests (0 = disabled)")
 
 
 class AudibleSettings(BaseSettings):
@@ -57,10 +54,6 @@ class AudibleSettings(BaseSettings):
     burst_size: int = Field(default=5, description="Number of requests before burst delay")
     backoff_multiplier: float = Field(default=2.0, description="Backoff multiplier on rate limit errors")
     max_backoff_seconds: float = Field(default=60.0, description="Maximum backoff delay in seconds")
-
-    # Caching
-    cache_enabled: bool = Field(default=True, description="Enable response caching")
-    cache_ttl_days: int = Field(default=10, description="Cache TTL in days")
 
 
 class APIRateLimitSettings(BaseSettings):
@@ -129,7 +122,6 @@ class EnrichmentSettings(BaseSettings):
     burst_size: int = Field(default=5)
     backoff_multiplier: float = Field(default=2.0)
     max_backoff_s: float = Field(default=60.0)
-    cache_ttl_days: int = Field(default=10)
 
 
 class Settings(BaseSettings):

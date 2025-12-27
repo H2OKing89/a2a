@@ -114,7 +114,9 @@ class AsyncABSClient:
         await self.close()
 
     async def _rate_limit(self) -> None:
-        """Apply rate limiting between requests with proper serialization."""
+        """Apply rate limiting between requests (skipped if delay is 0)."""
+        if self._rate_limit_delay <= 0:
+            return
         async with self._rate_lock:
             loop = asyncio.get_running_loop()
             now = loop.time()

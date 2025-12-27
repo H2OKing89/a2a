@@ -120,7 +120,9 @@ class ABSClient:
             )
 
     def _rate_limit(self) -> None:
-        """Apply rate limiting between requests."""
+        """Apply rate limiting between requests (skipped if delay is 0)."""
+        if self.rate_limit_delay <= 0:
+            return
         elapsed = time.time() - self._last_request_time
         if elapsed < self.rate_limit_delay:
             time.sleep(self.rate_limit_delay - elapsed)
