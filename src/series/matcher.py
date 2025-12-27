@@ -279,7 +279,7 @@ class SeriesMatcher:
             return [], None
 
         series_asin: str | None = None
-        series_name: str | None = None
+        _series_name: str | None = None  # Captured but not returned; kept for consistency
         all_series_books: dict[str, AudibleSeriesBook] = {}  # keyed by ASIN to avoid duplicates
 
         for asin in asins:
@@ -295,7 +295,7 @@ class SeriesMatcher:
                 for ps in product.series or []:
                     if series_asin is None:
                         series_asin = ps.asin
-                        series_name = ps.title
+                        _series_name = ps.title
 
                     # Add this book
                     all_series_books[product.asin] = AudibleSeriesBook(
@@ -316,6 +316,124 @@ class SeriesMatcher:
                 continue
 
         return list(all_series_books.values()), series_asin
+
+    def get_complete_series_from_sims(
+        self,
+        seed_asin: str,
+        use_cache: bool = True,
+    ) -> tuple[list[AudibleSeriesBook], str | None, str | None]:
+        """
+        Discover ALL books in a series using the /sims endpoint.
+
+        This is the most powerful method for series discovery - given just
+        ONE ASIN from a series, it returns ALL books in that series on Audible.
+
+        Args:
+            seed_asin: ASIN of any book in the series
+            use_cache: Use cached results
+
+        Returns:
+            Tuple of (all series books, series_asin, series_name)
+        """
+        if not self._audible:
+            return [], None, None
+
+        series_asin: str | None = None
+        series_name: str | None = None
+        all_series_books: dict[str, AudibleSeriesBook] = {}  # keyed by ASIN to avoid duplicates
+
+        # First, get the seed product to get series info
+        try:
+            seed_product = self._audible.get_catalog_product(seed_asin, use_cache=use_cache)
+            if seed_product and seed_product.series:
+                ps = seed_product.series[0]  # Use first series
+                series_asin = ps.asin
+                series_name = ps.title
+
+                # Extract price from price dict if available
+                seed_price = None
+                if seed_product.price and isinstance(seed_product.price, dict):
+                    seed_price = seed_product.price.get("list_price", {}).get("base")
+
+                # Add the seed book itself with full metadata
+                all_series_books[seed_product.asin] = AudibleSeriesBook(
+                    asin=seed_product.asin,
+                    title=seed_product.title,
+                    subtitle=seed_product.subtitle,
+                    sequence=ps.sequence,
+                    author_name=seed_product.primary_author,
+                    narrator_name=seed_product.primary_narrator,
+                    runtime_minutes=seed_product.runtime_length_min,
+                    release_date=seed_product.release_date,
+                    is_in_library=False,
+                    price=seed_price,
+                    is_in_plus_catalog=getattr(seed_product, "is_ayce", False),
+                    language=seed_product.language,
+                    publisher_name=seed_product.publisher_name,
+                    summary=seed_product.merchandising_summary,
+                )
+        except Exception as e:
+            logger.warning(f"Failed to look up seed ASIN {seed_asin}: {e}")
+
+        # Now use /sims to get ALL other books in the series
+        try:
+            sims_products = self._audible.get_series_books_from_sims(seed_asin, use_cache=use_cache)
+
+            for product in sims_products:
+                if product.asin in all_series_books:
+                    continue  # Skip duplicates
+
+                # Find the series info for this product
+                sequence = None
+                for ps in product.series or []:
+                    # Match to our detected series
+                    if series_asin and ps.asin == series_asin:
+                        sequence = ps.sequence
+                        break
+                    elif series_name and ps.title:
+                        # Fuzzy match series name
+                        score = fuzz.ratio(
+                            _normalize_series_name(series_name),
+                            _normalize_series_name(ps.title),
+                        )
+                        if score >= 80:
+                            sequence = ps.sequence
+                            if not series_asin:
+                                series_asin = ps.asin
+                            break
+
+                # Extract price from price dict if available
+                product_price = None
+                if product.price and isinstance(product.price, dict):
+                    product_price = product.price.get("list_price", {}).get("base")
+
+                # Add this book with full metadata
+                all_series_books[product.asin] = AudibleSeriesBook(
+                    asin=product.asin,
+                    title=product.title,
+                    subtitle=product.subtitle,
+                    sequence=sequence,
+                    author_name=product.primary_author,
+                    narrator_name=product.primary_narrator,
+                    runtime_minutes=product.runtime_length_min,
+                    release_date=product.release_date,
+                    is_in_library=False,
+                    price=product_price,
+                    is_in_plus_catalog=getattr(product, "is_ayce", False),
+                    language=product.language,
+                    publisher_name=product.publisher_name,
+                    summary=product.merchandising_summary,
+                )
+
+            logger.debug(
+                f"Sims discovery found {len(all_series_books)} books for series "
+                f"'{series_name}' (ASIN: {series_asin})"
+            )
+
+        except Exception as e:
+            logger.warning(f"Failed to get sims for ASIN {seed_asin}: {e}")
+
+        return list(all_series_books.values()), series_asin, series_name
 
     # -------------------------------------------------------------------------
     # Matching Logic
@@ -442,10 +560,11 @@ class SeriesMatcher:
         Compare an ABS series with Audible catalog.
 
         This is the main entry point for series comparison. It:
-        1. Tries ASIN-based lookup first (more reliable when we have ASINs)
-        2. Falls back to keyword search
-        3. Matches ABS books to Audible books
-        4. Identifies missing books
+        1. Uses /sims endpoint to discover ALL books in a series (best method)
+        2. Falls back to ASIN lookup if sims fails
+        3. Falls back to keyword search as last resort
+        4. Matches ABS books to Audible books
+        5. Identifies missing books with full metadata
 
         Args:
             abs_series: ABS series to analyze
@@ -456,14 +575,29 @@ class SeriesMatcher:
         """
         audible_books: list[AudibleSeriesBook] = []
         series_asin: str | None = None
+        series_name: str | None = None
 
-        # Strategy 1: Use ASIN lookups if we have ASINs (more reliable)
+        # Get ASINs from ABS books
         abs_asins = [b.asin for b in abs_series.books if b.asin]
+
+        # Strategy 1: Use /sims endpoint to discover ALL books in the series
+        # This is the most reliable way to find missing books
         if abs_asins:
+            # Use first available ASIN as seed
+            seed_asin = abs_asins[0]
+            audible_books, series_asin, series_name = self.get_complete_series_from_sims(seed_asin, use_cache=use_cache)
+            if audible_books:
+                logger.debug(
+                    f"Sims discovery found {len(audible_books)} total books for '{abs_series.name}' "
+                    f"(series: '{series_name}', ASIN: {series_asin})"
+                )
+
+        # Strategy 2: Fall back to ASIN lookup if sims didn't work
+        if not audible_books and abs_asins:
             audible_books, series_asin = self.get_series_books_by_asin(abs_asins, use_cache=use_cache)
             logger.debug(f"ASIN lookup found {len(audible_books)} books for {abs_series.name}")
 
-        # Strategy 2: Fall back to keyword search if ASIN lookup didn't work
+        # Strategy 3: Fall back to keyword search if ASIN lookup didn't work
         if not audible_books:
             primary_author = None
             if abs_series.books:
@@ -483,7 +617,7 @@ class SeriesMatcher:
                 abs_series=abs_series,
                 audible_series=AudibleSeriesInfo(
                     asin=series_asin,
-                    title=abs_series.name,
+                    title=series_name or abs_series.name,
                     book_count=len(audible_books),
                     books=audible_books,
                 ),
@@ -522,8 +656,12 @@ class SeriesMatcher:
                         narrator_name=aud_book.narrator_name,
                         runtime_hours=aud_book.runtime_hours,
                         release_date=aud_book.release_date,
+                        price=aud_book.price,
                         is_in_plus_catalog=aud_book.is_in_plus_catalog,
                         audible_url=f"https://www.audible.com/pd/{aud_book.asin}" if aud_book.asin else None,
+                        language=aud_book.language,
+                        publisher_name=aud_book.publisher_name,
+                        summary=aud_book.summary,
                     )
                 )
 
