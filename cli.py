@@ -1232,9 +1232,9 @@ def audible_wishlist(
 
                     # Format rating
                     rating = "-"
-                    if item.rating:
-                        stars = "★" * int(item.rating) + "☆" * (5 - int(item.rating))
-                        rating = f"{stars[:5]} {item.rating:.1f}"
+                    if item.overall_rating:
+                        stars = "★" * int(item.overall_rating) + "☆" * (5 - int(item.overall_rating))
+                        rating = f"{stars[:5]} {item.overall_rating:.1f}"
 
                     table.add_row(
                         item.asin,
@@ -1412,9 +1412,9 @@ def audible_recommendations(
 
                 # Format rating with stars
                 rating = "-"
-                if item.rating:
-                    full_stars = int(item.rating)
-                    rating = f"{'★' * full_stars}{'☆' * (5 - full_stars)} {item.rating:.1f}"
+                if item.overall_rating:
+                    full_stars = int(item.overall_rating)
+                    rating = f"{'★' * full_stars}{'☆' * (5 - full_stars)} {item.overall_rating:.1f}"
 
                 # Check if in library (if we have that info)
                 in_lib = "[green]✓[/green]" if getattr(item, "is_downloaded", False) else "[dim]-[/dim]"
