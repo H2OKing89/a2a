@@ -9,9 +9,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 import httpx
+from pydantic import ValidationError
 
 from .models import (
     Author,
+    AuthorSearchResponse,
+    BookSearchResult,
     Collection,
     CollectionExpanded,
     LibrariesResponse,
@@ -20,6 +23,9 @@ from .models import (
     LibraryItemMinified,
     LibraryItemsResponse,
     LibraryStats,
+    SearchResponse,
+    SeriesListResponse,
+    SeriesResponse,
     User,
 )
 
@@ -485,6 +491,30 @@ class ABSClient:
 
         return self._get(f"/libraries/{library_id}/series", params=params)
 
+    def get_library_series_parsed(
+        self,
+        library_id: str,
+        limit: int = 0,
+        page: int = 0,
+        sort: str | None = None,
+        desc: bool = False,
+    ) -> SeriesListResponse:
+        """
+        Get library series with Pydantic model response.
+
+        Args:
+            library_id: Library ID
+            limit: Items per page (0 = all)
+            page: Page number
+            sort: Sort field
+            desc: Sort descending
+
+        Returns:
+            SeriesListResponse model
+        """
+        data = self.get_library_series(library_id, limit, page, sort, desc)
+        return SeriesListResponse.model_validate(data)
+
     def search_library(self, library_id: str, query: str, limit: int = 12) -> dict:
         """
         Search a library.
@@ -499,6 +529,21 @@ class ABSClient:
         """
         params = {"q": query, "limit": limit}
         return self._get(f"/libraries/{library_id}/search", params=params)
+
+    def search_library_parsed(self, library_id: str, query: str, limit: int = 12) -> SearchResponse:
+        """
+        Search a library with Pydantic model response.
+
+        Args:
+            library_id: Library ID
+            query: Search query
+            limit: Max results
+
+        Returns:
+            SearchResponse model
+        """
+        data = self.search_library(library_id, query, limit)
+        return SearchResponse.model_validate(data)
 
     # =====================
     # Library Items
@@ -733,6 +778,20 @@ class ABSClient:
 
         return self._get(f"/series/{series_id}", params=params if params else None)
 
+    def get_series_parsed(self, series_id: str, include: str | None = None) -> SeriesResponse:
+        """
+        Get a series with Pydantic model response.
+
+        Args:
+            series_id: Series ID
+            include: Include progress
+
+        Returns:
+            SeriesResponse model
+        """
+        data = self.get_series(series_id, include)
+        return SeriesResponse.model_validate(data)
+
     # =====================
     # Search
     # =====================
@@ -757,6 +816,32 @@ class ABSClient:
         params = {"title": title, "author": author, "provider": provider}
         return self._get("/search/books", params=params)
 
+    def search_books_parsed(
+        self,
+        title: str = "",
+        author: str = "",
+        provider: str = "audible",
+    ) -> list[BookSearchResult]:
+        """
+        Search for books using metadata provider with Pydantic models.
+
+        Args:
+            title: Book title or ASIN
+            author: Author name
+            provider: Metadata provider
+
+        Returns:
+            List of BookSearchResult models
+        """
+        data = self.search_books(title, author, provider)
+        results = []
+        for item in data:
+            try:
+                results.append(BookSearchResult.model_validate(item))
+            except ValidationError:
+                logger.debug(f"Skipping invalid book search result: {item}")
+        return results
+
     def search_authors(self, query: str) -> dict | None:
         """
         Search for an author.
@@ -768,6 +853,24 @@ class ABSClient:
             Author dict or None
         """
         return self._get("/search/authors", params={"q": query})
+
+    def search_authors_parsed(self, query: str) -> AuthorSearchResponse:
+        """
+        Search for an author with Pydantic model response.
+
+        Args:
+            query: Author name
+
+        Returns:
+            AuthorSearchResponse model
+        """
+        data = self.search_authors(query)
+        if data is None:
+            return AuthorSearchResponse(results=[])
+        # The search_authors endpoint returns a list directly
+        if isinstance(data, list):
+            return AuthorSearchResponse(results=data)
+        return AuthorSearchResponse.model_validate(data)
 
     # =====================
     # Enhanced Author Methods
