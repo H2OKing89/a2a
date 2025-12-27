@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import ValidationError
+
 from audible import Authenticator, Client
 
 from .models import (

@@ -26,7 +26,6 @@ from src.audible.models import (
     WishlistItem,
 )
 
-
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -333,9 +332,7 @@ class TestLibraryMethods:
 
     def test_get_library_uses_cache(self, mock_client_with_cache):
         """get_library caches results."""
-        mock_client_with_cache._client.get.return_value = {
-            "items": [{"asin": "B001", "title": "Book 1"}]
-        }
+        mock_client_with_cache._client.get.return_value = {"items": [{"asin": "B001", "title": "Book 1"}]}
 
         # First call - hits API
         items1 = mock_client_with_cache.get_library(use_cache=True)
@@ -366,9 +363,7 @@ class TestCatalogMethods:
 
     def test_get_catalog_product(self, mock_client):
         """get_catalog_product parses response."""
-        mock_client._client.get.return_value = {
-            "product": {"asin": "B001", "title": "Test Product"}
-        }
+        mock_client._client.get.return_value = {"product": {"asin": "B001", "title": "Test Product"}}
 
         product = mock_client.get_catalog_product("B001", use_cache=False)
 
@@ -456,18 +451,14 @@ class TestWishlistMethods:
 
     def test_is_in_wishlist_true(self, mock_client):
         """is_in_wishlist returns True when item in wishlist."""
-        mock_client._client.get.return_value = {
-            "products": [{"asin": "B001", "title": "In Wishlist"}]
-        }
+        mock_client._client.get.return_value = {"products": [{"asin": "B001", "title": "In Wishlist"}]}
 
         result = mock_client.is_in_wishlist("B001", use_cache=False)
         assert result is True
 
     def test_is_in_wishlist_false(self, mock_client):
         """is_in_wishlist returns False when item not in wishlist."""
-        mock_client._client.get.return_value = {
-            "products": [{"asin": "OTHER", "title": "Other Item"}]
-        }
+        mock_client._client.get.return_value = {"products": [{"asin": "OTHER", "title": "Other Item"}]}
 
         result = mock_client.is_in_wishlist("B001", use_cache=False)
         assert result is False

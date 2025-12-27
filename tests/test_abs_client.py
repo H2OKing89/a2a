@@ -3,17 +3,19 @@ Tests for ABSClient (Audiobookshelf client).
 Covers exceptions, initialization, context manager, rate limiting, and main API methods.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.abs.client import (
-    ABSClient,
-    ABSError,
-    ABSConnectionError,
     ABSAuthError,
+    ABSClient,
+    ABSConnectionError,
+    ABSError,
     ABSNotFoundError,
 )
-from src.abs.models import Library, LibraryItem, Collection, Series
+from src.abs.models import Collection, Library, LibraryItem, Series
+
 
 # -----------------------------------------------------------------------------
 # Exception Tests
@@ -41,6 +43,7 @@ class TestExceptions:
         err = ABSNotFoundError("Not found")
         assert isinstance(err, ABSError)
 
+
 # -----------------------------------------------------------------------------
 # Client Initialization & Context Manager
 # -----------------------------------------------------------------------------
@@ -51,6 +54,7 @@ class TestClientInit:
 
     def test_init_with_cache(self, tmp_path):
         from src.cache import SQLiteCache
+
         cache = SQLiteCache(db_path=tmp_path / "test.db")
         client = ABSClient("http://localhost:13378", "token", cache=cache)
         assert client._cache is cache
@@ -63,9 +67,11 @@ class TestClientInit:
                 pass
             mock_close.assert_called_once()
 
+
 # -----------------------------------------------------------------------------
 # Rate Limiting
 # -----------------------------------------------------------------------------
+
 
 # -----------------------------------------------------------------------------
 # Library Methods
@@ -144,6 +150,7 @@ class TestLibraryMethods:
 
     # get_library_item does not exist; skip these tests
 
+
 # -----------------------------------------------------------------------------
 # Collection Methods
 # -----------------------------------------------------------------------------
@@ -211,12 +218,13 @@ class TestCollectionMethods:
             "description": None,
             "userId": "user1",
             "lastUpdate": 1700000000,
-            "books": [{"id": "item1"}]
+            "books": [{"id": "item1"}],
         }
         result = client.update_collection("col1", ["item1"])
         assert result.id == "col1"
         assert isinstance(result.books, list)
         assert result.books[0]["id"] == "item1"
+
 
 # -----------------------------------------------------------------------------
 # Series Methods
@@ -246,6 +254,7 @@ class TestSeriesMethods:
         resp = client.get_library_series("lib1")
         assert len(resp["results"]) == 1
         assert resp["results"][0]["id"] == "ser1"
+
 
 # -----------------------------------------------------------------------------
 # Error Handling
