@@ -272,10 +272,16 @@ class AsyncAudibleClient:
 
         items_data = response.get("items", [])
         items = []
-        for item_data in items_data:
+        for idx, item_data in enumerate(items_data):
             try:
                 items.append(AudibleLibraryItem.model_validate(item_data))
-            except ValidationError:
+            except ValidationError as e:
+                logger.debug(
+                    "Failed to validate library item at index %d: %s. Item data: %s",
+                    idx,
+                    str(e),
+                    item_data.get("asin", "<unknown ASIN>"),
+                )
                 pass
 
         # Cache results
@@ -437,10 +443,16 @@ class AsyncAudibleClient:
 
         products_data = response.get("products", [])
         products = []
-        for prod_data in products_data:
+        for idx, prod_data in enumerate(products_data):
             try:
                 products.append(AudibleCatalogProduct.model_validate(prod_data))
-            except ValidationError:
+            except ValidationError as e:
+                logger.debug(
+                    "Failed to validate catalog product at index %d: %s. Product ASIN: %s",
+                    idx,
+                    str(e),
+                    prod_data.get("asin", "<unknown ASIN>"),
+                )
                 pass
 
         if self._cache:
@@ -481,10 +493,17 @@ class AsyncAudibleClient:
 
             products_data = response.get("similar_products", [])
             products = []
-            for prod_data in products_data:
+            for idx, prod_data in enumerate(products_data):
                 try:
                     products.append(AudibleCatalogProduct.model_validate(prod_data))
-                except ValidationError:
+                except ValidationError as e:
+                    logger.debug(
+                        "Failed to validate similar product at index %d for ASIN %s: %s. Product ASIN: %s",
+                        idx,
+                        asin,
+                        str(e),
+                        prod_data.get("asin", "<unknown ASIN>"),
+                    )
                     pass
 
             if self._cache:
@@ -541,10 +560,16 @@ class AsyncAudibleClient:
 
         products_data = response.get("products", [])
         products = []
-        for prod_data in products_data:
+        for idx, prod_data in enumerate(products_data):
             try:
                 products.append(WishlistItem.model_validate(prod_data))
-            except ValidationError:
+            except ValidationError as e:
+                logger.debug(
+                    "Failed to validate wishlist item at index %d: %s. Item ASIN: %s",
+                    idx,
+                    str(e),
+                    prod_data.get("asin", "<unknown ASIN>"),
+                )
                 pass
 
         if self._cache:
@@ -601,10 +626,16 @@ class AsyncAudibleClient:
 
             products_data = response.get("products", [])
             products = []
-            for prod_data in products_data:
+            for idx, prod_data in enumerate(products_data):
                 try:
                     products.append(AudibleCatalogProduct.model_validate(prod_data))
-                except ValidationError:
+                except ValidationError as e:
+                    logger.debug(
+                        "Failed to validate catalog product at index %d: %s. Product ASIN: %s",
+                        idx,
+                        str(e),
+                        prod_data.get("asin", "<unknown ASIN>"),
+                    )
                     pass
 
             if self._cache:
