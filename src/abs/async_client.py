@@ -390,19 +390,24 @@ class AsyncABSClient:
             use_cache: Whether to use cached results
 
         Returns:
-            List of items (in order, with None for failures filtered out)
+            List of items in the same order as input item_ids,
+            with failed/not-found items filtered out.
         """
         tasks = [self.get_item(item_id, expanded=expanded, use_cache=use_cache) for item_id in item_ids]
 
+        # Use gather to preserve order (results correspond to input order)
+        gathered = await asyncio.gather(*tasks, return_exceptions=True)
+
         results = []
-        for coro in asyncio.as_completed(tasks):
-            try:
-                item = await coro
-                results.append(item)
-            except ABSNotFoundError:
-                logger.debug("Item not found during batch fetch")
-            except ABSError as e:
-                logger.warning("Error fetching item during batch: %s", e)
+        for i, result in enumerate(gathered):
+            if isinstance(result, ABSNotFoundError):
+                logger.debug("Item %s not found during batch fetch", item_ids[i])
+            elif isinstance(result, ABSError):
+                logger.warning("Error fetching item %s during batch: %s", item_ids[i], result)
+            elif isinstance(result, Exception):
+                logger.warning("Unexpected error fetching item %s: %s", item_ids[i], result)
+            else:
+                results.append(result)
 
         logger.debug("Batch fetched %d/%d items", len(results), len(item_ids))
         return results
