@@ -160,11 +160,11 @@ class ABSClient:
                 json=json,
             )
         except httpx.ConnectError as e:
-            logger.error("ABS connection error: %s", e)
-            raise ABSConnectionError(f"Failed to connect to {self.host}: {e}")
+            logger.exception("ABS connection error: %s", e)
+            raise ABSConnectionError(f"Failed to connect to {self.host}: {e}") from e
         except httpx.TimeoutException as e:
-            logger.error("ABS timeout: %s", e)
-            raise ABSConnectionError(f"Request timed out: {e}")
+            logger.exception("ABS timeout: %s", e)
+            raise ABSConnectionError(f"Request timed out: {e}") from e
 
         if response.status_code == 401:
             logger.error("ABS auth error: 401 Unauthorized")
