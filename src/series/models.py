@@ -85,6 +85,10 @@ class AudibleSeriesBook(BaseModel):
     # Pricing info
     price: float | None = None
     is_in_plus_catalog: bool = False
+    # Additional metadata
+    language: str | None = None
+    publisher_name: str | None = None
+    summary: str | None = None
 
     model_config = {"extra": "ignore"}
 
@@ -133,6 +137,12 @@ class MissingBook(BaseModel):
     price: float | None = None
     is_in_plus_catalog: bool = False
     audible_url: str | None = None
+    # Additional metadata for richer display
+    language: str | None = None
+    publisher_name: str | None = None
+    summary: str | None = None  # Short description
+
+    model_config = {"extra": "ignore"}
 
 
 class SeriesMatchResult(BaseModel):
@@ -159,6 +169,9 @@ class SeriesComparisonResult(BaseModel):
     audible_book_count: int = 0
     matched_count: int = 0
     missing_count: int = 0
+
+    # Warnings for data quality issues
+    warnings: list[str] = Field(default_factory=list)
 
     # Calculated at creation time
     analyzed_at: datetime = Field(default_factory=_utcnow)
