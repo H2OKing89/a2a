@@ -1037,9 +1037,10 @@ class AudibleClient:
         """
         try:
             self._request("POST", "1.0/wishlist", json={"asin": asin})
-            # Invalidate wishlist cache
+            # Invalidate wishlist-related cache entries only
             if self._cache:
-                self._cache.clear_namespace("library")
+                self._cache.delete_by_pattern("library", "wishlist_%")
+                self._cache.invalidate_related(asin)
             return True
         except AudibleError:
             return False
@@ -1059,9 +1060,10 @@ class AudibleClient:
         """
         try:
             self._request("DELETE", f"1.0/wishlist/{asin}")
-            # Invalidate wishlist cache
+            # Invalidate wishlist-related cache entries only
             if self._cache:
-                self._cache.clear_namespace("library")
+                self._cache.delete_by_pattern("library", "wishlist_%")
+                self._cache.invalidate_related(asin)
             return True
         except AudibleError:
             return False
