@@ -147,7 +147,8 @@ class TestABSClientCollections:
         collections = mock_client.get_collections()
 
         assert len(collections) == 1
-        assert collections[0]["name"] == "Favorites"
+        assert collections[0].name == "Favorites"
+        assert isinstance(collections[0], Collection)
 
     def test_create_collection(self, mock_client):
         """Test create_collection method."""
@@ -169,7 +170,8 @@ class TestABSClientCollections:
             description="Test",
         )
 
-        assert result["id"] == "col_new"
+        assert result.id == "col_new"
+        assert isinstance(result, CollectionExpanded)
         mock_client._post.assert_called_once()
         call_args = mock_client._post.call_args
         assert call_args[1]["json"]["name"] == "New Collection"
@@ -177,19 +179,21 @@ class TestABSClientCollections:
 
     def test_find_or_create_collection_existing(self, mock_client):
         """Test find_or_create_collection finds existing."""
-        mock_client.get_collections = MagicMock(
-            return_value=[
-                {
-                    "id": "col_1",
-                    "libraryId": "lib_1",
-                    "name": "Existing",
-                }
-            ]
+        existing_collection = Collection(
+            id="col_1",
+            libraryId="lib_1",
+            userId="root",
+            name="Existing",
+            books=[],
+            lastUpdate=0,
+            createdAt=0,
         )
+        mock_client.get_collections = MagicMock(return_value=[existing_collection])
 
         result = mock_client.find_or_create_collection("lib_1", "Existing")
 
-        assert result["id"] == "col_1"
+        assert result.id == "col_1"
+        assert isinstance(result, Collection)
         # create_collection should not be called
         mock_client._post = MagicMock()
         assert not mock_client._post.called
@@ -197,17 +201,21 @@ class TestABSClientCollections:
     def test_find_or_create_collection_new(self, mock_client):
         """Test find_or_create_collection creates new."""
         mock_client.get_collections = MagicMock(return_value=[])
-        mock_client.create_collection = MagicMock(
-            return_value={
-                "id": "col_new",
-                "libraryId": "lib_1",
-                "name": "New",
-            }
+        new_collection = CollectionExpanded(
+            id="col_new",
+            libraryId="lib_1",
+            userId="root",
+            name="New",
+            books=[],
+            lastUpdate=0,
+            createdAt=0,
         )
+        mock_client.create_collection = MagicMock(return_value=new_collection)
 
         result = mock_client.find_or_create_collection("lib_1", "New")
 
-        assert result["id"] == "col_new"
+        assert result.id == "col_new"
+        assert isinstance(result, CollectionExpanded)
         mock_client.create_collection.assert_called_once_with("lib_1", "New", None)
 
 

@@ -14,6 +14,8 @@ from pydantic import ValidationError
 
 from .models import (
     Author,
+    Collection,
+    CollectionExpanded,
     LibrariesResponse,
     Library,
     LibraryItem,
@@ -868,19 +870,19 @@ class ABSClient:
     # Collection Management
     # =====================
 
-    def get_collections(self) -> list[dict]:
+    def get_collections(self) -> list[Collection]:
         """
         Get all collections.
 
         Returns:
-            List of collection dicts
+            List of Collection models
         """
         result = self._get("/collections")
-        collections = result.get("collections", [])
+        collections = [Collection.model_validate(c) for c in result.get("collections", [])]
         logger.debug("Fetched %d collections", len(collections))
         return collections
 
-    def get_collection(self, collection_id: str) -> dict:
+    def get_collection(self, collection_id: str) -> CollectionExpanded:
         """
         Get a collection by ID.
 
@@ -888,9 +890,10 @@ class ABSClient:
             collection_id: Collection ID
 
         Returns:
-            Collection dict with books array
+            CollectionExpanded model with books array
         """
-        return self._get(f"/collections/{collection_id}")
+        result = self._get(f"/collections/{collection_id}")
+        return CollectionExpanded.model_validate(result)
 
     def create_collection(
         self,
@@ -898,7 +901,7 @@ class ABSClient:
         name: str,
         description: str | None = None,
         book_ids: list[str] | None = None,
-    ) -> dict:
+    ) -> CollectionExpanded:
         """
         Create a new collection.
 
@@ -909,7 +912,7 @@ class ABSClient:
             book_ids: Optional list of book IDs to add
 
         Returns:
-            Created collection dict
+            Created CollectionExpanded model
 
         Example:
             collection = client.create_collection(
@@ -928,8 +931,9 @@ class ABSClient:
             payload["books"] = book_ids
 
         result = self._post("/collections", json=payload)
-        logger.info("Created collection '%s' (id=%s)", name, result.get("id"))
-        return result
+        collection = CollectionExpanded.model_validate(result)
+        logger.info("Created collection '%s' (id=%s)", name, collection.id)
+        return collection
 
     def update_collection(
         self,
@@ -937,7 +941,7 @@ class ABSClient:
         name: str | None = None,
         description: str | None = None,
         book_ids: list[str] | None = None,
-    ) -> dict:
+    ) -> CollectionExpanded:
         """
         Update a collection.
 
@@ -948,7 +952,7 @@ class ABSClient:
             book_ids: Replace book list (optional)
 
         Returns:
-            Updated collection dict
+            Updated CollectionExpanded model
         """
         payload: dict[str, Any] = {}
         if name is not None:
@@ -960,7 +964,7 @@ class ABSClient:
 
         result = self._request("PATCH", f"/collections/{collection_id}", json=payload)
         logger.info("Updated collection %s", collection_id)
-        return result
+        return CollectionExpanded.model_validate(result)
 
     def delete_collection(self, collection_id: str) -> bool:
         """
@@ -976,7 +980,7 @@ class ABSClient:
         logger.info("Deleted collection %s", collection_id)
         return True
 
-    def add_book_to_collection(self, collection_id: str, book_id: str) -> dict:
+    def add_book_to_collection(self, collection_id: str, book_id: str) -> CollectionExpanded:
         """
         Add a single book to a collection.
 
@@ -985,13 +989,13 @@ class ABSClient:
             book_id: Library item ID to add
 
         Returns:
-            Updated collection dict
+            Updated CollectionExpanded model
         """
         result = self._post(f"/collections/{collection_id}/book", json={"id": book_id})
         logger.debug("Added book %s to collection %s", book_id, collection_id)
-        return result
+        return CollectionExpanded.model_validate(result)
 
-    def remove_book_from_collection(self, collection_id: str, book_id: str) -> dict:
+    def remove_book_from_collection(self, collection_id: str, book_id: str) -> CollectionExpanded:
         """
         Remove a book from a collection.
 
@@ -1000,13 +1004,13 @@ class ABSClient:
             book_id: Library item ID to remove
 
         Returns:
-            Updated collection dict
+            Updated CollectionExpanded model
         """
         result = self._request("DELETE", f"/collections/{collection_id}/book/{book_id}")
         logger.debug("Removed book %s from collection %s", book_id, collection_id)
-        return result
+        return CollectionExpanded.model_validate(result)
 
-    def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+    def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> CollectionExpanded:
         """
         Add multiple books to a collection.
 
@@ -1015,13 +1019,13 @@ class ABSClient:
             book_ids: List of library item IDs to add
 
         Returns:
-            Updated collection dict
+            Updated CollectionExpanded model
         """
         result = self._post(f"/collections/{collection_id}/batch/add", json={"books": book_ids})
         logger.info("Added %d books to collection %s", len(book_ids), collection_id)
-        return result
+        return CollectionExpanded.model_validate(result)
 
-    def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+    def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> CollectionExpanded:
         """
         Remove multiple books from a collection.
 
@@ -1030,11 +1034,11 @@ class ABSClient:
             book_ids: List of library item IDs to remove
 
         Returns:
-            Updated collection dict
+            Updated CollectionExpanded model
         """
         result = self._post(f"/collections/{collection_id}/batch/remove", json={"books": book_ids})
         logger.info("Removed %d books from collection %s", len(book_ids), collection_id)
-        return result
+        return CollectionExpanded.model_validate(result)
 
     # =====================
     # Utility Methods
@@ -1045,7 +1049,7 @@ class ABSClient:
         library_id: str,
         name: str,
         description: str | None = None,
-    ) -> dict:
+    ) -> Collection | CollectionExpanded:
         """
         Find a collection by name or create it if it doesn't exist.
 
@@ -1057,20 +1061,20 @@ class ABSClient:
             description: Description if creating new
 
         Returns:
-            Collection dict (existing or newly created)
+            Collection (if found) or CollectionExpanded (if created)
 
         Example:
             collection = client.find_or_create_collection(
                 library_id,
                 "Upgrade Candidates - Low Quality"
             )
-            client.batch_add_to_collection(collection['id'], book_ids)
+            client.batch_add_to_collection(collection.id, book_ids)
         """
         collections = self.get_collections()
 
         # Find existing collection with same name in this library
         for col in collections:
-            if col.get("name") == name and col.get("libraryId") == library_id:
+            if col.name == name and col.library_id == library_id:
                 logger.debug("Found existing collection '%s'", name)
                 return col
 
