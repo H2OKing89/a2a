@@ -250,10 +250,10 @@ Multiple functions returning `Any` when typed to return specific types:
    - All methods need shared access to `_request()`, caching, and auth
    - Splitting would add complexity without meaningful benefit
    - Structure: Auth → Rate limiting → Library → Catalog → Series → Account → Wishlist → Recommendations → Metadata → Utils
-   
+
 2. [x] ~~Review empty `pass` statements in exception handlers~~ - **DECIDED: Keep as-is**
    - 6 instances found in `src/audible/client.py` - all are ValidationError handlers in list parsing loops
-   - Pattern: `except ValidationError: pass` - gracefully skips unparseable API items
+   - Pattern: `except ValidationError: pass` - gracefully skips unparsable API items
    - This is intentional defensive coding - prevents one bad item from crashing entire response
    - Same pattern in `src/abs/client.py` (line 617), `src/audible/models.py` (line 369), `src/audible/logging.py` (line 274)
 
