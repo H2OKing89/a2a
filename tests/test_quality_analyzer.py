@@ -326,16 +326,16 @@ class TestQualityAnalyzer:
         assert tier == QualityTier.EXCELLENT
 
     def test_calculate_tier_good(self):
-        """Test good tier classification."""
+        """Test better tier classification (was good)."""
         analyzer = QualityAnalyzer()
         tier = analyzer.calculate_tier(bitrate_kbps=160, format_rank=FormatRank.M4B, is_atmos=False)
-        assert tier == QualityTier.GOOD
+        assert tier == QualityTier.BETTER
 
     def test_calculate_tier_acceptable(self):
-        """Test acceptable tier classification."""
+        """Test good tier classification (was acceptable)."""
         analyzer = QualityAnalyzer()
         tier = analyzer.calculate_tier(bitrate_kbps=115, format_rank=FormatRank.M4B, is_atmos=False)
-        assert tier == QualityTier.ACCEPTABLE
+        assert tier == QualityTier.GOOD
 
     def test_calculate_tier_low(self):
         """Test low tier classification."""
@@ -364,6 +364,6 @@ class TestQualityAnalyzer:
         m4b_tier = analyzer.calculate_tier(160, FormatRank.M4B, False)
         mp3_tier = analyzer.calculate_tier(160, FormatRank.MP3, False)
 
-        # M4B should be GOOD, MP3 should be ACCEPTABLE
-        assert m4b_tier == QualityTier.GOOD
-        assert mp3_tier == QualityTier.ACCEPTABLE
+        # M4B should be BETTER, MP3 should be GOOD
+        assert m4b_tier == QualityTier.BETTER
+        assert mp3_tier == QualityTier.GOOD

@@ -1635,7 +1635,7 @@ def quality_scan(
     Scan library for audio quality analysis.
 
     Analyzes all audiobooks and generates a quality report showing
-    items by tier (Excellent, Good, Acceptable, Low, Poor).
+    items by tier (Excellent, Better, Good, Low, Poor).
     """
     try:
         with get_abs_client() as client:
@@ -1645,7 +1645,7 @@ def quality_scan(
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
-                    console.print("[red]No libraries found[/red]")
+                    ui.error("No libraries found")
                     raise typer.Exit(1)
                 library_id = libraries[0].id
 
@@ -1656,69 +1656,108 @@ def quality_scan(
             if limit > 0:
                 total_items = min(limit, total_items)
 
-            console.print(f"\nScanning {total_items} items...\n")
+            ui.header("Quality Scan", subtitle=f"Analyzing {total_items} audiobooks", icon=Icons.QUALITY_HIGH)
 
             # Create analyzer and report
             analyzer = QualityAnalyzer()
             report = QualityReport()
 
-            # Scan with progress bar
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
-                TaskProgressColumn(),
-                console=console,
-            ) as progress:
-                task = progress.add_task("Analyzing...", total=total_items)
+            # Get item IDs to scan
+            items = items_resp.get("results", [])[:total_items] if limit else items_resp.get("results", [])
+            item_ids = [item.get("id") for item in items if item.get("id")]
 
-                items = items_resp.get("results", [])[:total_items] if limit else items_resp.get("results", [])
+            # Fetch expanded items in parallel with progress
+            with ui.progress() as progress:
+                task = progress.add_task(f"{Icons.SEARCH} Analyzing quality...", total=len(item_ids))
 
-                for item in items:
-                    item_id = item.get("id")
-                    try:
-                        full_item: dict[str, Any] = client._get(f"/items/{item_id}", params={"expanded": 1})
-                        quality = analyzer.analyze_item(full_item)
-                        report.add_item(quality)
-                    except Exception as e:
-                        console.print(f"[yellow]Warning:[/yellow] Failed to analyze {item_id}: {e}")
+                def progress_callback(completed: int, total: int) -> None:
+                    progress.update(task, completed=completed)
 
-                    progress.advance(task)
+                # batch_get_items_expanded uses parallel requests + caching
+                expanded_items = client.batch_get_items_expanded(
+                    item_ids,
+                    use_cache=True,
+                    max_workers=20,  # Parallel requests to local server
+                    progress_callback=progress_callback,
+                )
+
+                # Analyze each item
+                for full_item in expanded_items:
+                    if full_item:
+                        try:
+                            quality = analyzer.analyze_item(full_item)
+                            report.add_item(quality)
+                        except Exception as e:
+                            ui.warning(f"Failed to analyze item", details=str(e))
 
             report.finalize()
 
-            # Display summary
+            # Build summary panel
+            summary_text = Text()
+            summary_text.append(f"\n{Icons.BOOK} Total Items: ", style="bold")
+            summary_text.append(f"{report.total_items}\n", style="accent")
+
+            summary_text.append(f"{Icons.DATABASE} Total Size: ", style="bold")
+            summary_text.append(f"{report.total_size_gb:.2f} GB\n", style="size")
+
+            summary_text.append(f"{Icons.CLOCK} Total Duration: ", style="bold")
+            summary_text.append(f"{report.total_duration_hours:.1f} hours\n", style="duration")
+
+            summary_text.append(f"\n{Icons.MUSIC} Bitrate Range: ", style="bold")
+            summary_text.append(
+                f"{report.min_bitrate_kbps:.0f} - {report.max_bitrate_kbps:.0f} kbps\n", style="bitrate"
+            )
+
+            summary_text.append(f"{Icons.MUSIC} Average Bitrate: ", style="bold")
+            summary_text.append(f"{report.avg_bitrate_kbps:.0f} kbps\n", style="bitrate")
+
             console.print(
                 Panel(
-                    f"[bold]Total Items:[/bold] {report.total_items}\n"
-                    f"[bold]Total Size:[/bold] {report.total_size_gb:.2f} GB\n"
-                    f"[bold]Total Duration:[/bold] {report.total_duration_hours:.1f} hours\n\n"
-                    f"[bold]Bitrate Range:[/bold] {report.min_bitrate_kbps:.0f} - {report.max_bitrate_kbps:.0f} kbps\n"
-                    f"[bold]Average Bitrate:[/bold] {report.avg_bitrate_kbps:.0f} kbps",
-                    title="Quality Scan Complete",
+                    summary_text,
+                    title=f"{Icons.SUCCESS} Quality Scan Complete",
+                    border_style="success",
+                    box=ROUNDED,
                 )
             )
 
-            # Tier breakdown table
-            tier_table = Table(title="Quality Tiers")
+            # Tier breakdown table with visual bars
+            tier_table = ui.create_table(
+                title=f"{Icons.QUALITY_HIGH} Quality Tiers",
+                box_style=ROUNDED,
+            )
             tier_table.add_column("Tier", style="bold")
             tier_table.add_column("Count", justify="right")
-            tier_table.add_column("Percentage", justify="right")
+            tier_table.add_column("Distribution", min_width=25)
+            tier_table.add_column("%", justify="right")
 
-            tier_order = ["Excellent", "Good", "Acceptable", "Low", "Poor"]
-            tier_colors = {"Excellent": "green", "Good": "blue", "Acceptable": "cyan", "Low": "yellow", "Poor": "red"}
+            tier_order = ["Excellent", "Better", "Good", "Low", "Poor"]
+            tier_styles = {
+                "Excellent": ("tier.excellent", Icons.QUALITY_HIGH),
+                "Better": ("tier.better", Icons.QUALITY_GOOD),
+                "Good": ("tier.good", Icons.QUALITY_OK),
+                "Low": ("tier.low", Icons.QUALITY_LOW),
+                "Poor": ("tier.poor", Icons.QUALITY_BAD),
+            }
 
             for tier_name in tier_order:
                 count = report.tier_counts.get(tier_name, 0)
                 pct = (count / report.total_items * 100) if report.total_items else 0
-                color = tier_colors.get(tier_name, "white")
-                tier_table.add_row(f"[{color}]{tier_name}[/{color}]", str(count), f"{pct:.1f}%")
+                style, icon = tier_styles.get(tier_name, ("white", ""))
+
+                # Visual distribution bar
+                bar_width = int(pct / 5)  # Max 20 chars
+                bar = f"[{style}]{'█' * bar_width}[/{style}][dim]{'░' * (20 - bar_width)}[/dim]"
+
+                tier_table.add_row(f"[{style}]{icon} {tier_name}[/{style}]", str(count), bar, f"{pct:.1f}%")
 
             console.print(tier_table)
 
             # Format breakdown
-            format_table = Table(title="Format Distribution")
-            format_table.add_column("Format", style="bold")
+            format_table = ui.create_table(
+                title=f"{Icons.FILE} Format Distribution",
+                box_style=ROUNDED,
+            )
+            format_table.add_column("Format", style="bold cyan")
             format_table.add_column("Count", justify="right")
 
             for fmt, count in sorted(report.format_counts.items(), key=lambda x: -x[1]):
@@ -1728,8 +1767,10 @@ def quality_scan(
 
             # Upgrade candidates summary
             if report.upgrade_candidates:
-                console.print(f"\n[yellow]⚠ {len(report.upgrade_candidates)} items need upgrades[/yellow]")
-                console.print("Run [bold]quality low[/bold] to see details.")
+                console.print()
+                ui.warning(
+                    f"{len(report.upgrade_candidates)} items need upgrades", details="Run 'quality low' to see details."
+                )
 
             # Save report if requested
             if output:
@@ -1788,7 +1829,7 @@ def quality_low(
     """
     List low quality audiobooks below bitrate threshold.
 
-    Default threshold is 110 kbps (Acceptable minimum).
+    Default threshold is 110 kbps (Good minimum).
     """
     try:
         with get_abs_client() as client:
@@ -1948,9 +1989,9 @@ def quality_item(
 
             # Display results
             tier_color = {
-                QualityTier.EXCELLENT: "green",
-                QualityTier.GOOD: "blue",
-                QualityTier.ACCEPTABLE: "cyan",
+                QualityTier.EXCELLENT: "bright_blue",
+                QualityTier.BETTER: "dark_green",
+                QualityTier.GOOD: "green",
                 QualityTier.LOW: "yellow",
                 QualityTier.POOR: "red",
             }.get(quality.tier, "white")

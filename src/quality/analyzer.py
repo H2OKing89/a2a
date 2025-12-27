@@ -138,9 +138,9 @@ class QualityAnalyzer:
         if is_premium_format:
             # M4B/M4A tiers
             if bitrate_kbps >= self.bitrate_good:  # 128+
-                return QualityTier.GOOD
+                return QualityTier.BETTER
             elif bitrate_kbps >= self.bitrate_acceptable:  # 110-127
-                return QualityTier.ACCEPTABLE
+                return QualityTier.GOOD
             elif bitrate_kbps >= self.bitrate_low:  # 64-109
                 return QualityTier.LOW
             else:  # <64
@@ -149,7 +149,7 @@ class QualityAnalyzer:
         elif is_mp3_format:
             # MP3 tiers (stricter - one tier lower than m4b at same bitrate)
             if bitrate_kbps >= self.bitrate_good:  # 128+
-                return QualityTier.ACCEPTABLE  # MP3 128+ = Acceptable (not Good)
+                return QualityTier.GOOD  # MP3 128+ = Good (not Better)
             elif bitrate_kbps >= self.bitrate_acceptable:  # 110-127
                 return QualityTier.LOW
             else:  # <110
@@ -158,7 +158,7 @@ class QualityAnalyzer:
         else:
             # Unknown format - use generic bitrate rules
             if bitrate_kbps >= self.bitrate_good:
-                return QualityTier.ACCEPTABLE
+                return QualityTier.GOOD
             elif bitrate_kbps >= self.bitrate_low:
                 return QualityTier.LOW
             else:
@@ -231,11 +231,11 @@ class QualityAnalyzer:
         elif tier == QualityTier.LOW:
             priority += 50
             reasons.append(f"Below acceptable quality ({bitrate_kbps:.0f} kbps)")
-        elif tier == QualityTier.ACCEPTABLE:
+        elif tier == QualityTier.GOOD:
             priority += 10
             reasons.append(f"Could be improved ({bitrate_kbps:.0f} kbps)")
         else:
-            # Good/Excellent - no upgrade needed
+            # Better/Excellent - no upgrade needed
             return 0, None
 
         # ASIN bonus (easier to find replacement)
