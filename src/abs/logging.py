@@ -1,14 +1,29 @@
 """
-Logging configuration for the ABS module.
+Rich-enhanced logging configuration for the ABS module.
 
-Provides centralized logging setup with configurable handlers for
-console and file output.
+Provides centralized logging setup with beautiful rich console output
+and configurable handlers for console and file output.
+
+Usage:
+    from src.abs.logging import configure_logging, get_logger
+
+    # Quick setup with rich console output
+    configure_logging(level="info", console=True, use_rich=True)
+
+    # Get a logger for your module
+    logger = get_logger(__name__)
+    logger.info("[green]✓[/green] Connected to ABS")
 """
 
 import logging
 import sys
 from pathlib import Path
 from typing import Literal
+
+from rich.logging import RichHandler
+from rich.traceback import install as install_rich_traceback
+
+from src.utils.ui import console as rich_console
 
 # Module logger name - all ABS module logs use this prefix
 MODULE_LOGGER_NAME = "src.abs"
@@ -41,33 +56,49 @@ def configure_logging(
     file_path: str | Path | None = None,
     file_log_level: LogLevel | int | None = None,
     format_string: str | None = None,
+    use_rich: bool = True,
+    rich_tracebacks: bool = True,
+    show_path: bool = False,
+    show_time: bool = True,
+    markup: bool = True,
 ) -> logging.Logger:
     """
-    Configure logging for the ABS module.
+    Configure rich-enhanced logging for the ABS module.
 
     Args:
         level: Log level for console output
         console: Whether to enable console logging
         file_path: Optional file path for file logging
         file_log_level: Log level for file output (defaults to level)
-        format_string: Custom format string
+        format_string: Custom format string for file logging
+        use_rich: Use rich handler for console (beautiful output)
+        rich_tracebacks: Enable rich tracebacks (exceptions look great)
+        show_path: Show file path in console logs
+        show_time: Show timestamp in console logs
+        markup: Enable rich markup in log messages
 
     Returns:
         Configured logger instance
 
     Example:
-        logger = configure_logging("debug", file_path="logs/abs.log")
+        logger = configure_logging("debug", file_path="logs/abs.log", use_rich=True)
+        logger.info("[green]✓[/green] Connected to server")
     """
     global _configured
 
     log_level = _get_log_level(level)
     file_log_level = _get_log_level(file_log_level) if file_log_level else log_level
 
-    # Default format
-    if format_string is None:
-        format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-    formatter = logging.Formatter(format_string)
+    # Install rich tracebacks globally for beautiful exceptions
+    if use_rich and rich_tracebacks:
+        install_rich_traceback(
+            console=rich_console,
+            show_locals=False,
+            width=rich_console.width,
+            extra_lines=3,
+            theme="monokai",
+            word_wrap=True,
+        )
 
     # Configure our module logger
     logger = logging.getLogger(MODULE_LOGGER_NAME)
@@ -80,20 +111,49 @@ def configure_logging(
     console_handler: logging.Handler | None = None
     file_handler: logging.Handler | None = None
 
-    # Console handler
+    # Console handler - use Rich if enabled
     if console:
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(log_level)
-        console_handler.setFormatter(formatter)
+        if use_rich:
+            console_handler = RichHandler(
+                level=log_level,
+                console=rich_console,
+                show_time=show_time,
+                show_path=show_path,
+                rich_tracebacks=rich_tracebacks,
+                markup=markup,
+                log_time_format="[%X]",
+                keywords=[
+                    # Highlight these words in logs
+                    "ABS",
+                    "audiobookshelf",
+                    "library",
+                    "item",
+                    "cache",
+                    "API",
+                ],
+            )
+        else:
+            # Standard handler
+            if format_string is None:
+                format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            formatter = logging.Formatter(format_string)
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setLevel(log_level)
+            console_handler.setFormatter(formatter)
+
         logger.addHandler(console_handler)
 
-    # File handler
+    # File handler - always use standard formatting for parseable logs
     if file_path:
         file_path = Path(file_path)
         file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        file_format = format_string or "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        file_formatter = logging.Formatter(file_format)
+
         file_handler = logging.FileHandler(file_path, encoding="utf-8")
         file_handler.setLevel(file_log_level)
-        file_handler.setFormatter(formatter)
+        file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
 
     _configured = True
@@ -104,6 +164,8 @@ def get_logger(name: str | None = None) -> logging.Logger:
     """
     Get a logger for the ABS module.
 
+    Supports rich markup in log messages when using RichHandler.
+
     Args:
         name: Optional sub-logger name (e.g., "client", "async")
 
@@ -112,6 +174,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
     Example:
         logger = get_logger("client")  # Returns src.abs.client logger
+        logger.info("[green]✓[/green] Library fetched")
     """
     if name:
         return logging.getLogger(f"{MODULE_LOGGER_NAME}.{name}")
@@ -133,8 +196,8 @@ def set_level(level: LogLevel | int) -> None:
 
 
 def enable_debug_logging() -> None:
-    """Enable debug logging for troubleshooting."""
-    set_level("debug")
+    """Enable debug logging with rich output for troubleshooting."""
+    configure_logging(level="debug", use_rich=True, rich_tracebacks=True)
 
 
 class LogContext:
@@ -165,3 +228,38 @@ class LogContext:
         if self._original_level is not None:
             logger = logging.getLogger(MODULE_LOGGER_NAME)
             logger.setLevel(self._original_level)
+
+
+# =============================================================================
+# Convenience log functions with rich markup
+# =============================================================================
+
+
+def log_success(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
+    """Log a success message with green checkmark."""
+    logger = get_logger(logger_name)
+    logger.info(f"[green]✓[/green] {message}", *args, **kwargs)
+
+
+def log_error(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
+    """Log an error message with red X."""
+    logger = get_logger(logger_name)
+    logger.error(f"[red]✗[/red] {message}", *args, **kwargs)
+
+
+def log_warning(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
+    """Log a warning message with yellow warning sign."""
+    logger = get_logger(logger_name)
+    logger.warning(f"[yellow]⚠[/yellow] {message}", *args, **kwargs)
+
+
+def log_info(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
+    """Log an info message with blue info icon."""
+    logger = get_logger(logger_name)
+    logger.info(f"[cyan]ℹ[/cyan] {message}", *args, **kwargs)
+
+
+def log_debug(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
+    """Log a debug message."""
+    logger = get_logger(logger_name)
+    logger.debug(f"[dim]{message}[/dim]", *args, **kwargs)
