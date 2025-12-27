@@ -22,13 +22,7 @@ from src.audible import AudibleAuthError, AudibleBook, AudibleClient
 from src.cache import SQLiteCache
 from src.config import get_settings
 from src.quality import AudibleEnrichmentService, QualityAnalyzer, QualityReport, QualityTier
-from src.series import (
-    ABSSeriesInfo,
-    MatchConfidence,
-    SeriesAnalysisReport,
-    SeriesComparisonResult,
-    SeriesMatcher,
-)
+from src.series import ABSSeriesInfo, MatchConfidence, SeriesAnalysisReport, SeriesComparisonResult, SeriesMatcher
 from src.utils import save_golden_sample
 
 app = typer.Typer(
@@ -1788,6 +1782,8 @@ def series_analyze(
         None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: table or json"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file (default: stdout for json)"),
 ):
     """Analyze a specific series and find missing books."""
     library_id = resolve_library_id(library_id)
@@ -1854,7 +1850,59 @@ def series_analyze(
 
             result = matcher.compare_series(target_series)
 
-            # Display results
+            # JSON output format
+            if format.lower() == "json":
+                import json
+
+                export_data = {
+                    "series_name": result.series_match.abs_series.name,
+                    "audible_series_asin": (
+                        result.series_match.audible_series.asin if result.series_match.audible_series else None
+                    ),
+                    "match_confidence": result.series_match.confidence.value,
+                    "in_library": result.abs_book_count,
+                    "on_audible": result.audible_book_count,
+                    "completion_percentage": result.completion_percentage,
+                    "is_complete": result.is_complete,
+                    "matched_books": [
+                        {
+                            "title": m.abs_book.title,
+                            "asin": m.abs_book.asin,
+                            "sequence": m.abs_book.sequence,
+                            "audible_asin": m.audible_book.asin if m.audible_book else None,
+                            "match_confidence": m.confidence.value,
+                            "matched_by": m.matched_by,
+                        }
+                        for m in result.matched_books
+                    ],
+                    "missing_books": [
+                        {
+                            "title": b.title,
+                            "asin": b.asin,
+                            "sequence": b.sequence,
+                            "runtime_hours": b.runtime_hours,
+                            "release_date": b.release_date,
+                            "author": b.author_name,
+                            "narrator": b.narrator_name,
+                            "price": b.price,
+                            "is_in_plus_catalog": b.is_in_plus_catalog,
+                            "audible_url": b.audible_url,
+                        }
+                        for b in result.missing_books
+                    ],
+                }
+
+                json_output = json.dumps(export_data, indent=2)
+                if output:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output, "w") as f:
+                        f.write(json_output)
+                    console.print(f"[green]✓[/green] Exported to {output}")
+                else:
+                    print(json_output)
+                return
+
+            # Table output format (default)
             series_name = result.series_match.abs_series.name
             match_confidence = result.series_match.confidence
             audible_series = result.series_match.audible_series
@@ -1920,7 +1968,8 @@ def series_report(
     ),
     min_books: int = typer.Option(2, "--min-books", "-m", help="Minimum books in series to analyze"),
     limit: int = typer.Option(None, "--limit", "-n", help="Max series to analyze"),
-    output: Path = typer.Option(None, "--output", "-o", help="Export JSON report"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: table or json"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file (default: stdout for json)"),
     incomplete_only: bool = typer.Option(False, "--incomplete", "-i", help="Only show incomplete series"),
 ):
     """Generate a full series analysis report for a library."""
@@ -1969,24 +2018,137 @@ def series_report(
 
                     progress.advance(task)
 
+            # Calculate summary stats BEFORE filtering
+            all_results = results  # Keep reference for summary
+            total_in_library = sum(r.abs_book_count for r in all_results)
+            total_on_audible = sum(r.audible_book_count for r in all_results if r.audible_book_count)
+            total_missing = sum(len(r.missing_books) for r in all_results)
+            complete_series_count = sum(1 for r in all_results if r.is_complete)
+
+            # Detect warnings for data quality issues
+            asin_to_series: dict[str, list[str]] = {}
+            for r in all_results:
+                if r.series_match.audible_series and r.series_match.audible_series.asin:
+                    asin = r.series_match.audible_series.asin
+                    series_name = r.series_match.abs_series.name
+                    if asin not in asin_to_series:
+                        asin_to_series[asin] = []
+                    asin_to_series[asin].append(series_name)
+
+            # Add warnings to each result
+            for r in all_results:
+                warnings = []
+
+                # Check for duplicate ASIN (multiple ABS series → same Audible series)
+                if r.series_match.audible_series and r.series_match.audible_series.asin:
+                    asin = r.series_match.audible_series.asin
+                    if len(asin_to_series.get(asin, [])) > 1:
+                        other_series = [s for s in asin_to_series[asin] if s != r.series_match.abs_series.name]
+                        warnings.append(f"DUPLICATE_ASIN: Also matched by '{other_series[0]}'")
+
+                # Check for missing metadata (no Audible match)
+                if not r.series_match.audible_series or not r.series_match.audible_series.asin:
+                    warnings.append("MISSING_METADATA: No Audible series found (check ABS metadata)")
+
+                # Check for potential duplicates in library (>100% completion)
+                if r.completion_percentage > 100:
+                    warnings.append(
+                        f"POTENTIAL_DUPES: Library has {r.abs_book_count} books but Audible shows {r.audible_book_count}"
+                    )
+
+                r.warnings = warnings
+
             # Filter if needed
             if incomplete_only:
-                results = [r for r in results if r.completion_percentage < 100]
+                results = [r for r in results if not r.is_complete]
 
             # Sort by completion percentage
             results.sort(key=lambda r: r.completion_percentage)
 
-            # Display summary table
+            elapsed = time.time() - start_time
+
+            # Build export data (used for both JSON format and file export)
+            export_data = {
+                "summary": {
+                    "series_analyzed": len(all_results),
+                    "series_shown": len(results),
+                    "complete_series": complete_series_count,
+                    "total_in_library": total_in_library,
+                    "total_on_audible": total_on_audible,
+                    "total_missing": total_missing,
+                    "analysis_time_seconds": elapsed,
+                },
+                "series": [
+                    {
+                        "name": (
+                            r.series_match.audible_series.title
+                            if r.series_match.audible_series and r.series_match.audible_series.title
+                            else r.series_match.abs_series.name
+                        ),
+                        "abs_name": r.series_match.abs_series.name,
+                        "audible_asin": (r.series_match.audible_series.asin if r.series_match.audible_series else None),
+                        "in_library": r.abs_book_count,
+                        "on_audible": r.audible_book_count,
+                        "completion_percentage": r.completion_percentage,
+                        "is_complete": r.is_complete,
+                        "match_confidence": r.series_match.confidence.value,
+                        "warnings": r.warnings,
+                        "matched_books": [
+                            {
+                                "title": m.abs_book.title,
+                                "sequence": m.abs_book.sequence,
+                                "asin": m.audible_book.asin if m.audible_book else None,
+                                "confidence": m.confidence.value,
+                            }
+                            for m in r.matched_books
+                        ],
+                        "missing_books": [
+                            {
+                                "title": b.title,
+                                "sequence": b.sequence,
+                                "asin": b.asin,
+                                "runtime_hours": b.runtime_hours,
+                                "release_date": b.release_date,
+                                "author": b.author_name,
+                                "narrator": b.narrator_name,
+                                "price": b.price,
+                                "is_in_plus_catalog": b.is_in_plus_catalog,
+                                "audible_url": b.audible_url,
+                            }
+                            for b in r.missing_books
+                        ],
+                    }
+                    for r in results
+                ],
+            }
+
+            # JSON output format
+            if format.lower() == "json":
+                json_output = json.dumps(export_data, indent=2)
+                if output:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output, "w") as f:
+                        f.write(json_output)
+                    console.print(f"[green]✓[/green] Exported to {output}")
+                else:
+                    print(json_output)
+                return
+
+            # Table output format (default)
             table = Table(title=f"Series Analysis Report ({len(results)} series)")
             table.add_column("Series", style="bold")
-            table.add_column("Owned", justify="right")
-            table.add_column("Total", justify="right")
+            table.add_column("In Library", justify="right")
+            table.add_column("On Audible", justify="right")
             table.add_column("Complete", justify="right")
             table.add_column("Missing", justify="right")
-            table.add_column("Confidence")
+            table.add_column("Warnings", style="yellow")
 
             for result in results:
-                series_name = result.series_match.abs_series.name
+                # Use Audible series name as source of truth
+                if result.series_match.audible_series and result.series_match.audible_series.title:
+                    series_name = result.series_match.audible_series.title
+                else:
+                    series_name = result.series_match.abs_series.name
                 match_confidence = result.series_match.confidence
 
                 completion_style = (
@@ -1995,13 +2157,16 @@ def series_report(
                     else "yellow" if result.completion_percentage >= 75 else "red"
                 )
 
-                confidence_style = {
-                    MatchConfidence.EXACT: "green",
-                    MatchConfidence.HIGH: "cyan",
-                    MatchConfidence.MEDIUM: "yellow",
-                    MatchConfidence.LOW: "red",
-                    MatchConfidence.NO_MATCH: "dim",
-                }.get(match_confidence, "white")
+                # Build warning indicators
+                warning_indicators = []
+                for w in result.warnings:
+                    if w.startswith("DUPLICATE_ASIN"):
+                        warning_indicators.append("⚠️ DUP")
+                    elif w.startswith("MISSING_METADATA"):
+                        warning_indicators.append("⚠️ META")
+                    elif w.startswith("POTENTIAL_DUPES"):
+                        warning_indicators.append("🔍 DUPE?")
+                warning_str = " ".join(warning_indicators)
 
                 table.add_row(
                     series_name[:40],
@@ -2009,76 +2174,28 @@ def series_report(
                     str(result.audible_book_count) if result.audible_book_count else "?",
                     f"[{completion_style}]{result.completion_percentage:.0f}%[/{completion_style}]",
                     str(len(result.missing_books)),
-                    f"[{confidence_style}]{match_confidence.value}[/{confidence_style}]",
+                    warning_str,
                 )
 
             console.print(table)
 
-            # Summary stats
-            total_owned = sum(r.abs_book_count for r in results)
-            total_audible = sum(r.audible_book_count for r in results if r.audible_book_count)
-            total_missing = sum(len(r.missing_books) for r in results)
-            complete_series = sum(1 for r in results if r.completion_percentage >= 100)
-
+            # Summary stats (use pre-calculated values from all_results)
             console.print(f"\n[bold]Summary:[/bold]")
-            console.print(f"  Series analyzed: {len(results)}")
-            console.print(f"  Complete series: {complete_series}")
-            console.print(f"  Books owned: {total_owned}")
-            console.print(f"  Books on Audible: {total_audible}")
+            console.print(f"  Total series analyzed: {len(all_results)}")
+            if incomplete_only:
+                console.print(f"  Incomplete series shown: {len(results)}")
+            console.print(f"  Complete series: [green]{complete_series_count}[/green]")
+            console.print(f"  Books in library: {total_in_library}")
+            console.print(f"  Books on Audible: {total_on_audible}")
             console.print(f"  Missing books: [red]{total_missing}[/red]")
 
-            elapsed = time.time() - start_time
             console.print(f"\n[dim]Analysis completed in {elapsed:.1f}s[/dim]")
 
-            # Export if requested
+            # Export to file if requested (for table format)
             if output:
                 output.parent.mkdir(parents=True, exist_ok=True)
-
-                export_data = {
-                    "summary": {
-                        "series_analyzed": len(results),
-                        "complete_series": complete_series,
-                        "total_owned": total_owned,
-                        "total_audible": total_audible,
-                        "total_missing": total_missing,
-                        "analysis_time_seconds": elapsed,
-                    },
-                    "series": [
-                        {
-                            "name": r.series_match.abs_series.name,
-                            "audible_asin": (
-                                r.series_match.audible_series.asin if r.series_match.audible_series else None
-                            ),
-                            "abs_book_count": r.abs_book_count,
-                            "audible_book_count": r.audible_book_count,
-                            "completion_percentage": r.completion_percentage,
-                            "match_confidence": r.series_match.confidence.value,
-                            "matched_books": [
-                                {
-                                    "title": m.abs_book.title,
-                                    "sequence": m.abs_book.sequence,
-                                    "asin": m.audible_book.asin if m.audible_book else None,
-                                    "confidence": m.confidence.value,
-                                }
-                                for m in r.matched_books
-                            ],
-                            "missing_books": [
-                                {
-                                    "title": b.title,
-                                    "sequence": b.sequence,
-                                    "asin": b.asin,
-                                    "runtime_hours": b.runtime_hours,
-                                }
-                                for b in r.missing_books
-                            ],
-                        }
-                        for r in results
-                    ],
-                }
-
                 with open(output, "w") as f:
                     json.dump(export_data, f, indent=2)
-
                 console.print(f"\n[green]✓[/green] Exported report to {output}")
 
     except Exception as e:
