@@ -2,9 +2,6 @@
 Pydantic models for Audiobookshelf API responses.
 """
 
-from datetime import datetime
-from typing import Any, Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -327,19 +324,27 @@ class User(BaseModel):
     libraries_accessible: list[str] = Field(default_factory=list, alias="librariesAccessible")
 
 
-class Collection(BaseModel):
-    """ABS Collection model."""
+from typing import Any
+
+
+class CollectionBase(BaseModel):
+    """Base ABS Collection model (shared fields)."""
 
     id: str
     library_id: str = Field(alias="libraryId")
     user_id: str = Field(alias="userId")
     name: str
     description: str | None = None
-    books: list[str] = Field(default_factory=list)  # List of library item IDs
     last_update: int = Field(alias="lastUpdate")
     created_at: int = Field(alias="createdAt")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class Collection(CollectionBase):
+    """ABS Collection model with book IDs."""
+
+    books: list[str] = Field(default_factory=list)  # List of library item IDs
 
     @property
     def book_count(self) -> int:
@@ -347,10 +352,15 @@ class Collection(BaseModel):
         return len(self.books)
 
 
-class CollectionExpanded(Collection):
+class CollectionExpanded(CollectionBase):
     """Collection with expanded book data."""
 
-    books: list[dict] = Field(default_factory=list)  # Full library item dicts
+    books: list[dict[str, Any]] = Field(default_factory=list)  # Full library item dicts
+
+    @property
+    def book_count(self) -> int:
+        """Number of books in collection."""
+        return len(self.books)
 
     @property
     def book_ids(self) -> list[str]:
