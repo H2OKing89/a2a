@@ -53,6 +53,18 @@ class TestNormalizeFunctions:
         assert _score_to_confidence(65) == MatchConfidence.LOW
         assert _score_to_confidence(50) == MatchConfidence.NO_MATCH
 
+    def test_score_to_confidence_boundaries(self):
+        """Test exact boundary values for confidence transitions."""
+        # Exact boundaries
+        assert _score_to_confidence(90) == MatchConfidence.HIGH  # 90 is HIGH, not EXACT
+        assert _score_to_confidence(75) == MatchConfidence.MEDIUM  # 75 is MEDIUM
+        assert _score_to_confidence(60) == MatchConfidence.LOW  # 60 is LOW
+
+        # Just below boundaries
+        assert _score_to_confidence(89.9) == MatchConfidence.MEDIUM
+        assert _score_to_confidence(74.9) == MatchConfidence.LOW
+        assert _score_to_confidence(59.9) == MatchConfidence.NO_MATCH
+
 
 class TestABSSeriesInfo:
     """Tests for ABSSeriesInfo model."""

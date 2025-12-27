@@ -40,6 +40,8 @@ class ABSSeriesBook(BaseModel):
     duration: float = 0.0
     added_at: int | None = None
 
+    model_config = {"extra": "ignore"}
+
 
 class ABSSeriesInfo(BaseModel):
     """Series information from Audiobookshelf."""

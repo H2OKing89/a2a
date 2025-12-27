@@ -15,12 +15,13 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Setup path
 sys.path.insert(0, str(Path(__file__).parent))
 
+from rapidfuzz import fuzz
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
@@ -136,7 +137,7 @@ def list_series(library_id: str, limit: int = 20):
 
 def test_audible_search(query: str, author: str | None = None):
     """Test Audible catalog search."""
-    _, audible_client, cache = get_clients()
+    _, audible_client, _cache = get_clients()
 
     console.print(f"\n[bold cyan]Audible Search: '{query}'[/bold cyan]")
     if author:
@@ -188,8 +189,6 @@ def analyze_single_series(library_id: str, series_name: str):
         # Find the series
         all_series = matcher.get_abs_series(library_id)
         target_series = None
-
-        from rapidfuzz import fuzz
 
         for series in all_series:
             if fuzz.ratio(series.name.lower(), series_name.lower()) >= 80:
@@ -275,7 +274,7 @@ def full_library_analysis(library_id: str, max_series: int = 0, output_file: str
         ) as progress:
             task = progress.add_task("Analyzing series...", total=None)
 
-            def update_progress(current, total, name):
+            def update_progress(current: int, total: int, name: str) -> None:
                 progress.update(task, completed=current, total=total, description=f"Analyzing: {name[:30]}")
 
             report = matcher.analyze_library(
@@ -378,7 +377,7 @@ def save_series_sample(library_id: str, output_file: str = "data/samples/abs_ser
             "_meta": {
                 "name": "library_series",
                 "source": "abs",
-                "captured_at": datetime.utcnow().isoformat() + "Z",
+                "captured_at": datetime.now(timezone.utc).isoformat(),
                 "library_id": library_id,
             },
             "data": raw_series,

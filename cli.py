@@ -1840,7 +1840,7 @@ def series_analyze(
                             console.print(f"  • {name} [dim](similarity: {score:.0f}%)[/dim]")
 
                     console.print(
-                        f"\n[dim]Hint: Run [cyan]python cli.py series list[/cyan] to see all available series[/dim]"
+                        "\n[dim]Hint: Run [cyan]python cli.py series list[/cyan] to see all available series[/dim]"
                     )
                     raise typer.Exit(1)
 
@@ -1913,7 +1913,7 @@ def series_analyze(
             if audible_series and audible_series.asin:
                 console.print(f"Audible Series ASIN: {audible_series.asin}")
 
-            console.print(f"\n[bold]Collection Status:[/bold]")
+            console.print("\n[bold]Collection Status:[/bold]")
             console.print(f"  Your Library: {result.abs_book_count} books")
             console.print(f"  On Audible: {result.audible_book_count} books")
             console.print(f"  Completion: {result.completion_percentage:.1f}%")
@@ -1958,7 +1958,7 @@ def series_analyze(
         import traceback
 
         traceback.print_exc()
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @series_app.command("report")
@@ -2149,7 +2149,6 @@ def series_report(
                     series_name = result.series_match.audible_series.title
                 else:
                     series_name = result.series_match.abs_series.name
-                match_confidence = result.series_match.confidence
 
                 completion_style = (
                     "green"
@@ -2203,7 +2202,7 @@ def series_report(
         import traceback
 
         traceback.print_exc()
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

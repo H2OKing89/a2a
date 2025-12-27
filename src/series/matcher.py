@@ -6,6 +6,7 @@ with Audible catalog series and identify missing books.
 """
 
 import logging
+import re
 from typing import TYPE_CHECKING, Optional
 
 from rapidfuzz import fuzz, process
@@ -52,8 +53,6 @@ def _normalize_title(title: str) -> str:
     if title.startswith("the "):
         title = title[4:]
     # Remove series indicators like "(Series Name #1)"
-    import re
-
     title = re.sub(r"\s*\([^)]*#\d+[^)]*\)", "", title)
     title = re.sub(r"\s*,?\s*(book|volume|part)\s*\d+", "", title, flags=re.IGNORECASE)
     return title.strip()
@@ -84,6 +83,8 @@ class SeriesMatcher:
         result = matcher.compare_series(abs_series_info)
     """
 
+    MAX_SERIES_FETCH = 10000  # Maximum series to fetch when no limit specified
+
     def __init__(
         self,
         abs_client: "ABSClient",
@@ -104,6 +105,13 @@ class SeriesMatcher:
         self._audible = audible_client
         self._cache = cache
         self.min_match_score = min_match_score
+
+    @staticmethod
+    def _extract_price(price_data: dict | None) -> float | None:
+        """Extract base price from price dict if available."""
+        if price_data and isinstance(price_data, dict):
+            return price_data.get("list_price", {}).get("base")
+        return None
 
     # -------------------------------------------------------------------------
     # ABS Series Fetching
@@ -134,7 +142,7 @@ class SeriesMatcher:
                 return [ABSSeriesInfo.model_validate(s) for s in cached]
 
         # Fetch from ABS (use large limit if 0 to get all series)
-        fetch_limit = limit if limit > 0 else 10000
+        fetch_limit = limit if limit > 0 else self.MAX_SERIES_FETCH
         raw_series = self._abs.get_library_series(library_id, limit=fetch_limit)
         results = raw_series.get("results", [])
 
@@ -350,11 +358,6 @@ class SeriesMatcher:
                 series_asin = ps.asin
                 series_name = ps.title
 
-                # Extract price from price dict if available
-                seed_price = None
-                if seed_product.price and isinstance(seed_product.price, dict):
-                    seed_price = seed_product.price.get("list_price", {}).get("base")
-
                 # Add the seed book itself with full metadata
                 all_series_books[seed_product.asin] = AudibleSeriesBook(
                     asin=seed_product.asin,
@@ -366,7 +369,7 @@ class SeriesMatcher:
                     runtime_minutes=seed_product.runtime_length_min,
                     release_date=seed_product.release_date,
                     is_in_library=False,
-                    price=seed_price,
+                    price=self._extract_price(seed_product.price),
                     is_in_plus_catalog=getattr(seed_product, "is_ayce", False),
                     language=seed_product.language,
                     publisher_name=seed_product.publisher_name,
@@ -402,11 +405,6 @@ class SeriesMatcher:
                                 series_asin = ps.asin
                             break
 
-                # Extract price from price dict if available
-                product_price = None
-                if product.price and isinstance(product.price, dict):
-                    product_price = product.price.get("list_price", {}).get("base")
-
                 # Add this book with full metadata
                 all_series_books[product.asin] = AudibleSeriesBook(
                     asin=product.asin,
@@ -418,7 +416,7 @@ class SeriesMatcher:
                     runtime_minutes=product.runtime_length_min,
                     release_date=product.release_date,
                     is_in_library=False,
-                    price=product_price,
+                    price=self._extract_price(product.price),
                     is_in_plus_catalog=getattr(product, "is_ayce", False),
                     language=product.language,
                     publisher_name=product.publisher_name,

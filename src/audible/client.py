@@ -6,6 +6,7 @@ for common operations like library retrieval and catalog lookups.
 """
 
 import hashlib
+import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -810,9 +811,7 @@ class AudibleClient:
             return []
         except AudibleError as e:
             # Log but don't fail - return empty list
-            import logging
-
-            logging.getLogger(__name__).warning(f"Failed to get similar products for {asin}: {e}")
+            logging.getLogger(__name__).warning("Failed to get similar products for %s: %s", asin, e)
             return []
 
     def get_series_books_from_sims(
