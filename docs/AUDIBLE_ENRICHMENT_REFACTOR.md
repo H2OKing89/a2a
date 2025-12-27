@@ -251,15 +251,11 @@ device = get_device_info(auth)
 # deregister_device(auth)
 ```
 
-## Backwards Compatibility
+## Import Path
 
-Old imports still work with deprecation warning:
+Use the centralized audible module for enrichment:
 ```python
-# Old way (shows warning)
-from src.quality.audible_enrichment import AudibleEnrichment
-
-# New way (preferred)
-from src.audible import AudibleEnrichment, PricingInfo
+from src.audible import AudibleEnrichment, AudibleEnrichmentService, PricingInfo, PlusCatalogInfo
 ```
 
 ## Benefits
