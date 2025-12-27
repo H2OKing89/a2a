@@ -25,6 +25,18 @@ from .models import (
     AudibleLibraryItem,
     AudibleLibraryResponse,
     AudibleListeningStats,
+    CatalogSortBy,
+    ChapterInfo,
+    ContentMetadata,
+    LibrarySortBy,
+    LibraryStatus,
+    PlusCatalogInfo,
+    PricingInfo,
+    ResponseGroups,
+    SimilarityType,
+    WishlistItem,
+    WishlistResponse,
+    WishlistSortBy,
 )
 
 if TYPE_CHECKING:
@@ -485,7 +497,8 @@ class AudibleClient:
         num_results: int = 1000,
         page: int = 1,
         response_groups: str | None = None,
-        sort_by: str = "-PurchaseDate",
+        sort_by: LibrarySortBy | str = LibrarySortBy.PURCHASE_DATE_DESC,
+        status: LibraryStatus | str = LibraryStatus.ACTIVE,
         use_cache: bool = True,
     ) -> list[AudibleLibraryItem]:
         """
@@ -495,13 +508,16 @@ class AudibleClient:
             num_results: Max results per page (max 1000)
             page: Page number
             response_groups: Override default response groups
-            sort_by: Sort order (-PurchaseDate, Title, Author, etc.)
+            sort_by: Sort order (LibrarySortBy enum or string)
+            status: Filter by status - ACTIVE (owned) or REVOKED (returned)
             use_cache: Whether to use cached results
 
         Returns:
             List of library items
         """
-        cache_key = f"library_p{page}_n{num_results}_{sort_by}"
+        sort_value = sort_by.value if isinstance(sort_by, LibrarySortBy) else sort_by
+        status_value = status.value if isinstance(status, LibraryStatus) else status
+        cache_key = f"library_p{page}_n{num_results}_{sort_value}_{status_value}"
 
         # Check cache
         if use_cache and self._cache:
@@ -516,7 +532,8 @@ class AudibleClient:
             num_results=num_results,
             page=page,
             response_groups=response_groups or LIBRARY_RESPONSE_GROUPS,
-            sort_by=sort_by,
+            sort_by=sort_value,
+            status=status_value,
         )
 
         # Parse items
@@ -671,7 +688,7 @@ class AudibleClient:
         publisher: str | None = None,
         num_results: int = 50,
         page: int = 1,
-        sort_by: str = "Relevance",
+        sort_by: CatalogSortBy | str = CatalogSortBy.RELEVANCE,
         response_groups: str | None = None,
         use_cache: bool = True,
     ) -> list[AudibleCatalogProduct]:
@@ -686,7 +703,7 @@ class AudibleClient:
             publisher: Filter by publisher
             num_results: Max results (max 50)
             page: Page number
-            sort_by: Sort order (Relevance, -ReleaseDate, BestSellers, etc.)
+            sort_by: Sort order (CatalogSortBy enum or string)
             response_groups: Override default response groups
             use_cache: Whether to use cached results
 
@@ -694,7 +711,8 @@ class AudibleClient:
             List of matching products
         """
         # Build cache key from search params
-        search_params = f"{keywords}|{title}|{author}|{narrator}|{publisher}|{sort_by}|p{page}"
+        sort_value = sort_by.value if isinstance(sort_by, CatalogSortBy) else sort_by
+        search_params = f"{keywords}|{title}|{author}|{narrator}|{publisher}|{sort_value}|p{page}"
         cache_key = hashlib.md5(search_params.encode()).hexdigest()
 
         # Check cache
@@ -707,7 +725,7 @@ class AudibleClient:
         params = {
             "num_results": min(num_results, 50),
             "page": page,
-            "products_sort_by": sort_by,
+            "products_sort_by": sort_value,
             "response_groups": response_groups or CATALOG_RESPONSE_GROUPS,
         }
 
@@ -748,7 +766,7 @@ class AudibleClient:
     def get_similar_products(
         self,
         asin: str,
-        similarity_type: str = "InTheSameSeries",
+        similarity_type: SimilarityType | str = SimilarityType.IN_SAME_SERIES,
         num_results: int = 50,
         response_groups: str | None = None,
         use_cache: bool = True,
@@ -761,19 +779,21 @@ class AudibleClient:
 
         Args:
             asin: Product ASIN to find similar products for
-            similarity_type: Type of similarity. Options:
-                - "InTheSameSeries" - Other books in the same series (best for series discovery)
-                - "AuthorBasedSims" - Other books by the same author
-                - "ListenerAlsoLiked" - Listener recommendations
-                - "ClubPickRecommendation" - Book club picks
-            num_results: Maximum results to return
+            similarity_type: Type of similarity (SimilarityType enum or string):
+                - IN_SAME_SERIES - Other books in the same series
+                - BY_SAME_AUTHOR - Other books by the same author
+                - BY_SAME_NARRATOR - Other books by the same narrator
+                - NEXT_IN_SERIES - Next book in the series only
+                - RAW_SIMILARITIES - General recommendations
+            num_results: Maximum results to return (max 50)
             response_groups: Override default response groups
             use_cache: Whether to use cached results
 
         Returns:
             List of similar products
         """
-        cache_key = f"sims_{asin}_{similarity_type}"
+        sim_value = similarity_type.value if isinstance(similarity_type, SimilarityType) else similarity_type
+        cache_key = f"sims_{asin}_{sim_value}"
 
         # Check cache
         if use_cache and self._cache:
@@ -785,7 +805,7 @@ class AudibleClient:
             response = self._request(
                 "GET",
                 f"1.0/catalog/products/{asin}/sims",
-                similarity_type=similarity_type,
+                similarity_type=sim_value,
                 num_results=min(num_results, 50),
                 response_groups=response_groups or CATALOG_RESPONSE_GROUPS,
             )
@@ -924,43 +944,44 @@ class AudibleClient:
         self,
         num_results: int = 50,
         page: int = 0,  # Wishlist uses 0-based pages
-        sort_by: str = "-DateAdded",
+        sort_by: WishlistSortBy | str = WishlistSortBy.DATE_ADDED_DESC,
         use_cache: bool = True,
-    ) -> list[AudibleCatalogProduct]:
+    ) -> list[WishlistItem]:
         """
         Get the user's wishlist.
 
         Args:
             num_results: Max results (max 50)
             page: Page number (0-based)
-            sort_by: Sort order (-DateAdded, Title, -Price, etc.)
+            sort_by: Sort order (WishlistSortBy enum or string)
             use_cache: Whether to use cached results
 
         Returns:
             List of wishlist items
         """
-        cache_key = f"wishlist_p{page}_{sort_by}"
+        sort_value = sort_by.value if isinstance(sort_by, WishlistSortBy) else sort_by
+        cache_key = f"wishlist_p{page}_{sort_value}"
 
         # Check cache
         if use_cache and self._cache:
             cached = self._cache.get("library", cache_key)
             if cached:
-                return [AudibleCatalogProduct.model_validate(p) for p in cached]
+                return [WishlistItem.model_validate(p) for p in cached]
 
         response = self._request(
             "GET",
             "1.0/wishlist",
             num_results=min(num_results, 50),
             page=page,
-            sort_by=sort_by,
-            response_groups=CATALOG_RESPONSE_GROUPS,
+            sort_by=sort_value,
+            response_groups=ResponseGroups.WISHLIST_FULL,
         )
 
         products_data = response.get("products", [])
         products = []
         for prod_data in products_data:
             try:
-                products.append(AudibleCatalogProduct.model_validate(prod_data))
+                products.append(WishlistItem.model_validate(prod_data))
             except ValidationError:
                 pass
 
@@ -971,6 +992,307 @@ class AudibleClient:
             )
 
         return products
+
+    def get_all_wishlist(
+        self,
+        sort_by: WishlistSortBy | str = WishlistSortBy.DATE_ADDED_DESC,
+        use_cache: bool = True,
+    ) -> list[WishlistItem]:
+        """
+        Get all items from wishlist (handles pagination).
+
+        Args:
+            sort_by: Sort order
+            use_cache: Whether to use cached results
+
+        Returns:
+            Complete list of wishlist items
+        """
+        all_items: list[WishlistItem] = []
+        page = 0
+
+        while True:
+            items = self.get_wishlist(
+                num_results=50,
+                page=page,
+                sort_by=sort_by,
+                use_cache=use_cache,
+            )
+            if not items:
+                break
+            all_items.extend(items)
+            if len(items) < 50:
+                break
+            page += 1
+
+        return all_items
+
+    def add_to_wishlist(self, asin: str) -> bool:
+        """
+        Add a book to the wishlist.
+
+        Args:
+            asin: ASIN of the book to add
+
+        Returns:
+            True if successful
+
+        Raises:
+            AudibleError: If the request fails
+        """
+        try:
+            self._request("POST", "1.0/wishlist", json={"asin": asin})
+            # Invalidate wishlist cache
+            if self._cache:
+                self._cache.clear_namespace("library")
+            return True
+        except AudibleError:
+            return False
+
+    def remove_from_wishlist(self, asin: str) -> bool:
+        """
+        Remove a book from the wishlist.
+
+        Args:
+            asin: ASIN of the book to remove
+
+        Returns:
+            True if successful
+
+        Raises:
+            AudibleError: If the request fails
+        """
+        try:
+            self._request("DELETE", f"1.0/wishlist/{asin}")
+            # Invalidate wishlist cache
+            if self._cache:
+                self._cache.clear_namespace("library")
+            return True
+        except AudibleError:
+            return False
+
+    def is_in_wishlist(self, asin: str, use_cache: bool = True) -> bool:
+        """
+        Check if a book is in the wishlist.
+
+        Args:
+            asin: ASIN to check
+            use_cache: Whether to use cached wishlist
+
+        Returns:
+            True if in wishlist
+        """
+        wishlist = self.get_all_wishlist(use_cache=use_cache)
+        return any(item.asin == asin for item in wishlist)
+
+    # -------------------------------------------------------------------------
+    # Recommendations
+    # -------------------------------------------------------------------------
+
+    def get_recommendations(
+        self,
+        num_results: int = 50,
+        use_cache: bool = True,
+    ) -> list[AudibleCatalogProduct]:
+        """
+        Get personalized recommendations for the user.
+
+        Args:
+            num_results: Max results (max 50)
+            use_cache: Whether to use cached results
+
+        Returns:
+            List of recommended products
+        """
+        cache_key = f"recommendations_{num_results}"
+
+        # Check cache
+        if use_cache and self._cache:
+            cached = self._cache.get("catalog", cache_key)
+            if cached:
+                return [AudibleCatalogProduct.model_validate(p) for p in cached]
+
+        try:
+            response = self._request(
+                "GET",
+                "1.0/recommendations",
+                num_results=min(num_results, 50),
+                response_groups=ResponseGroups.RECOMMENDATIONS,
+            )
+
+            products_data = response.get("products", [])
+            products = []
+            for prod_data in products_data:
+                try:
+                    products.append(AudibleCatalogProduct.model_validate(prod_data))
+                except ValidationError:
+                    pass
+
+            # Cache results
+            if self._cache:
+                self._cache.set(
+                    "catalog", cache_key, [p.model_dump() for p in products], ttl_seconds=self._cache_ttl_seconds
+                )
+
+            return products
+
+        except AudibleError as e:
+            logging.getLogger(__name__).warning("Failed to get recommendations: %s", e)
+            return []
+
+    # -------------------------------------------------------------------------
+    # Content Metadata (Quality/Codec Info)
+    # -------------------------------------------------------------------------
+
+    def get_content_metadata(
+        self,
+        asin: str,
+        quality: str = "High",
+        use_cache: bool = True,
+    ) -> ContentMetadata | None:
+        """
+        Get content metadata including chapter info and available codecs.
+
+        This is useful for determining if a book supports Dolby Atmos
+        or other high-quality audio formats.
+
+        Args:
+            asin: ASIN of the book
+            quality: Audio quality (High, Normal)
+            use_cache: Whether to use cached results
+
+        Returns:
+            ContentMetadata or None on error
+        """
+        cache_key = f"content_meta_{asin}_{quality}"
+
+        # Check cache
+        if use_cache and self._cache:
+            cached = self._cache.get("catalog", cache_key)
+            if cached:
+                return ContentMetadata.model_validate(cached)
+
+        try:
+            response = self._request(
+                "GET",
+                f"1.0/content/{asin}/metadata",
+                response_groups="chapter_info,content_reference",
+                quality=quality,
+            )
+
+            # Build metadata model
+            metadata = ContentMetadata(
+                asin=asin,
+                acr=response.get("content_reference", {}).get("acr"),
+                chapter_info=response.get("chapter_info"),
+                content_reference=response.get("content_reference"),
+            )
+
+            # Extract available codecs from content_reference
+            content_ref = response.get("content_reference", {})
+            if "available_codec" in content_ref:
+                metadata.available_codecs = content_ref["available_codec"]
+
+            # Cache result
+            if self._cache:
+                self._cache.set("catalog", cache_key, metadata.model_dump(), ttl_seconds=self._cache_ttl_seconds)
+
+            return metadata
+
+        except AudibleError as e:
+            logging.getLogger(__name__).warning("Failed to get content metadata for %s: %s", asin, e)
+            return None
+
+    def get_chapter_info(
+        self,
+        asin: str,
+        use_cache: bool = True,
+    ) -> ChapterInfo | None:
+        """
+        Get chapter information for a book.
+
+        Args:
+            asin: ASIN of the book
+            use_cache: Whether to use cached results
+
+        Returns:
+            ChapterInfo or None on error
+        """
+        metadata = self.get_content_metadata(asin, use_cache=use_cache)
+        if metadata and metadata.chapter_info:
+            try:
+                return ChapterInfo.model_validate(metadata.chapter_info)
+            except ValidationError:
+                pass
+        return None
+
+    def supports_dolby_atmos(
+        self,
+        asin: str,
+        use_cache: bool = True,
+    ) -> bool:
+        """
+        Check if a book supports Dolby Atmos audio.
+
+        Args:
+            asin: ASIN of the book
+            use_cache: Whether to use cached results
+
+        Returns:
+            True if Dolby Atmos (AC-4 or EC+3) is available
+        """
+        metadata = self.get_content_metadata(asin, use_cache=use_cache)
+        return metadata.supports_atmos if metadata else False
+
+    # -------------------------------------------------------------------------
+    # Pricing and Plus Catalog Parsing
+    # -------------------------------------------------------------------------
+
+    @staticmethod
+    def parse_pricing(price_data: dict[str, Any] | None) -> PricingInfo | None:
+        """
+        Parse pricing data from Audible API response.
+
+        This is a convenience method that delegates to PricingInfo.from_api_response().
+        Use this when you have raw API response data and need structured pricing info.
+
+        Args:
+            price_data: The 'price' dict from API response
+
+        Returns:
+            PricingInfo or None if no price data
+
+        Example:
+            product = client.get_catalog_product(asin)
+            pricing = client.parse_pricing(product.price)
+            if pricing and pricing.is_good_deal:
+                print(f"On sale: ${pricing.effective_price}")
+        """
+        return PricingInfo.from_api_response(price_data)
+
+    @staticmethod
+    def parse_plus_catalog(plans: list[dict[str, Any]] | None) -> PlusCatalogInfo:
+        """
+        Parse plans array for Plus Catalog info.
+
+        This is a convenience method that delegates to PlusCatalogInfo.from_api_response().
+        Use this when you have raw API response data and need Plus Catalog status.
+
+        Args:
+            plans: The 'plans' array from API response
+
+        Returns:
+            PlusCatalogInfo (always returns, with defaults if not in Plus)
+
+        Example:
+            # Note: 'plans' requires specific response_groups in API call
+            response = client._request("GET", f"1.0/catalog/products/{asin}",
+                                        response_groups="...,customer_rights,price")
+            plus_info = client.parse_plus_catalog(response.get("product", {}).get("plans", []))
+            if plus_info.is_plus_catalog:
+                print("Free with Plus!")
+        """
+        return PlusCatalogInfo.from_api_response(plans)
 
     # -------------------------------------------------------------------------
     # Utility Methods

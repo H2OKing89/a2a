@@ -7,10 +7,11 @@ with Audible catalog series and identify missing books.
 
 import logging
 import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from rapidfuzz import fuzz, process
 
+from ..audible.models import PlusCatalogInfo, PricingInfo
 from .models import (
     ABSSeriesBook,
     ABSSeriesInfo,
@@ -107,11 +108,33 @@ class SeriesMatcher:
         self.min_match_score = min_match_score
 
     @staticmethod
-    def _extract_price(price_data: dict | None) -> float | None:
-        """Extract base price from price dict if available."""
-        if price_data and isinstance(price_data, dict):
-            return price_data.get("list_price", {}).get("base")
-        return None
+    def _extract_price(price_data: dict[str, Any] | None) -> float | None:
+        """
+        Extract base list price from price dict.
+
+        Uses shared PricingInfo model for consistent parsing.
+        """
+        pricing = PricingInfo.from_api_response(price_data)
+        return pricing.list_price if pricing else None
+
+    @staticmethod
+    def _check_plus_catalog(product: Any) -> bool:
+        """
+        Check if product is in Plus Catalog.
+
+        Checks both is_ayce attribute and plans array for consistency.
+        """
+        # Quick check via is_ayce attribute
+        if getattr(product, "is_ayce", False):
+            return True
+
+        # Check plans if available (more reliable)
+        plans = getattr(product, "plans", None)
+        if plans:
+            plus_info = PlusCatalogInfo.from_api_response(plans)
+            return plus_info.is_plus_catalog
+
+        return False
 
     # -------------------------------------------------------------------------
     # ABS Series Fetching
@@ -370,7 +393,7 @@ class SeriesMatcher:
                     release_date=seed_product.release_date,
                     is_in_library=False,
                     price=self._extract_price(seed_product.price),
-                    is_in_plus_catalog=getattr(seed_product, "is_ayce", False),
+                    is_in_plus_catalog=self._check_plus_catalog(seed_product),
                     language=seed_product.language,
                     publisher_name=seed_product.publisher_name,
                     summary=seed_product.merchandising_summary,
@@ -417,7 +440,7 @@ class SeriesMatcher:
                     release_date=product.release_date,
                     is_in_library=False,
                     price=self._extract_price(product.price),
-                    is_in_plus_catalog=getattr(product, "is_ayce", False),
+                    is_in_plus_catalog=self._check_plus_catalog(product),
                     language=product.language,
                     publisher_name=product.publisher_name,
                     summary=product.merchandising_summary,
