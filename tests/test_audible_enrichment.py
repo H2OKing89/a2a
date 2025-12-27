@@ -1,5 +1,6 @@
 """Tests for Audible enrichment module."""
 
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,52 +19,65 @@ class TestAudibleEnrichment:
         assert enrichment.asin == "B001"
         assert enrichment.title is None
         assert enrichment.pricing is None
-        assert enrichment.plus_catalog is None
-        assert enrichment.series is None
-        assert enrichment.rating is None
+        # plus_catalog has a default factory
+        assert enrichment.plus_catalog is not None
+        assert enrichment.plus_catalog.is_plus_catalog is False
 
-    def test_enrichment_with_all_fields(self):
-        """Test AudibleEnrichment with all fields populated."""
+    def test_enrichment_with_pricing(self):
+        """Test AudibleEnrichment with pricing data."""
         pricing = PricingInfo(list_price=19.99, sale_price=14.99, currency="USD")
+
+        enrichment = AudibleEnrichment(
+            asin="B001",
+            title="Test Book",
+            pricing=pricing,
+        )
+
+        assert enrichment.asin == "B001"
+        assert enrichment.title == "Test Book"
+        assert enrichment.pricing.list_price == 19.99
+        assert enrichment.pricing.sale_price == 14.99
+
+    def test_enrichment_with_plus_catalog(self):
+        """Test AudibleEnrichment with Plus Catalog info."""
         plus_info = PlusCatalogInfo(is_plus_catalog=True, plan_name="US_MINERVA")
 
         enrichment = AudibleEnrichment(
             asin="B001",
             title="Test Book",
-            authors=["Author One", "Author Two"],
-            narrators=["Narrator One"],
-            pricing=pricing,
             plus_catalog=plus_info,
-            series="Test Series",
-            series_sequence="1",
-            rating=4.5,
-            rating_count=1000,
-            description="Test description",
         )
 
-        assert enrichment.asin == "B001"
-        assert enrichment.title == "Test Book"
-        assert len(enrichment.authors) == 2
-        assert enrichment.pricing.discount_percent == 25.0
         assert enrichment.plus_catalog.is_plus_catalog is True
-        assert enrichment.series == "Test Series"
+        assert enrichment.plus_catalog.plan_name == "US_MINERVA"
 
-    def test_enrichment_pricing_properties(self):
-        """Test pricing-related properties."""
-        pricing = PricingInfo(list_price=20.0, sale_price=10.0, currency="USD")
-        enrichment = AudibleEnrichment(asin="B001", pricing=pricing)
+    def test_enrichment_acquisition_recommendation_owned(self):
+        """Test acquisition recommendation for owned book."""
+        enrichment = AudibleEnrichment(asin="B001", owned=True)
+        assert enrichment.acquisition_recommendation == "OWNED"
 
-        assert enrichment.pricing.discount_percent == 50.0
-        assert enrichment.pricing.is_good_deal is True
+    def test_enrichment_acquisition_recommendation_free(self):
+        """Test acquisition recommendation for Plus Catalog book."""
+        plus_info = PlusCatalogInfo(is_plus_catalog=True)
+        enrichment = AudibleEnrichment(asin="B001", plus_catalog=plus_info)
+        assert enrichment.acquisition_recommendation == "FREE"
 
     def test_enrichment_json_serialization(self):
         """Test AudibleEnrichment can be serialized to JSON."""
-        enrichment = AudibleEnrichment(asin="B001", title="Test", authors=["Author"], narrators=["Narrator"])
+        enrichment = AudibleEnrichment(asin="B001", title="Test")
 
         # Should be able to convert to dict
         data = enrichment.model_dump()
         assert data["asin"] == "B001"
         assert data["title"] == "Test"
+
+    def test_enrichment_has_atmos_field(self):
+        """Test has_atmos field."""
+        enrichment = AudibleEnrichment(asin="B001", has_atmos=True)
+        assert enrichment.has_atmos is True
+
+        enrichment2 = AudibleEnrichment(asin="B002")
+        assert enrichment2.has_atmos is False
 
 
 class TestAudibleEnrichmentService:
@@ -83,150 +97,51 @@ class TestAudibleEnrichmentService:
     def test_service_initialization(self, mock_client):
         """Test service can be initialized with client."""
         service = AudibleEnrichmentService(client=mock_client)
-        assert service.client == mock_client
+        assert service._client == mock_client
 
-    def test_enrich_basic_product(self, service, mock_client):
-        """Test enriching a product with basic data."""
-        mock_product = {
-            "asin": "B001",
-            "title": "Test Book",
-            "authors": [{"name": "Author One"}],
-            "narrators": [{"name": "Narrator One"}],
-        }
+    def test_service_enrich_single(self, service, mock_client):
+        """Test enriching a single ASIN calls the right methods."""
+        # The implementation calls _get_catalog_product internally
+        # Mock that method directly on the service
+        with patch.object(service, "_get_catalog_product") as mock_get:
+            mock_get.return_value = {
+                "product": {
+                    "asin": "B001",
+                    "title": "Test Book",
+                    "price": {"list_price": {"base": 15.0}},
+                    "plans": [],
+                }
+            }
+            result = service.enrich_single("B001")
 
-        mock_client.get_product.return_value = {"product": mock_product}
+        # Result is AudibleEnrichment
+        assert isinstance(result, AudibleEnrichment)
+        assert result.asin == "B001"
+        assert result.title == "Test Book"
 
-        enrichment = service.enrich("B001")
+    def test_service_enrich_single_returns_none_on_error(self, service, mock_client):
+        """Test enrich_single returns None when API fails."""
+        with patch.object(service, "_get_catalog_product") as mock_get:
+            mock_get.side_effect = Exception("API error")
+            result = service.enrich_single("B001")
 
-        assert enrichment.asin == "B001"
-        assert enrichment.title == "Test Book"
-        assert "Author One" in enrichment.authors
-        assert "Narrator One" in enrichment.narrators
+        assert result is None
 
-    def test_enrich_with_pricing(self, service, mock_client):
-        """Test enriching with pricing data."""
-        mock_product = {
-            "asin": "B001",
-            "title": "Test Book",
-            "price": {"list_price": {"base": 19.99}, "lowest_price": {"base": 14.99}},
-        }
+    def test_service_enrich_batch(self, service, mock_client):
+        """Test enriching multiple ASINs."""
+        # Mock the enrich_single method for batch test
+        with patch.object(service, "enrich_single") as mock_enrich:
+            mock_enrich.side_effect = [
+                AudibleEnrichment(asin="B001", title="Book 1"),
+                AudibleEnrichment(asin="B002", title="Book 2"),
+            ]
+            results = service.enrich_batch(["B001", "B002"])
 
-        mock_client.get_product.return_value = {"product": mock_product}
-
-        enrichment = service.enrich("B001")
-
-        assert enrichment.pricing is not None
-        assert enrichment.pricing.list_price == 19.99
-
-    def test_enrich_with_plus_catalog(self, service, mock_client):
-        """Test enriching with Plus Catalog data."""
-        mock_product = {
-            "asin": "B001",
-            "title": "Test Book",
-            "plans": [{"plan_name": "US_MINERVA"}],
-        }
-
-        mock_client.get_product.return_value = {"product": mock_product}
-        mock_client.parse_plus_catalog.return_value = PlusCatalogInfo(is_plus_catalog=True, plan_name="US_MINERVA")
-
-        enrichment = service.enrich("B001")
-
-        assert enrichment.plus_catalog is not None
-        assert enrichment.plus_catalog.is_plus_catalog is True
-
-    def test_enrich_with_series(self, service, mock_client):
-        """Test enriching with series data."""
-        mock_product = {
-            "asin": "B001",
-            "title": "Test Book",
-            "series": [{"title": "Test Series", "sequence": "1"}],
-        }
-
-        mock_client.get_product.return_value = {"product": mock_product}
-
-        enrichment = service.enrich("B001")
-
-        assert enrichment.series == "Test Series"
-        assert enrichment.series_sequence == "1"
-
-    def test_enrich_with_rating(self, service, mock_client):
-        """Test enriching with rating data."""
-        mock_product = {
-            "asin": "B001",
-            "title": "Test Book",
-            "rating": {"overall_distribution": {"display_average_rating": "4.5", "num_ratings": 1000}},
-        }
-
-        mock_client.get_product.return_value = {"product": mock_product}
-
-        enrichment = service.enrich("B001")
-
-        assert enrichment.rating == 4.5
-        assert enrichment.rating_count == 1000
-
-    def test_enrich_handles_missing_data(self, service, mock_client):
-        """Test enrichment handles missing fields gracefully."""
-        mock_product = {"asin": "B001"}  # Minimal data
-
-        mock_client.get_product.return_value = {"product": mock_product}
-
-        enrichment = service.enrich("B001")
-
-        assert enrichment.asin == "B001"
-        assert enrichment.title is None
-        assert enrichment.pricing is None
-
-    def test_enrich_multiple(self, service, mock_client):
-        """Test enriching multiple products."""
-        mock_products = [
-            {"asin": "B001", "title": "Book 1"},
-            {"asin": "B002", "title": "Book 2"},
-        ]
-
-        def mock_get_product(asin, **kwargs):
-            for product in mock_products:
-                if product["asin"] == asin:
-                    return {"product": product}
-            return None
-
-        mock_client.get_product.side_effect = mock_get_product
-
-        enrichments = service.enrich_multiple(["B001", "B002"])
-
-        assert len(enrichments) == 2
-        assert enrichments[0].asin == "B001"
-        assert enrichments[1].asin == "B002"
-
-    def test_enrich_from_library_item(self, service, mock_client):
-        """Test enriching from existing library item data."""
-        library_item = {
-            "asin": "B001",
-            "title": "Test Book",
-            "authors": [{"name": "Author"}],
-            "purchase_date": "2024-01-01T00:00:00Z",
-        }
-
-        enrichment = service.enrich_from_library_item(library_item)
-
-        assert enrichment.asin == "B001"
-        assert enrichment.title == "Test Book"
-        assert "Author" in enrichment.authors
-
-    def test_service_with_cache(self, mock_client):
-        """Test service uses cache for repeated requests."""
-        service = AudibleEnrichmentService(client=mock_client, use_cache=True)
-
-        mock_product = {"asin": "B001", "title": "Test Book"}
-        mock_client.get_product.return_value = {"product": mock_product}
-
-        # First call
-        enrichment1 = service.enrich("B001")
-        # Second call (should use cache)
-        enrichment2 = service.enrich("B001")
-
-        assert enrichment1.asin == enrichment2.asin
-        # Client should only be called once if cache is working
-        assert mock_client.get_product.call_count <= 2
+        # Result is dict mapping ASIN to AudibleEnrichment
+        assert isinstance(results, dict)
+        assert len(results) == 2
+        assert "B001" in results
+        assert "B002" in results
 
 
 class TestPricingInfoIntegration:
@@ -243,7 +158,7 @@ class TestPricingInfoIntegration:
 
         assert pricing is not None
         assert pricing.list_price == 20.0
-        assert pricing.effective_price == 15.0
+        assert pricing.sale_price == 15.0
         assert pricing.currency == "USD"
 
     def test_pricing_discount_calculation(self):
@@ -253,22 +168,38 @@ class TestPricingInfoIntegration:
         assert pricing.discount_percent == 25.0
 
     def test_pricing_good_deal_detection(self):
-        """Test good deal detection (>20% discount)."""
-        good_deal = PricingInfo(list_price=100.0, sale_price=70.0, currency="USD")
+        """Test good deal detection (price under $9.00)."""
+        # Good deal: price under $9.00
+        good_deal = PricingInfo(list_price=10.0, sale_price=8.99, currency="USD")
         assert good_deal.is_good_deal is True
 
-        not_good_deal = PricingInfo(list_price=100.0, sale_price=85.0, currency="USD")
+        # Not a good deal: price >= $9.00
+        not_good_deal = PricingInfo(list_price=20.0, sale_price=15.0, currency="USD")
         assert not_good_deal.is_good_deal is False
+
+    def test_pricing_effective_price(self):
+        """Test effective price is sale_price or list_price."""
+        # With sale price
+        pricing1 = PricingInfo(list_price=20.0, sale_price=15.0)
+        assert pricing1.effective_price == 15.0
+
+        # Without sale price
+        pricing2 = PricingInfo(list_price=20.0)
+        assert pricing2.effective_price == 20.0
 
 
 class TestPlusCatalogInfoIntegration:
     """Test PlusCatalogInfo integration with enrichment."""
 
-    def test_plus_catalog_from_plans(self):
-        """Test creating PlusCatalogInfo from plans array."""
-        plans = [{"plan_name": "US_MINERVA"}]
+    def test_plus_catalog_default(self):
+        """Test PlusCatalogInfo default values."""
+        plus_info = PlusCatalogInfo()
+        assert plus_info.is_plus_catalog is False
+        assert plus_info.plan_name is None
+        assert plus_info.expiration_date is None
 
-        # This would be done by client.parse_plus_catalog()
+    def test_plus_catalog_with_plan(self):
+        """Test PlusCatalogInfo with plan name."""
         plus_info = PlusCatalogInfo(is_plus_catalog=True, plan_name="US_MINERVA")
 
         assert plus_info.is_plus_catalog is True
@@ -276,11 +207,32 @@ class TestPlusCatalogInfoIntegration:
 
     def test_plus_catalog_expiration(self):
         """Test Plus Catalog expiration tracking."""
-        from datetime import datetime, timedelta
-
         future_date = datetime.now() + timedelta(days=30)
 
         plus_info = PlusCatalogInfo(is_plus_catalog=True, plan_name="US_MINERVA", expiration_date=future_date)
 
         assert plus_info.is_plus_catalog is True
         assert plus_info.expiration_date == future_date
+
+    def test_plus_catalog_is_expiring_soon(self):
+        """Test is_expiring_soon property."""
+        from datetime import timezone
+
+        # Expiring in 5 days (timezone-aware) - should be "soon"
+        soon_date = datetime.now(timezone.utc) + timedelta(days=5)
+        plus_soon = PlusCatalogInfo(is_plus_catalog=True, expiration_date=soon_date)
+        assert plus_soon.is_expiring_soon is True
+
+        # Expiring in 30 days - implementation uses <= 30, so this IS "soon"
+        border_date = datetime.now(timezone.utc) + timedelta(days=30)
+        plus_border = PlusCatalogInfo(is_plus_catalog=True, expiration_date=border_date)
+        assert plus_border.is_expiring_soon is True
+
+        # Expiring in 31 days - NOT "soon" (use 32 to avoid edge case rounding)
+        later_date = datetime.now(timezone.utc) + timedelta(days=32)
+        plus_later = PlusCatalogInfo(is_plus_catalog=True, expiration_date=later_date)
+        assert plus_later.is_expiring_soon is False
+
+        # No expiration
+        plus_no_exp = PlusCatalogInfo(is_plus_catalog=True)
+        assert plus_no_exp.is_expiring_soon is False

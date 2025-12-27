@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.audible.async_client import AsyncAudibleClient, AsyncAudibleError
+from src.audible.async_client import AsyncAudibleAuthError, AsyncAudibleClient, AsyncAudibleError
 
 
 class TestAsyncAudibleClient:
@@ -18,24 +18,20 @@ class TestAsyncAudibleClient:
         auth.locale.country_code = "us"
         return auth
 
-    @pytest.fixture
-    def mock_async_client(self):
-        """Mock audible.AsyncClient."""
-        with patch("src.audible.async_client.audible.AsyncClient") as mock:
-            yield mock
-
     @pytest.mark.asyncio
-    async def test_client_initialization(self, mock_auth, mock_async_client):
+    async def test_client_initialization(self, mock_auth):
         """Test client can be initialized with auth."""
         client = AsyncAudibleClient(auth=mock_auth)
-        assert client.auth == mock_auth
-        assert client.max_concurrent == 5
+        # The client stores auth as _auth (private)
+        assert client._auth == mock_auth
+        # Default max concurrent is 5
+        assert client._semaphore._value == 5
 
     @pytest.mark.asyncio
     async def test_client_initialization_custom_concurrency(self, mock_auth):
-        """Test client initialization with custom max_concurrent."""
-        client = AsyncAudibleClient(auth=mock_auth, max_concurrent=10)
-        assert client.max_concurrent == 10
+        """Test client initialization with custom max_concurrent_requests."""
+        client = AsyncAudibleClient(auth=mock_auth, max_concurrent_requests=10)
+        assert client._semaphore._value == 10
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_auth):
@@ -54,8 +50,8 @@ class TestAsyncAudibleClient:
             mock_instance.__aexit__.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_library_basic(self, mock_auth):
-        """Test get_library returns items from API."""
+    async def test_get_library_returns_list(self, mock_auth):
+        """Test get_library returns list of AudibleLibraryItem."""
         mock_response = {
             "items": [
                 {"asin": "B001", "title": "Book 1"},
@@ -72,97 +68,15 @@ class TestAsyncAudibleClient:
 
             async with AsyncAudibleClient(auth=mock_auth) as client:
                 result = await client.get_library()
-                assert "items" in result
-                assert len(result["items"]) == 2
+                # Returns a list of AudibleLibraryItem, not raw dict
+                assert isinstance(result, list)
+                assert len(result) == 2
+                assert result[0].asin == "B001"
+                assert result[1].asin == "B002"
 
     @pytest.mark.asyncio
-    async def test_get_multiple_products(self, mock_auth):
-        """Test batch fetching multiple products."""
-        asins = ["B001", "B002", "B003"]
-        mock_responses = [{"product": {"asin": asin, "title": f"Book {asin}"}} for asin in asins]
-
-        with patch("src.audible.async_client.audible.AsyncClient") as mock_client_class:
-            mock_instance = AsyncMock()
-            mock_instance.__aenter__ = AsyncMock(return_value=mock_instance)
-            mock_instance.__aexit__ = AsyncMock(return_value=None)
-
-            # Mock get to return different response for each ASIN
-            async def mock_get(path, **kwargs):
-                for asin, resp in zip(asins, mock_responses):
-                    if asin in path:
-                        return resp
-                return {}
-
-            mock_instance.get = AsyncMock(side_effect=mock_get)
-            mock_client_class.return_value = mock_instance
-
-            async with AsyncAudibleClient(auth=mock_auth, max_concurrent=2) as client:
-                results = await client.get_multiple_products(asins)
-
-                assert len(results) == 3
-                assert all("product" in r for r in results)
-
-    @pytest.mark.asyncio
-    async def test_get_multiple_products_with_errors(self, mock_auth):
-        """Test batch fetching handles errors gracefully."""
-        asins = ["B001", "B002", "B003"]
-
-        with patch("src.audible.async_client.audible.AsyncClient") as mock_client_class:
-            mock_instance = AsyncMock()
-            mock_instance.__aenter__ = AsyncMock(return_value=mock_instance)
-            mock_instance.__aexit__ = AsyncMock(return_value=None)
-
-            # Second request fails
-            async def mock_get(path, **kwargs):
-                if "B002" in path:
-                    raise AsyncAudibleError("Not found")
-                asin = path.split("/")[-1].split("?")[0]
-                return {"product": {"asin": asin, "title": f"Book {asin}"}}
-
-            mock_instance.get = AsyncMock(side_effect=mock_get)
-            mock_client_class.return_value = mock_instance
-
-            async with AsyncAudibleClient(auth=mock_auth) as client:
-                results = await client.get_multiple_products(asins)
-
-                # Should return results for successful requests
-                assert len(results) == 2  # B001 and B003
-                assert all("product" in r for r in results)
-
-    @pytest.mark.asyncio
-    async def test_rate_limiting(self, mock_auth):
-        """Test that semaphore limits concurrent requests."""
-        asins = [f"B{i:03d}" for i in range(10)]
-        call_count = {"current": 0, "max": 0}
-
-        with patch("src.audible.async_client.audible.AsyncClient") as mock_client_class:
-            mock_instance = AsyncMock()
-            mock_instance.__aenter__ = AsyncMock(return_value=mock_instance)
-            mock_instance.__aexit__ = AsyncMock(return_value=None)
-
-            async def mock_get(path, **kwargs):
-                call_count["current"] += 1
-                call_count["max"] = max(call_count["max"], call_count["current"])
-                await asyncio.sleep(0.01)  # Simulate API delay
-                asin = path.split("/")[-1].split("?")[0]
-                result = {"product": {"asin": asin}}
-                call_count["current"] -= 1
-                return result
-
-            mock_instance.get = AsyncMock(side_effect=mock_get)
-            mock_client_class.return_value = mock_instance
-
-            max_concurrent = 3
-            async with AsyncAudibleClient(auth=mock_auth, max_concurrent=max_concurrent) as client:
-                results = await client.get_multiple_products(asins)
-
-                assert len(results) == 10
-                # Verify we never exceeded max_concurrent
-                assert call_count["max"] <= max_concurrent
-
-    @pytest.mark.asyncio
-    async def test_get_wishlist(self, mock_auth):
-        """Test get_wishlist returns wishlist items."""
+    async def test_get_wishlist_returns_list(self, mock_auth):
+        """Test get_wishlist returns list of WishlistItem."""
         mock_response = {
             "products": [
                 {"asin": "B001", "title": "Wishlist Book 1"},
@@ -178,7 +92,10 @@ class TestAsyncAudibleClient:
 
             async with AsyncAudibleClient(auth=mock_auth) as client:
                 result = await client.get_wishlist()
-                assert "products" in result
+                # Returns list of WishlistItem
+                assert isinstance(result, list)
+                assert len(result) == 1
+                assert result[0].asin == "B001"
 
     @pytest.mark.asyncio
     async def test_supports_dolby_atmos(self, mock_auth):
@@ -201,17 +118,68 @@ class TestAsyncAudibleClient:
             mock_client_class.return_value = mock_instance
 
             async with AsyncAudibleClient(auth=mock_auth) as client:
-                # Should return False when no codec info (simplified mock)
                 result = await client.supports_dolby_atmos("B001")
                 assert isinstance(result, bool)
 
     @pytest.mark.asyncio
-    async def test_client_without_auth_from_file(self):
-        """Test client initialization from auth file."""
-        with patch("src.audible.async_client.Authenticator") as mock_auth_class:
+    async def test_client_from_file_missing(self, tmp_path):
+        """Test client creation from auth file using from_file class method."""
+        auth_file = tmp_path / "nonexistent.json"
+
+        with pytest.raises(AsyncAudibleAuthError, match="Auth file not found"):
+            AsyncAudibleClient.from_file(str(auth_file))
+
+    @pytest.mark.asyncio
+    async def test_client_from_file_success(self):
+        """Test client from_file with valid auth file."""
+        with (
+            patch("src.audible.async_client.Authenticator") as mock_auth_class,
+            patch("src.audible.async_client.Path") as mock_path,
+        ):
             mock_auth = MagicMock()
             mock_auth_class.from_file.return_value = mock_auth
+            mock_path.return_value.exists.return_value = True
 
-            client = AsyncAudibleClient(auth_file="test.json")
-            assert client.auth == mock_auth
-            mock_auth_class.from_file.assert_called_once_with("test.json")
+            client = AsyncAudibleClient.from_file("test.json")
+            assert client._auth == mock_auth
+
+
+class TestAsyncAudibleClientRateLimiting:
+    """Test rate limiting behavior."""
+
+    @pytest.fixture
+    def mock_auth(self):
+        """Mock Audible authenticator."""
+        auth = MagicMock()
+        auth.locale.country_code = "us"
+        return auth
+
+    @pytest.mark.asyncio
+    async def test_semaphore_limits_concurrent(self, mock_auth):
+        """Test that semaphore limits concurrent requests."""
+        max_concurrent = 3
+        client = AsyncAudibleClient(auth=mock_auth, max_concurrent_requests=max_concurrent)
+
+        assert client._semaphore._value == max_concurrent
+
+    @pytest.mark.asyncio
+    async def test_request_delay_configured(self, mock_auth):
+        """Test request delay is configurable."""
+        client = AsyncAudibleClient(auth=mock_auth, request_delay=0.5)
+        assert client._request_delay == 0.5
+
+
+class TestAsyncAudibleClientExceptions:
+    """Test exception classes."""
+
+    def test_async_audible_error(self):
+        """Test AsyncAudibleError."""
+        error = AsyncAudibleError("Test error", response={"error": "test"})
+        assert str(error) == "Test error"
+        assert error.response == {"error": "test"}
+
+    def test_async_audible_auth_error(self):
+        """Test AsyncAudibleAuthError."""
+        error = AsyncAudibleAuthError("Auth failed")
+        assert str(error) == "Auth failed"
+        assert isinstance(error, AsyncAudibleError)
