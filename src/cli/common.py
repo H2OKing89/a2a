@@ -28,15 +28,18 @@ from .async_utils import (
 )
 
 __all__ = [
-    "async_command",
     "AsyncBatchProcessor",
+    "Icons",
+    "async_command",
     "console",
+    "format_bitrate",
+    "format_duration",
+    "format_size",
     "gather_with_progress",
     "get_abs_client",
     "get_audible_client",
     "get_cache",
     "get_default_library_id",
-    "Icons",
     "logger",
     "resolve_library_id",
     "run_async",
