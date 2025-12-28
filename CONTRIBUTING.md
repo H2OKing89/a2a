@@ -254,12 +254,88 @@ Aim for meaningful test coverage:
 - [ ] Documentation updated if needed
 - [ ] Code follows project style guide
 - [ ] Commits follow conventional commits format
+- [ ] **CHANGELOG.md updated** with your changes
+- [ ] **Version bumped** if needed (see [Versioning](#versioning) below)
 
 ### Review Process
 
 1. A maintainer will review your PR
 2. Address any requested changes
 3. Once approved, the PR will be merged
+
+## Versioning
+
+A2A follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html): `MAJOR.MINOR.PATCH`
+
+### When to Bump Version
+
+**PATCH (0.1.0 → 0.1.1):** Backward-compatible bug fixes only
+- Fixing a crash
+- Correcting error messages
+- Performance improvements (no API changes)
+
+**MINOR (0.1.0 → 0.2.0):** New features that are backward-compatible
+- Adding new CLI flags (e.g., `--fast`)
+- Adding new API methods
+- Adding new models/classes
+- Bug fixes + new features together
+
+**MAJOR (0.1.0 → 1.0.0):** Breaking changes
+- Removing CLI commands or flags
+- Changing API signatures
+- Changing config file structure
+- Removing or renaming public classes/functions
+
+### How to Bump Version
+
+```bash
+# Using the version utility
+python tools/version.py patch  # 0.1.0 → 0.1.1
+python tools/version.py minor  # 0.1.0 → 0.2.0
+python tools/version.py major  # 0.1.0 → 1.0.0
+
+# Or using make
+make bump-patch
+make bump-minor
+make bump-major
+```
+
+Version is stored in `src/__init__.py`:
+```python
+__version__ = "0.2.0"
+```
+
+### Updating CHANGELOG.md
+
+When your PR adds features or fixes bugs, update `CHANGELOG.md`:
+
+1. **Add an entry under the `[Unreleased]` section** if version hasn't been bumped yet
+2. **Or create a new version section** if bumping version (e.g., `## [0.2.0] - 2025-12-28`)
+3. **Organize changes by category:**
+   - `### Added` - New features
+   - `### Fixed` - Bug fixes
+   - `### Changed` - Changes to existing functionality
+   - `### Deprecated` - Soon-to-be removed features
+   - `### Removed` - Removed features
+   - `### Security` - Security fixes
+   - `### Performance` - Performance improvements
+
+**Example:**
+
+```markdown
+## [0.2.0] - 2025-12-28
+
+### Added
+- Async batch enrichment service for Audible quality discovery
+- New CLI flag `--fast` for `quality upgrades` to skip license requests
+
+### Fixed
+- Missing Audible pricing in `quality upgrades`
+- Progress bar stuck at 0% during async batch enrichment
+
+### Performance
+- Concurrent async quality discovery with configurable limits
+```
 
 ## Reporting Issues
 

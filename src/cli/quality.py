@@ -8,6 +8,7 @@ Commands for analyzing and managing audiobook quality:
 - upgrades: Find upgrade candidates with Audible pricing
 """
 
+import asyncio
 import json
 import logging
 import time
@@ -18,8 +19,9 @@ import typer
 from rich.box import ROUNDED
 from rich.text import Text
 
-from src.audible import AudibleEnrichmentService
+from src.audible import AsyncAudibleClient, AsyncAudibleEnrichmentService, AudibleEnrichmentService
 from src.cli.common import Icons, console, get_abs_client, get_audible_client, get_cache, get_default_library_id, ui
+from src.config import get_settings
 from src.quality import QualityAnalyzer, QualityReport, QualityTier
 from src.utils.ui import BarColumn, Panel, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn
 
@@ -455,6 +457,7 @@ def quality_upgrades(
     plus_only: bool = typer.Option(False, "--plus-only", "-p", help="Show only Plus Catalog items (FREE)"),
     deals_only: bool = typer.Option(False, "--deals", "-d", help="Show only items under $9.00"),
     monthly_deals: bool = typer.Option(False, "--monthly-deals", "-m", help="Show only monthly deal items"),
+    fast: bool = typer.Option(False, "--fast", "-f", help="Skip license requests (faster but less accurate bitrate)"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Export to JSON file"),
 ):
     """
@@ -465,12 +468,13 @@ def quality_upgrades(
     - Plus Catalog availability (FREE!)
     - Monthly deals (up to 80% off!)
     - Current pricing and discounts
+    - ACTUAL best audio quality via license requests (unless --fast)
     - Buy recommendation (FREE, MONTHLY_DEAL, GOOD_DEAL, CREDIT, etc)
     """
     start_time = time.time()
 
     try:
-        with get_abs_client() as abs_client, get_audible_client() as audible_client:
+        with get_abs_client() as abs_client:
             cache = get_cache()  # Get shared cache for enrichment
 
             # Get library ID from settings or pick first if not specified
@@ -536,48 +540,29 @@ def quality_upgrades(
             console.print(f"\n[yellow]Found {len(upgrade_candidates)} upgrade candidates with ASINs[/yellow]")
             console.print(f"[dim]Phase 1 completed in {phase1_time:.1f}s[/dim]")
 
-            # Phase 2: Enrich with Audible data
-            console.print(f"\nPhase 2: Fetching Audible pricing for {len(upgrade_candidates)} items...\n")
+            # Phase 2: Enrich with Audible data using async for actual quality discovery
+            if fast:
+                console.print(
+                    f"\nPhase 2: Fetching Audible pricing for {len(upgrade_candidates)} items (fast mode)...\n"
+                )
+            else:
+                console.print(
+                    f"\nPhase 2: Fetching Audible pricing & actual quality for {len(upgrade_candidates)} items...\n"
+                )
 
-            enrichment_service = AudibleEnrichmentService(audible_client, cache=cache)
             asins = [c.asin for c in upgrade_candidates if c.asin]
 
-            enrichments = {}
-            phase2_start = time.time()
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
-                TaskProgressColumn(),
-                TextColumn("[cyan]{task.fields[elapsed]}[/cyan]"),
-                console=console,
-            ) as progress:
-                task = progress.add_task("Enriching...", total=len(asins), elapsed="")
-
-                for asin in asins:
-                    try:
-                        enrichment = enrichment_service.enrich_single(asin)
-                        if enrichment:
-                            enrichments[asin] = enrichment
-                    except Exception as e:
-                        # Find the title for this ASIN from upgrade_candidates
-                        candidate_title = next((c.title for c in upgrade_candidates if c.asin == asin), "Unknown")
-                        logger.exception(
-                            "Failed to enrich ASIN %s: %s",
-                            asin,
-                            e,
-                            extra={"asin": asin, "title": candidate_title},
-                        )
-
-                    elapsed = time.time() - phase2_start
-                    progress.update(task, advance=1, elapsed=f"{elapsed:.1f}s")
-
-            phase2_time = time.time() - phase2_start
-            stats = enrichment_service.stats
-            console.print(
-                f"[dim]Phase 2 completed in {phase2_time:.1f}s "
-                f"(cache hits: {stats['cache_hits']}, API calls: {stats['api_calls']})[/dim]"
+            # Run async enrichment
+            enrichments = asyncio.run(
+                _async_enrich_upgrades(
+                    asins=asins,
+                    cache=cache,
+                    discover_quality=not fast,
+                    console=console,
+                )
             )
+
+            phase2_time = time.time() - phase1_time - start_time
 
             # Merge enrichment into quality objects
             for candidate in upgrade_candidates:
@@ -593,6 +578,8 @@ def quality_upgrades(
                         candidate.is_good_deal = enrichment.pricing.is_good_deal
                         candidate.is_monthly_deal = enrichment.pricing.is_monthly_deal
                     candidate.has_atmos_upgrade = enrichment.has_atmos
+                    # Use actual_best_bitrate which comes from license requests
+                    candidate.audible_best_bitrate = enrichment.actual_best_bitrate
                     candidate.acquisition_recommendation = enrichment.acquisition_recommendation
                     candidate.audible_url = enrichment.audible_url
                     candidate.cover_image_url = enrichment.cover_image_url
@@ -622,17 +609,19 @@ def quality_upgrades(
             # Display table
             console.print()
             table = Table(title=f"Upgrade Candidates ({len(upgrade_candidates)} items)")
-            table.add_column("Priority", justify="right", style="bold")
             table.add_column("kbps", justify="right")
             table.add_column("Title", max_width=35)
+            table.add_column("Author", max_width=20)
+            table.add_column("ASIN", style="dim")
             table.add_column("Recommendation", style="bold")
-            table.add_column("Price", justify="right")
-            table.add_column("Owned", justify="center")
-            table.add_column("Atmos", justify="center")
+            table.add_column("Price")
+            table.add_column("Best Available", justify="center")
 
             for item in upgrade_candidates[:limit]:
-                # Determine recommendation color
+                # Determine recommendation color and simplify text
                 rec = item.acquisition_recommendation or "N/A"
+                # Strip price info from recommendation (e.g., "MONTHLY_DEAL ($7.99, 87% off)" -> "MONTHLY_DEAL")
+                rec_simple = rec.split(" (")[0] if " (" in rec else rec
                 if rec.startswith("FREE"):
                     rec_style = "[green bold]"
                 elif rec.startswith("MONTHLY_DEAL"):
@@ -655,20 +644,26 @@ def quality_upgrades(
                 else:
                     price_display = "-"
 
-                # Owned badge
-                owned_display = "✓" if item.owned_on_audible else ""
+                # Author display (first author only)
+                author_display = item.author.split(",")[0].strip()[:20] if item.author else "-"
 
-                # Atmos badge
-                atmos_display = "[magenta]🎧[/magenta]" if item.has_atmos_upgrade else ""
+                # Best available quality display
+                # Show Atmos badge if available, otherwise show best bitrate from Audible
+                if item.has_atmos_upgrade:
+                    quality_display = "[magenta]🎧 Atmos[/magenta]"
+                elif item.audible_best_bitrate:
+                    quality_display = f"{item.audible_best_bitrate} kbps"
+                else:
+                    quality_display = "-"
 
                 table.add_row(
-                    str(item.upgrade_priority),
                     f"{item.bitrate_kbps:.0f}",
                     item.title[:35],
-                    f"{rec_style}{rec}[/]" if rec_style else rec,
+                    author_display,
+                    item.asin or "-",
+                    f"{rec_style}{rec_simple}[/]" if rec_style else rec_simple,
                     price_display,
-                    owned_display,
-                    atmos_display,
+                    quality_display,
                 )
 
             console.print(table)
@@ -745,3 +740,74 @@ def quality_upgrades(
         console.print(f"[red]Error:[/red] {e}")
         ui.print_exception()
         raise typer.Exit(1)
+
+
+async def _async_enrich_upgrades(
+    asins: list[str],
+    cache,
+    discover_quality: bool = True,
+    console=None,
+):
+    """
+    Async helper to enrich ASINs with actual quality via license requests.
+
+    Args:
+        asins: List of ASINs to enrich
+        cache: SQLiteCache instance
+        discover_quality: Whether to make license requests for actual quality
+        console: Rich console for output
+
+    Returns:
+        Dict mapping ASIN to AudibleEnrichment
+    """
+    settings = get_settings()
+    auth_file = Path(settings.audible.auth_file)
+    auth_password = settings.audible.auth_password
+
+    phase2_start = time.time()
+    enrichments = {}
+
+    async with AsyncAudibleClient.from_file(
+        auth_file,
+        cache=cache,
+        auth_password=auth_password,
+        request_delay=settings.audible.rate_limit_delay,
+        max_concurrent_requests=5,
+    ) as client:
+        # Progress tracking with callback
+        total = len(asins)
+        progress_ctx = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            TextColumn("[cyan]{task.fields[elapsed]}[/cyan]"),
+            console=console,
+        )
+
+        with progress_ctx as progress:
+            task = progress.add_task("Enriching with quality discovery...", total=total, elapsed="")
+
+            def update_progress(completed: int, total_items: int, message: str) -> None:
+                elapsed = time.time() - phase2_start
+                progress.update(task, completed=completed, elapsed=f"{elapsed:.1f}s")
+
+            service = AsyncAudibleEnrichmentService(client, cache=cache, progress_callback=update_progress)
+
+            # Process with concurrent enrichment - progress updates live
+            enrichments = await service.enrich_batch_with_quality(
+                asins,
+                use_cache=True,
+                discover_quality=discover_quality,
+                max_concurrent=5,  # Limit concurrent API calls
+            )
+
+        stats = service.stats
+        if console:
+            console.print(
+                f"[dim]Phase 2 completed in {time.time() - phase2_start:.1f}s "
+                f"(cache hits: {stats['cache_hits']}, API calls: {stats['api_calls']}, "
+                f"quality discoveries: {stats['quality_discoveries']})[/dim]"
+            )
+
+    return enrichments

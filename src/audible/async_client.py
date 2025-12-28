@@ -33,12 +33,16 @@ from audible import Authenticator
 
 from .encryption import get_encryption_config, load_auth
 from .models import (
+    LICENSE_TEST_CONFIGS,
     AudibleAccountInfo,
     AudibleCatalogProduct,
     AudibleLibraryItem,
     AudibleListeningStats,
+    AudioFormat,
     CatalogSortBy,
     ContentMetadata,
+    ContentQualityInfo,
+    DrmType,
     LibrarySortBy,
     LibraryStatus,
     PlusCatalogInfo,
@@ -84,8 +88,8 @@ LIBRARY_RESPONSE_GROUPS = (
 )
 
 CATALOG_RESPONSE_GROUPS = (
-    "contributors,media,product_attrs,product_desc,product_details,"
-    "product_extended_attrs,rating,series,category_ladders,reviews,customer_rights"
+    "contributors,media,price,product_attrs,product_desc,product_details,"
+    "product_extended_attrs,product_plan_details,product_plans,rating,series,category_ladders,reviews,customer_rights"
 )
 
 
@@ -373,7 +377,11 @@ class AsyncAudibleClient:
         if use_cache and self._cache:
             cached = self._cache.get("catalog", cache_key)
             if cached:
-                return AudibleCatalogProduct.model_validate(cached)
+                try:
+                    return AudibleCatalogProduct.model_validate(cached)
+                except ValidationError:
+                    # Cached data is invalid, continue to fetch fresh
+                    pass
 
         try:
             response = await self._request(
@@ -391,6 +399,10 @@ class AsyncAudibleClient:
             return product
 
         except AsyncAudibleNotFoundError:
+            return None
+        except ValidationError as e:
+            # Product data is malformed (e.g., missing title for delisted product)
+            logger.debug("Invalid catalog product data for ASIN %s: %s", asin, str(e))
             return None
 
     async def get_multiple_products(
@@ -715,6 +727,190 @@ class AsyncAudibleClient:
         """Check if a book supports Dolby Atmos."""
         metadata = await self.get_content_metadata(asin, use_cache=use_cache)
         return metadata.supports_atmos if metadata else False
+
+    # -------------------------------------------------------------------------
+    # Content License / Quality Discovery
+    # -------------------------------------------------------------------------
+
+    async def request_content_license(
+        self,
+        asin: str,
+        codecs: list[str],
+        drm_types: list[str],
+        *,
+        spatial: bool = False,
+        quality: str = "High",
+    ) -> dict | None:
+        """
+        Request a content license to discover actual audio quality.
+
+        This is the only reliable way to get actual bitrate/size info for
+        modern Widevine/FairPlay formats. The catalog's available_codecs
+        field only shows legacy AAX formats.
+
+        Args:
+            asin: Audible ASIN
+            codecs: List of codec identifiers (mp4a.40.2, mp4a.40.42, ec+3, ac-4)
+            drm_types: List of DRM types (Adrm, Widevine, FairPlay)
+            spatial: Request spatial audio (for Dolby Atmos) (keyword-only)
+            quality: Quality level (High, Normal)
+
+        Returns:
+            License response dict or None if codec not available
+        """
+        try:
+            response = await self._request(
+                "POST",
+                f"1.0/content/{asin}/licenserequest",
+                json={
+                    "quality": quality,
+                    "response_groups": "chapter_info,content_reference",
+                    "consumption_type": "Download",
+                    "spatial": spatial,
+                    "supported_media_features": {
+                        "codecs": codecs,
+                        "drm_types": drm_types,
+                    },
+                },
+            )
+            return response if "content_license" in response else None
+        except AsyncAudibleError as e:
+            logger.debug(
+                "License request failed for ASIN %s (codecs=%s, drm=%s, spatial=%s): %s",
+                asin,
+                codecs,
+                drm_types,
+                spatial,
+                e,
+            )
+            return None
+
+    async def get_audio_format(
+        self,
+        asin: str,
+        config: dict,
+    ) -> AudioFormat | None:
+        """
+        Discover a specific audio format via license request.
+
+        Args:
+            asin: Audible ASIN
+            config: Format config dict with keys: name, codecs, drm_types, spatial
+
+        Returns:
+            AudioFormat if available, None otherwise
+        """
+        response = await self.request_content_license(
+            asin=asin,
+            codecs=config["codecs"],
+            drm_types=config["drm_types"],
+            spatial=config.get("spatial", False),
+        )
+
+        if not response:
+            return None
+
+        license_info = response.get("content_license", {})
+        content_meta = license_info.get("content_metadata", {})
+        content_ref = content_meta.get("content_reference", {})
+        chapter_info = content_meta.get("chapter_info", {})
+
+        actual_codec = content_ref.get("codec", config["codecs"][0])
+        content_size = content_ref.get("content_size_in_bytes", 0)
+        drm_type = license_info.get("drm_type", config["drm_types"][0])
+        runtime_ms = chapter_info.get("runtime_length_ms", 0)
+
+        # Calculate bitrate from size and runtime
+        bitrate = 0.0
+        if runtime_ms > 0 and content_size > 0:
+            bitrate = (content_size * 8) / (runtime_ms / 1000) / 1000
+
+        return AudioFormat(
+            codec=actual_codec,
+            codec_name=config["name"],
+            drm_type=drm_type,
+            bitrate_kbps=bitrate,
+            size_bytes=content_size,
+            runtime_ms=runtime_ms,
+            is_spatial=config.get("spatial", False),
+        )
+
+    async def discover_content_quality(
+        self,
+        asin: str,
+        *,
+        use_cache: bool = True,
+    ) -> ContentQualityInfo:
+        """
+        Discover all available audio formats and quality for an audiobook.
+
+        This method tests multiple codec/DRM combinations via license requests
+        to find the actual best quality available, including modern formats
+        like Widevine HE-AAC (114 kbps) and Dolby Atmos.
+
+        The catalog API's available_codecs field only shows legacy AAX formats
+        (max ~64 kbps), so this is the only way to get accurate quality info.
+
+        Args:
+            asin: Audible ASIN
+            use_cache: Use cached results (keyword-only)
+
+        Returns:
+            ContentQualityInfo with all discovered formats
+        """
+        cache_key = f"quality_{asin}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("content_quality", cache_key)
+            if cached:
+                return ContentQualityInfo.model_validate(cached)
+
+        # Test all codec configurations concurrently
+        tasks = [self.get_audio_format(asin, config) for config in LICENSE_TEST_CONFIGS]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        formats = []
+        for result in results:
+            if isinstance(result, AudioFormat):
+                formats.append(result)
+
+        quality_info = ContentQualityInfo.from_formats(asin, formats)
+
+        if self._cache:
+            self._cache.set(
+                "content_quality",
+                cache_key,
+                quality_info.model_dump(),
+                ttl_seconds=self._cache_ttl_seconds,
+            )
+
+        return quality_info
+
+    async def discover_multiple_quality(
+        self,
+        asins: list[str],
+        *,
+        use_cache: bool = True,
+    ) -> dict[str, ContentQualityInfo]:
+        """
+        Discover content quality for multiple ASINs concurrently.
+
+        Args:
+            asins: List of Audible ASINs
+            use_cache: Use cached results (keyword-only)
+
+        Returns:
+            Dict mapping ASIN to ContentQualityInfo
+        """
+        tasks = [self.discover_content_quality(asin, use_cache=use_cache) for asin in asins]
+        results = await asyncio.gather(*tasks)
+
+        quality_map = {}
+        for asin, result in zip(asins, results, strict=True):
+            if isinstance(result, ContentQualityInfo):
+                quality_map[asin] = result
+
+        return quality_map
 
     # -------------------------------------------------------------------------
     # Account & Stats

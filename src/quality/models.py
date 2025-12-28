@@ -142,6 +142,7 @@ class AudioQuality(BaseModel):
     is_good_deal: bool = Field(default=False, description="Under $9.00 threshold")
     is_monthly_deal: bool = Field(default=False, description="Monthly deal (type=sale)")
     has_atmos_upgrade: bool = Field(default=False, description="Atmos version available on Audible")
+    audible_best_bitrate: int | None = Field(default=None, description="Best available bitrate on Audible (kbps)")
     acquisition_recommendation: str | None = Field(default=None, description="Buy recommendation")
     audible_url: str | None = Field(default=None, description="URL to Audible product page")
     cover_image_url: str | None = Field(default=None, description="URL to 500x500 cover image")

@@ -27,7 +27,7 @@ from .encryption import (
     load_auth,
     save_auth,
 )
-from .enrichment import AudibleEnrichment, AudibleEnrichmentService
+from .enrichment import AsyncAudibleEnrichmentService, AudibleEnrichment, AudibleEnrichmentService
 from .logging import (
     LogContext,
     configure_logging,
@@ -38,6 +38,7 @@ from .logging import (
     silence_audible_package,
 )
 from .models import (  # Core models; Wishlist models; Content/quality models; Pricing and Plus Catalog; API Enums
+    LICENSE_TEST_CONFIGS,
     AudibleAccountInfo,
     AudibleAuthor,
     AudibleBook,
@@ -49,10 +50,12 @@ from .models import (  # Core models; Wishlist models; Content/quality models; P
     AudibleNarrator,
     AudibleSeries,
     AudioCodec,
+    AudioFormat,
     CatalogSortBy,
     ChapterInfo,
     ContentMetadata,
     ContentQuality,
+    ContentQualityInfo,
     DrmType,
     LibrarySortBy,
     LibraryStatus,
@@ -110,6 +113,9 @@ __all__ = [
     # Content/quality models
     "ChapterInfo",
     "ContentMetadata",
+    "AudioFormat",
+    "ContentQualityInfo",
+    "LICENSE_TEST_CONFIGS",
     # Pricing and Plus Catalog
     "PricingInfo",
     "PlusCatalogInfo",
@@ -124,6 +130,7 @@ __all__ = [
     # Enrichment service
     "AudibleEnrichment",
     "AudibleEnrichmentService",
+    "AsyncAudibleEnrichmentService",
     # API Enums - for type-safe API usage
     "SimilarityType",
     "LibrarySortBy",
