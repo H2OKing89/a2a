@@ -6,14 +6,31 @@ body:
 - type: markdown
   attributes:
     value: |
-      Thanks for taking the time to report a bug.
+      Thanks for taking the time to report a bug! Please fill out as much detail as possible to help us reproduce and fix the issue.
+
+- type: dropdown
+  id: component
+  attributes:
+    label: Component / Area
+    description: Which part of the tool is affected?
+    options:
+    - ABS (Audiobookshelf integration)
+    - Audible (Audible API integration)
+    - Quality Analysis
+    - Series Management
+    - Caching / Database
+    - CLI / UI
+    - Authentication / Security
+    - Other
+  validations:
+    required: true
 
 - type: input
   id: version
   attributes:
     label: A2A version
-    description: Output of `python -c "import src; print(src.__version__)"` (or the git commit)
-    placeholder: 0.1.0
+    description: Output of `python -c "import src; print(src.__version__)"` or git commit hash
+    placeholder: 0.1.0 or commit abc1234
   validations:
     required: false
 
@@ -21,14 +38,15 @@ body:
   id: python
   attributes:
     label: Python version
-    placeholder: 3.13.x
+    description: Output of `python --version`
+    placeholder: 3.12.3
   validations:
     required: true
 
 - type: dropdown
   id: os
   attributes:
-    label: OS
+    label: Operating System
     options:
     - Linux
     - macOS
@@ -38,10 +56,28 @@ body:
     required: true
 
 - type: textarea
+  id: environment
+  attributes:
+    label: Environment details
+    description: ABS version, system packages (mediainfo), etc.
+    placeholder: |
+      - Audiobookshelf: 2.x.x
+      - mediainfo: installed via apt
+      - Running in Docker: yes/no
+  validations:
+    required: false
+
+- type: textarea
   id: what-happened
   attributes:
-    label: What happened?
-    description: Include expected behavior too.
+    label: Bug Description
+    description: A clear description of what the bug is and what you expected to happen.
+    placeholder: |
+      **What happened:**
+      ...
+
+      **Expected behavior:**
+      ...
   validations:
     required: true
 
@@ -51,15 +87,45 @@ body:
     label: Steps to reproduce
     description: Minimal steps to reproduce the issue.
     placeholder: |
-      1. Run `python cli.py ...`
-      2. See error ...
+      1. Run `python cli.py quality scan <library-id>`
+      2. Wait for scan to complete
+      3. Error occurs at...
   validations:
     required: true
 
 - type: textarea
-  id: logs
+  id: config
   attributes:
-    label: Relevant logs / traceback
-    render: shell
+    label: Configuration (if relevant)
+    description: Sanitized relevant parts of config.yaml (remove API keys!)
+    render: yaml
+    placeholder: |
+      abs:
+        rate_limit_delay: 0
+      quality:
+        bitrate_threshold_kbps: 100.0
   validations:
     required: false
+
+- type: textarea
+  id: logs
+  attributes:
+    label: Logs / Traceback
+    description: Relevant error messages, stack traces, or log output
+    render: shell
+    placeholder: |
+      Traceback (most recent call last):
+        File "...", line X, in ...
+        ...
+  validations:
+    required: false
+
+- type: checkboxes
+  id: checks
+  attributes:
+    label: Pre-submission checklist
+    options:
+    - label: I searched existing issues and this is not a duplicate
+      required: true
+    - label: I removed any sensitive information (API keys, tokens, personal data)
+      required: true
