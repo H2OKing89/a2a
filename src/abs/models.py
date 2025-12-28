@@ -13,7 +13,7 @@ class ServerInfo(BaseModel):
     version: str = Field(default="unknown")
     source: str = Field(default="unknown", alias="Source")
 
-    model_config = {"extra": "ignore"}
+    model_config = {"extra": "ignore", "populate_by_name": True}
 
 
 class Folder(BaseModel):
