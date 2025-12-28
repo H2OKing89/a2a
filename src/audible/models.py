@@ -505,10 +505,10 @@ class AudibleBook(BaseModel):
     language: str | None = None
 
     # Series (can be None from API, defaults to empty list)
-    series: list[AudibleSeries] | None = Field(default_factory=list)
+    series: list[AudibleSeries] | None = Field(default_factory=lambda: [])
 
     # Categories (can be None from API, defaults to empty list)
-    category_ladders: list[AudibleCategoryLadder] | None = Field(default_factory=list)
+    category_ladders: list[AudibleCategoryLadder] | None = Field(default_factory=lambda: [])
 
     # Ratings
     rating: AudibleRating | None = None
@@ -663,6 +663,12 @@ class AudibleListeningStats(BaseModel):
     total_listening_time_ms: int | None = Field(default=None, alias="totalListeningTimeMs")
     total_finished_titles: int | None = Field(default=None, alias="totalFinishedTitles")
 
+    # Additional stats
+    distinct_titles_listened: int | None = Field(default=None, alias="distinctTitlesListened")
+    distinct_authors_listened: int | None = Field(default=None, alias="distinctAuthorsListened")
+    current_listening_streak: int | None = Field(default=None, alias="currentListeningStreak")
+    longest_listening_streak: int | None = Field(default=None, alias="longestListeningStreak")
+
     # Daily/monthly breakdowns if requested
     daily_listening_stats: list[dict] | None = None
     monthly_listening_stats: list[dict] | None = None
@@ -686,8 +692,16 @@ class AudibleAccountInfo(BaseModel):
     marketplace: str | None = None
 
     # Subscription details
-    subscription_details: dict | None = None
-    plan_summary: dict | None = None
+    subscription_details: dict[str, Any] | None = None
+    plan_summary: dict[str, Any] | None = None
+
+    # Account status
+    is_active_member: bool | None = Field(default=None, alias="isActiveMember")
+
+    # Benefits and plans
+    benefits: list[dict[str, Any]] | None = Field(default=None)
+    plan_name: str | None = Field(default=None, alias="planName")
+    credits_available: int | None = Field(default=None, alias="creditsAvailable")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
