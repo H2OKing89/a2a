@@ -89,7 +89,7 @@ class SeriesMatcher:
     def __init__(
         self,
         abs_client: "ABSClient",
-        audible_client: "AudibleClient",
+        audible_client: Optional["AudibleClient"] = None,
         cache: Optional["SQLiteCache"] = None,
         min_match_score: float = 60.0,
     ):
@@ -195,14 +195,16 @@ class SeriesMatcher:
                         )
                     )
 
-                series_info = ABSSeriesInfo(
-                    id=raw.get("id", ""),
-                    name=raw.get("name", "Unknown"),
-                    name_ignore_prefix=raw.get("nameIgnorePrefix"),
-                    description=raw.get("description"),
-                    added_at=raw.get("addedAt"),
-                    total_duration=raw.get("totalDuration", 0.0),
-                    books=books,
+                series_info = ABSSeriesInfo.model_validate(
+                    {
+                        "id": raw.get("id", ""),
+                        "name": raw.get("name", "Unknown"),
+                        "nameIgnorePrefix": raw.get("nameIgnorePrefix"),
+                        "description": raw.get("description"),
+                        "addedAt": raw.get("addedAt"),
+                        "totalDuration": raw.get("totalDuration", 0.0),
+                        "books": books,
+                    }
                 )
                 series_list.append(series_info)
 
@@ -244,6 +246,9 @@ class SeriesMatcher:
         Returns:
             List of AudibleSeriesBook items
         """
+        if not self._audible:
+            return []
+            
         # Search catalog with series as keyword
         search_results = self._audible.search_catalog(
             keywords=series_name,
