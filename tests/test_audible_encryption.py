@@ -6,7 +6,6 @@ Uses monkeypatching to mock the upstream audible library calls.
 """
 
 import os
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -125,20 +124,24 @@ class TestLoadAuth:
         auth_file.write_text('{"test": "data"}')
 
         mock_auth = MagicMock()
-        with patch("src.audible.encryption.detect_file_encryption", return_value=None):
-            with patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth) as mock_from_file:
-                result = load_auth(auth_file, None)
-                mock_from_file.assert_called_once_with(str(auth_file))
-                assert result == mock_auth
+        with (
+            patch("src.audible.encryption.detect_file_encryption", return_value=None),
+            patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth) as mock_from_file,
+        ):
+            result = load_auth(auth_file, None)
+            mock_from_file.assert_called_once_with(str(auth_file))
+            assert result == mock_auth
 
     def test_encrypted_file_without_password_raises(self, tmp_path):
         """Test that encrypted file without password raises ValueError."""
         auth_file = tmp_path / "auth.json"
         auth_file.write_text("encrypted_data")
 
-        with patch("src.audible.encryption.detect_file_encryption", return_value="json"):
-            with pytest.raises(ValueError, match="Auth file is encrypted"):
-                load_auth(auth_file, AuthFileEncryption())
+        with (
+            patch("src.audible.encryption.detect_file_encryption", return_value="json"),
+            pytest.raises(ValueError, match="Auth file is encrypted"),
+        ):
+            load_auth(auth_file, AuthFileEncryption())
 
     def test_encrypted_file_with_password_loads(self, tmp_path):
         """Test loading encrypted file with password."""
@@ -148,11 +151,13 @@ class TestLoadAuth:
         mock_auth = MagicMock()
         enc = AuthFileEncryption(password="secret123")
 
-        with patch("src.audible.encryption.detect_file_encryption", return_value="json"):
-            with patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth) as mock_from_file:
-                result = load_auth(auth_file, enc)
-                mock_from_file.assert_called_once_with(str(auth_file), password="secret123")
-                assert result == mock_auth
+        with (
+            patch("src.audible.encryption.detect_file_encryption", return_value="json"),
+            patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth) as mock_from_file,
+        ):
+            result = load_auth(auth_file, enc)
+            mock_from_file.assert_called_once_with(str(auth_file), password="secret123")
+            assert result == mock_auth
 
 
 class TestSaveAuth:
@@ -217,8 +222,6 @@ class TestSaveAuth:
 
     def test_sets_secure_file_permissions(self, tmp_path):
         """Test that save_auth sets file permissions to 600 (owner read/write only)."""
-        import stat
-
         auth_file = tmp_path / "auth.json"
         mock_auth = MagicMock()
 
@@ -236,8 +239,6 @@ class TestSaveAuth:
 
     def test_sets_secure_permissions_with_encryption(self, tmp_path):
         """Test that encrypted file also gets secure permissions."""
-        import stat
-
         auth_file = tmp_path / "auth.json"
         mock_auth = MagicMock()
         enc = AuthFileEncryption(password="test", encryption="json")
@@ -304,7 +305,7 @@ class TestGetFileEncryptionStyle:
 class TestClientIntegration:
     """Integration tests for encryption with AudibleClient."""
 
-    def test_from_file_with_encrypted_auth(self, tmp_path, monkeypatch):
+    def test_from_file_with_encrypted_auth(self, tmp_path):
         """Test AudibleClient.from_file handles encrypted files."""
         from src.audible.client import AudibleClient
 
@@ -318,15 +319,17 @@ class TestClientIntegration:
         # Need to mock Client as well since it validates the auth
         mock_client = MagicMock()
 
-        with patch("src.audible.encryption.detect_file_encryption", return_value="json"):
-            with patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth):
-                with patch("src.utils.security.check_file_permissions"):
-                    with patch("src.audible.client.Client", return_value=mock_client):
-                        client = AudibleClient.from_file(
-                            auth_file=auth_file,
-                            auth_password="secret123",
-                        )
-                        assert client is not None
+        with (
+            patch("src.audible.encryption.detect_file_encryption", return_value="json"),
+            patch("src.audible.encryption.Authenticator.from_file", return_value=mock_auth),
+            patch("src.utils.security.check_file_permissions"),
+            patch("src.audible.client.Client", return_value=mock_client),
+        ):
+            client = AudibleClient.from_file(
+                auth_file=auth_file,
+                auth_password="secret123",
+            )
+            assert client is not None
 
     def test_from_file_encrypted_without_password_raises(self, tmp_path):
         """Test AudibleClient.from_file raises when encrypted file has no password."""
@@ -335,9 +338,11 @@ class TestClientIntegration:
         auth_file = tmp_path / "auth.json"
         auth_file.write_text("encrypted_data")
 
-        with patch("src.audible.encryption.detect_file_encryption", return_value="json"):
-            with patch("src.utils.security.check_file_permissions"):
-                # Clear env var to ensure no password is available
-                with patch.dict(os.environ, {}, clear=True):
-                    with pytest.raises(AudibleAuthError, match="encrypted"):
-                        AudibleClient.from_file(auth_file=auth_file)
+        with (
+            patch("src.audible.encryption.detect_file_encryption", return_value="json"),
+            patch("src.utils.security.check_file_permissions"),
+            # Clear env var to ensure no password is available
+            patch.dict(os.environ, {}, clear=True),
+            pytest.raises(AudibleAuthError, match="encrypted"),
+        ):
+            AudibleClient.from_file(auth_file=auth_file)

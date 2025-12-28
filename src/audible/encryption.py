@@ -59,6 +59,7 @@ def get_encryption_config(
     password: str | None = None,
     encryption: EncryptionStyle = "json",
     kdf_iterations: int = 50_000,
+    *,
     use_env_password: bool = True,
 ) -> AuthFileEncryption:
     """
@@ -152,12 +153,16 @@ def save_auth(
             kdf_iterations=enc.kdf_iterations,
         )
     else:
-        logger.warning("Saving auth file WITHOUT encryption. " "Consider setting AUDIBLE_AUTH_PASSWORD for security.")
+        logger.warning("Saving auth file WITHOUT encryption. Consider setting AUDIBLE_AUTH_PASSWORD for security.")
         auth.to_file(str(auth_path), encryption=False)
 
     # Set secure permissions: owner read/write only (600)
-    auth_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
-    logger.debug("Set file permissions to 600 on %s", auth_path)
+    # Note: chmod has no effect on Windows systems
+    if os.name != "nt":
+        auth_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        logger.debug("Set file permissions to 600 on %s", auth_path)
+    else:
+        logger.debug("Skipping chmod on Windows (not supported)")
 
 
 def is_file_encrypted(auth_path: Path) -> bool:

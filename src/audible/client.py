@@ -17,9 +17,7 @@ from pydantic import ValidationError
 from audible import Authenticator, Client
 
 from .encryption import (
-    AuthFileEncryption,
     get_encryption_config,
-    is_file_encrypted,
     load_auth,
     save_auth,
 )

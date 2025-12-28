@@ -120,9 +120,9 @@ def audible_login(
         console.print(f"  Marketplace: {client.marketplace}")
         console.print(f"  Credentials saved to: {auth_file}")
         if auth_password:
-            console.print(f"  Encryption: [success]Enabled[/success]")
+            console.print("  Encryption: [success]Enabled[/success]")
         else:
-            console.print(f"  Encryption: [warning]Disabled[/warning]")
+            console.print("  Encryption: [warning]Disabled[/warning]")
             console.print("\n[muted]Tip: Run 'audible encrypt' to encrypt your credentials.[/muted]")
 
     except Exception as e:
@@ -202,10 +202,10 @@ def audible_encrypt(
         console.print("[muted]Remember your password! Set AUDIBLE_AUTH_PASSWORD to avoid prompts.[/muted]")
 
     except ValueError as e:
-        ui.error("Encryption failed", details=str(e))
+        ui.error(f"Failed to encrypt credentials at {auth_file}", details=str(e))
         raise typer.Exit(1) from e
     except Exception as e:
-        ui.error("Error", details=str(e))
+        ui.error(f"Failed to encrypt credentials at {auth_file}", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -232,7 +232,7 @@ def audible_status():
         console.print()
         ui.warning(
             "Auth file is NOT encrypted",
-            details="Your credentials are stored in plaintext. " "Run 'audible encrypt' to encrypt them.",
+            details="Your credentials are stored in plaintext. Run 'audible encrypt' to encrypt them.",
         )
 
     try:
