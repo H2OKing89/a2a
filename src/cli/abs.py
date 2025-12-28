@@ -107,7 +107,7 @@ def abs_status():
     except (ABSError, ABSConnectionError, ABSAuthError) as e:
         # Expected errors - show friendly message only, no traceback
         ui.error("Connection failed", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
     except Exception as e:
         # Unexpected errors - show traceback for debugging
         ui.error("Connection failed", details=str(e))
@@ -453,7 +453,8 @@ def abs_series(
     library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
-            series_list = client.get_library_series(library_id, limit=500)
+            response = client.get_library_series(library_id, limit=500)
+            series_list = response.get("results", [])
 
             # Sort series
             if sort == "name":
@@ -574,9 +575,14 @@ def abs_collections(
                     book_table.add_column("ID", style="dim cyan", max_width=24)
 
                     for i, book in enumerate(coll.books, 1):
-                        # Handle both expanded and non-expanded book data
-                        title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
-                        book_id_val = book.get("id", "")
+                        # Handle both expanded (dict) and non-expanded (str) book data
+                        if isinstance(book, dict):
+                            title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
+                            book_id_val = book.get("id", "")
+                        else:
+                            # book is a string (book ID)
+                            title = "?"
+                            book_id_val = str(book)
                         book_table.add_row(str(i), title[:50], book_id_val)
 
                     console.print(book_table)

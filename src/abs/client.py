@@ -180,10 +180,10 @@ class ABSClient:
                 raise ABSConnectionError(f"tls_ca_bundle must be a file, not a directory: {tls_ca_bundle}")
             try:
                 ca_path.read_bytes()[:1]  # Check readability
-            except PermissionError:
+            except PermissionError as e:
                 raise ABSConnectionError(
                     f"tls_ca_bundle file is not readable: {tls_ca_bundle}\n" "Check file permissions."
-                )
+                ) from e
 
         # Security validation: HTTP only allowed for localhost or if explicitly enabled
         if not self._is_https and not self._is_localhost and not allow_insecure_http:
@@ -347,7 +347,13 @@ class ABSClient:
             return {}
 
         try:
-            return response.json()
+            data = response.json()
+            if not isinstance(data, dict):
+                raise ABSError(
+                    f"Expected dict response, got {type(data).__name__}",
+                    status_code=response.status_code,
+                )
+            return data
         except ValueError as e:
             # Server returned non-JSON response (likely HTML error page)
             content_preview = response.text[:500] if response.text else "(empty)"
