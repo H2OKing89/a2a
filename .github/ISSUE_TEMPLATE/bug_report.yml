@@ -1,0 +1,65 @@
+name: Bug report
+description: File a bug report
+title: 'bug: '
+labels: [bug]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thanks for taking the time to report a bug.
+
+- type: input
+  id: version
+  attributes:
+    label: A2A version
+    description: Output of `python -c "import src; print(src.__version__)"` (or the git commit)
+    placeholder: 0.1.0
+  validations:
+    required: false
+
+- type: input
+  id: python
+  attributes:
+    label: Python version
+    placeholder: 3.13.x
+  validations:
+    required: true
+
+- type: dropdown
+  id: os
+  attributes:
+    label: OS
+    options:
+    - Linux
+    - macOS
+    - Windows
+    - Other
+  validations:
+    required: true
+
+- type: textarea
+  id: what-happened
+  attributes:
+    label: What happened?
+    description: Include expected behavior too.
+  validations:
+    required: true
+
+- type: textarea
+  id: repro
+  attributes:
+    label: Steps to reproduce
+    description: Minimal steps to reproduce the issue.
+    placeholder: |
+      1. Run `python cli.py ...`
+      2. See error ...
+  validations:
+    required: true
+
+- type: textarea
+  id: logs
+  attributes:
+    label: Relevant logs / traceback
+    render: shell
+  validations:
+    required: false

@@ -1,7 +1,7 @@
 # 🎧 Audiobook to Audible (A2A)
 
 [![CI](https://github.com/H2OKing89/a2a/actions/workflows/ci.yml/badge.svg)](https://github.com/H2OKing89/a2a/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -18,7 +18,7 @@ A CLI tool for managing audiobook libraries via **Audiobookshelf (ABS)** and **A
 
 ## 📋 Requirements
 
-- Python 3.11 or higher
+- Python 3.13 or higher
 - [Audiobookshelf](https://www.audiobookshelf.org/) server (self-hosted)
 - Audible account (for enrichment features)
 - `mediainfo` system package (for audio analysis)
@@ -118,6 +118,11 @@ python cli.py audible auth
 python cli.py series list <library-id>
 python cli.py series analyze <library-id>
 ```
+
+## 🧰 Developer utilities
+
+- `tools/dev.py` (make-like helper)
+- `tools/dev_series_explore.py` (series matching exploration)
 
 ## 🏗️ Architecture
 
