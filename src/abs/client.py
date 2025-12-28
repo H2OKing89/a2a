@@ -82,26 +82,32 @@ def _is_localhost(host: str) -> bool:
     return hostname in ("localhost", "127.0.0.1", "::1")
 
 
-def _normalize_host(host: str, allow_insecure_http: bool) -> str:
+def _normalize_host(host: str) -> str:
     """
     Normalize host URL by adding scheme if missing.
 
+    Default behavior:
+    - Localhost: defaults to http:// (common for local dev)
+    - Remote: defaults to https:// (secure by default)
+
+    Note: allow_insecure_http only affects whether explicit http:// is accepted,
+    NOT what scheme is defaulted to. "allow" != "prefer".
+
     Args:
         host: Host URL (may or may not have scheme)
-        allow_insecure_http: Whether to allow HTTP for non-localhost
 
     Returns:
         Normalized URL with scheme
     """
     host = host.rstrip("/")
 
-    # Already has scheme
+    # Already has scheme - keep as-is
     if "://" in host:
         return host
 
-    # Add scheme based on settings
-    is_local = _is_localhost(host)
-    if is_local or allow_insecure_http:
+    # Add scheme: localhost -> http, remote -> https
+    # This ensures we default to secure even when allow_insecure_http is set
+    if _is_localhost(host):
         return f"http://{host}"
     else:
         return f"https://{host}"
@@ -140,12 +146,12 @@ class ABSClient:
             cache: SQLiteCache instance for caching API responses
             cache_ttl_hours: Cache TTL in hours (default 2)
             cache_dir: Deprecated - use cache parameter instead
-            allow_insecure_http: Allow HTTP connections (localhost always allowed)
+            allow_insecure_http: Allow HTTP connections to non-localhost (localhost always allowed)
             tls_ca_bundle: Path to CA certificate bundle for self-signed certs
             insecure_tls: DANGEROUS - Disable SSL verification entirely
         """
         # Normalize host URL (add scheme if missing)
-        self.host = _normalize_host(host, allow_insecure_http)
+        self.host = _normalize_host(host)
         self.api_key = api_key
         self.timeout = timeout
         self.rate_limit_delay = rate_limit_delay
@@ -155,9 +161,29 @@ class ABSClient:
         # Track security state for status display
         self._is_localhost = _is_localhost(self.host)
         self._is_https = self.host.startswith("https://")
-        self._http2_enabled = _http2_available()
+        self._http2_available = _http2_available()
+        self._http2_enabled = self._http2_available  # Will be confirmed after first request
+        self._last_http_version: str | None = None  # Actual negotiated protocol
         self._insecure_tls = insecure_tls
         self._using_ca_bundle = bool(tls_ca_bundle)
+        self._tls_ca_bundle_path = tls_ca_bundle
+
+        # Validate tls_ca_bundle path early (fail fast with helpful message)
+        if tls_ca_bundle:
+            ca_path = Path(tls_ca_bundle)
+            if not ca_path.exists():
+                raise ABSConnectionError(
+                    f"tls_ca_bundle path does not exist: {tls_ca_bundle}\n"
+                    "Fix the path, or remove it to use the system trust store."
+                )
+            if not ca_path.is_file():
+                raise ABSConnectionError(f"tls_ca_bundle must be a file, not a directory: {tls_ca_bundle}")
+            try:
+                ca_path.read_bytes()[:1]  # Check readability
+            except PermissionError:
+                raise ABSConnectionError(
+                    f"tls_ca_bundle file is not readable: {tls_ca_bundle}\n" "Check file permissions."
+                )
 
         # Security validation: HTTP only allowed for localhost or if explicitly enabled
         if not self._is_https and not self._is_localhost and not allow_insecure_http:
@@ -201,11 +227,11 @@ class ABSClient:
             },
             timeout=timeout,
             verify=verify,
-            http2=self._http2_enabled,
+            http2=self._http2_available,
         )
 
-        if self._http2_enabled:
-            logger.debug("HTTP/2 enabled (h2 library available)")
+        if self._http2_available:
+            logger.debug("HTTP/2 support available (h2 library installed)")
         else:
             logger.debug("HTTP/2 not available; using HTTP/1.1 (install httpx[http2] for HTTP/2)")
 
@@ -265,8 +291,24 @@ class ABSClient:
                 params=params,
                 json=json,
             )
+            # Track actual negotiated HTTP version
+            self._last_http_version = getattr(response, "http_version", None)
+            if self._last_http_version == "HTTP/2":
+                self._http2_enabled = True
+            elif self._last_http_version:
+                self._http2_enabled = False
         except httpx.ConnectError as e:
             logger.debug("ABS connection error: %s", e)
+            error_str = str(e).lower()
+            # Detect SSL certificate verification failures and give helpful hint
+            if "certificate" in error_str or "ssl" in error_str or "verify" in error_str:
+                raise ABSConnectionError(
+                    f"SSL certificate verification failed for {self.host}\n"
+                    "This usually means the server is using a self-signed or private CA certificate.\n"
+                    "Options:\n"
+                    "  1. Set tls_ca_bundle to your CA certificate file (recommended)\n"
+                    "  2. Set ABS_INSECURE_TLS=1 to disable verification (testing only)"
+                ) from e
             raise ABSConnectionError(f"Failed to connect to {self.host}: {e}") from e
         except httpx.TimeoutException as e:
             logger.debug("ABS timeout: %s", e)
