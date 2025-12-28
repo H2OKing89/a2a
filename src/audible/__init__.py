@@ -27,7 +27,7 @@ from .encryption import (
     load_auth,
     save_auth,
 )
-from .enrichment import AudibleEnrichment, AudibleEnrichmentService
+from .enrichment import AsyncAudibleEnrichmentService, AudibleEnrichment, AudibleEnrichmentService
 from .logging import (
     LogContext,
     configure_logging,
@@ -130,6 +130,7 @@ __all__ = [
     # Enrichment service
     "AudibleEnrichment",
     "AudibleEnrichmentService",
+    "AsyncAudibleEnrichmentService",
     # API Enums - for type-safe API usage
     "SimilarityType",
     "LibrarySortBy",
