@@ -5,6 +5,7 @@ This module provides:
 - Factory functions for API clients and cache
 - Library ID resolution
 - Shared console and UI instances
+- Async CLI utilities
 """
 
 import logging
@@ -18,8 +19,19 @@ from src.cache import SQLiteCache
 from src.config import get_settings
 from src.utils.ui import Icons, console, ui
 
+from .async_utils import (
+    AsyncBatchProcessor,
+    async_command,
+    gather_with_progress,
+    run_async,
+    stream_with_progress,
+)
+
 __all__ = [
+    "async_command",
+    "AsyncBatchProcessor",
     "console",
+    "gather_with_progress",
     "get_abs_client",
     "get_audible_client",
     "get_cache",
@@ -27,6 +39,8 @@ __all__ = [
     "Icons",
     "logger",
     "resolve_library_id",
+    "run_async",
+    "stream_with_progress",
     "ui",
 ]
 
