@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test coverage lint format pre-commit clean
+.PHONY: help install install-dev test coverage lint format pre-commit clean version
 
 # Default target
 help:
@@ -12,6 +12,10 @@ help:
 	@echo "  make pre-commit    - Run all pre-commit hooks"
 	@echo "  make setup-hooks   - Setup pre-commit git hooks"
 	@echo "  make clean         - Remove cache and build artifacts"
+	@echo "  make version       - Show current version"
+	@echo "  make bump-patch    - Bump patch version (0.1.0 -> 0.1.1)"
+	@echo "  make bump-minor    - Bump minor version (0.1.0 -> 0.2.0)"
+	@echo "  make bump-major    - Bump major version (0.1.0 -> 1.0.0)"
 
 # Installation
 install:
@@ -63,6 +67,25 @@ clean:
 	find . -type f -name "*.coverage" -delete
 	rm -rf .pytest_cache/ .mypy_cache/ htmlcov/ .coverage
 	@echo "Cleaned cache and build artifacts"
+
+# Version management
+version:
+	@python tools/version.py
+
+bump-patch:
+	@python tools/version.py patch
+
+bump-minor:
+	@python tools/version.py minor
+
+bump-major:
+	@python tools/version.py major
+
+release-patch: bump-patch
+	@git add src/__init__.py
+	@git commit -m "chore: bump version to $$(python tools/version.py | cut -d' ' -f3)"
+	@git tag v$$(python tools/version.py | cut -d' ' -f3)
+	@echo "✅ Version bumped and tagged. Run 'git push origin main --tags' to release."
 
 # Quick commands
 quick-test: format lint test
