@@ -92,7 +92,7 @@ def quality_scan(
             with ui.progress() as progress:
                 task = progress.add_task(f"{Icons.SEARCH} Analyzing quality...", total=len(item_ids))
 
-                def progress_callback(completed: int, total: int) -> None:
+                def progress_callback(completed: int, _total: int) -> None:
                     progress.update(task, completed=completed)
 
                 # batch_get_items_expanded uses parallel requests + caching
@@ -507,7 +507,7 @@ def quality_upgrades(
             ) as progress:
                 task = progress.add_task("Scanning quality...", total=len(item_ids), elapsed="")
 
-                def update_progress(completed: int, total: int):
+                def update_progress(completed: int, _total: int):
                     elapsed = time.time() - phase1_start
                     progress.update(task, completed=completed, elapsed=f"{elapsed:.1f}s")
 
