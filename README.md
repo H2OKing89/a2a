@@ -146,7 +146,7 @@ AUDIBLE_AUTH_FILE=data/audible_auth.json
 
 ### Command Structure
 
-```
+```bash
 cli.py
 ├── status              # Global status (ABS + Audible + Cache)
 ├── cache               # Manage unified SQLite cache
@@ -289,7 +289,7 @@ A2A uses an intelligent tier system to classify audio quality:
 
 ## 🏗️ Architecture
 
-```
+```bash
 src/
 ├── abs/          # Audiobookshelf API client (sync + async)
 ├── audible/      # Audible API client with encryption
@@ -313,7 +313,7 @@ src/
 
 ### Data Flow
 
-```
+```bash
 ┌─────────────┐     ┌─────────────────┐     ┌──────────────────┐
 │ ABS Library │────▶│ QualityAnalyzer │────▶│ AudioQuality     │
 └─────────────┘     └─────────────────┘     └────────┬─────────┘
@@ -423,7 +423,7 @@ python tools/dev_series_explore.py --library-id <id>
 
 ## 📁 Project Structure
 
-```
+```text
 a2a/
 ├── .github/              # GitHub Actions, templates, Dependabot
 │   ├── workflows/        # CI, release, pre-commit autoupdate
