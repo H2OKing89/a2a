@@ -66,7 +66,7 @@ def abs_status():
 
     except Exception as e:
         ui.error("Connection failed", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("libraries")
@@ -103,7 +103,7 @@ def abs_libraries():
 
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("stats")
@@ -152,7 +152,7 @@ def abs_stats(
 
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("items")
@@ -204,7 +204,7 @@ def abs_items(
 
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("item")
@@ -259,7 +259,7 @@ def abs_item(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("search")
@@ -307,7 +307,7 @@ def abs_search(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("export")
@@ -341,7 +341,7 @@ def abs_export(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("authors")
@@ -392,7 +392,7 @@ def abs_authors(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("series")
@@ -443,7 +443,7 @@ def abs_series(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("collections")
@@ -574,7 +574,7 @@ def abs_collections(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @abs_app.command("sample")
@@ -663,4 +663,4 @@ def abs_sample(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
