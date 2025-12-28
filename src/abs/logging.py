@@ -231,35 +231,26 @@ class LogContext:
 
 
 # =============================================================================
-# Convenience log functions with rich markup
+# Convenience log functions - re-exported from shared utilities
 # =============================================================================
 
+from src.utils.logging import (
+    log_debug,
+    log_error,
+    log_info,
+    log_success,
+    log_warning,
+)
 
-def log_success(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
-    """Log a success message with green checkmark."""
-    logger = get_logger(logger_name)
-    logger.info(f"[green]✓[/green] {message}", *args, **kwargs)
-
-
-def log_error(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
-    """Log an error message with red X."""
-    logger = get_logger(logger_name)
-    logger.error(f"[red]✗[/red] {message}", *args, **kwargs)
-
-
-def log_warning(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
-    """Log a warning message with yellow warning sign."""
-    logger = get_logger(logger_name)
-    logger.warning(f"[yellow]⚠[/yellow] {message}", *args, **kwargs)
-
-
-def log_info(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
-    """Log an info message with blue info icon."""
-    logger = get_logger(logger_name)
-    logger.info(f"[cyan]ℹ[/cyan] {message}", *args, **kwargs)
-
-
-def log_debug(message: str, *args, logger_name: str | None = None, **kwargs) -> None:
-    """Log a debug message."""
-    logger = get_logger(logger_name)
-    logger.debug(f"[dim]{message}[/dim]", *args, **kwargs)
+__all__ = [
+    "configure_logging",
+    "get_logger",
+    "set_level",
+    "enable_debug_logging",
+    "LogContext",
+    "log_success",
+    "log_error",
+    "log_warning",
+    "log_info",
+    "log_debug",
+]
