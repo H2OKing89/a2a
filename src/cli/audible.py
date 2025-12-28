@@ -344,11 +344,12 @@ def audible_item(
 
             # Build categories string
             categories: list[str] = []
-            for ladder in book.category_ladders:
-                if ladder.ladder:
-                    cats = [c.name for c in ladder.ladder if c.name]
-                    if cats:
-                        categories.append(" > ".join(cats))
+            if book.category_ladders:
+                for ladder in book.category_ladders:
+                    if ladder.ladder:
+                        cats = [c.name for c in ladder.ladder if c.name]
+                        if cats:
+                            categories.append(" > ".join(cats))
 
             console.print(
                 Panel(

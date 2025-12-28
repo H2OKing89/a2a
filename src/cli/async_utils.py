@@ -9,7 +9,7 @@ import asyncio
 import functools
 from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypeVar, cast
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -233,7 +233,7 @@ class AsyncBatchProcessor:
                         # Log error but continue
                         _console.print(f"[yellow]Warning: {result}[/yellow]")
                     else:
-                        results.append(result)
+                        results.append(cast(T, result))
                     progress.advance(task_id)
 
                 # Rate limit between batches

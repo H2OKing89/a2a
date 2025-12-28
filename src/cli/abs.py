@@ -562,27 +562,27 @@ def abs_collections(
                     console.print("[red]Error:[/red] --id required for 'show'")
                     raise typer.Exit(1)
 
-                coll = client.get_collection(collection_id)
+                collection = client.get_collection(collection_id)
 
                 # Header panel
                 console.print(
                     Panel(
-                        f"[bold]{coll.name or 'Unknown'}[/bold]\n\n"
-                        f"ID: [cyan]{coll.id}[/cyan]\n"
-                        f"Library: {coll.library_id or 'N/A'}\n"
-                        f"Description: {coll.description or '(none)'}\n"
-                        f"Books: [green]{coll.book_count}[/green]",
+                        f"[bold]{collection.name or 'Unknown'}[/bold]\n\n"
+                        f"ID: [cyan]{collection.id}[/cyan]\n"
+                        f"Library: {collection.library_id or 'N/A'}\n"
+                        f"Description: {collection.description or '(none)'}\n"
+                        f"Books: [green]{collection.book_count}[/green]",
                         title="📁 Collection Details",
                     )
                 )
 
-                if coll.books:
+                if collection.books:
                     book_table = Table(show_header=True, header_style="bold")
                     book_table.add_column("#", style="dim", width=4)
                     book_table.add_column("Title", style="bold", max_width=50)
                     book_table.add_column("ID", style="dim cyan", max_width=24)
 
-                    for i, book in enumerate(coll.books, 1):
+                    for i, book in enumerate(collection.books, 1):
                         # Handle both expanded (dict) and non-expanded (str) book data
                         if isinstance(book, dict):
                             title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")

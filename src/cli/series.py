@@ -115,8 +115,8 @@ def series_analyze(
                 from rapidfuzz import fuzz
 
                 best_match = None
-                best_score = 0
-                similar_series: list[tuple[str, int]] = []
+                best_score: float = 0
+                similar_series: list[tuple[str, float]] = []
 
                 for s in all_series:
                     score = fuzz.ratio(s.name.lower(), series_name.lower())
@@ -235,15 +235,15 @@ def series_analyze(
             # Missing books
             if result.missing_books:
                 console.print(f"\n[bold red]Missing Books ({len(result.missing_books)}):[/bold red]")
-                for book in result.missing_books:
-                    seq = f"#{book.sequence}" if book.sequence else ""
-                    duration = f"({book.runtime_hours:.1f}h)" if book.runtime_hours else ""
-                    console.print(f"  [red]✗[/red] {book.title} {seq} {duration}")
+                for missing_book in result.missing_books:
+                    seq = f"#{missing_book.sequence}" if missing_book.sequence else ""
+                    duration = f"({missing_book.runtime_hours:.1f}h)" if missing_book.runtime_hours else ""
+                    console.print(f"  [red]✗[/red] {missing_book.title} {seq} {duration}")
 
             # Unmatched ABS books (in ABS but couldn't match to any Audible book)
             # Find them by comparing matched books with all ABS books
             matched_abs_ids = {m.abs_book.id for m in result.matched_books}
-            unmatched_abs = [b for b in target_series.books if b.id not in matched_abs_ids]
+            unmatched_abs = [book_item for book_item in target_series.books if book_item.id not in matched_abs_ids]
 
             if unmatched_abs and verbose:
                 console.print(f"\n[bold yellow]Unmatched ABS Books ({len(unmatched_abs)}):[/bold yellow]")
