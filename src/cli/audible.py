@@ -89,7 +89,7 @@ def audible_login(
 
     except Exception as e:
         console.print(f"[red]✗[/red] Login failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("status")
@@ -130,10 +130,10 @@ def audible_status():
     except AudibleAuthError as e:
         ui.error("Auth failed", details=str(e))
         console.print("[muted]Try running 'audible login' to refresh credentials.[/muted]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("library")
@@ -186,10 +186,10 @@ def audible_library(
 
     except AudibleAuthError as e:
         ui.error("Auth failed", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("item")
@@ -257,10 +257,10 @@ def audible_item(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("search")
@@ -300,10 +300,10 @@ def audible_search(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("export")
@@ -333,10 +333,10 @@ def audible_export(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("cache")
@@ -389,7 +389,7 @@ def audible_cache(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("wishlist")
@@ -503,10 +503,10 @@ def audible_wishlist(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("stats")
@@ -591,10 +591,10 @@ def audible_stats():
 
     except AudibleAuthError as e:
         ui.error("Auth failed", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         ui.error("Error", details=str(e))
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("recommendations")
@@ -650,10 +650,10 @@ def audible_recommendations(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @audible_app.command("sample")
@@ -733,7 +733,7 @@ def audible_sample(
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
