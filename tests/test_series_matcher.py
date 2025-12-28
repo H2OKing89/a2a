@@ -423,7 +423,7 @@ class TestSeriesMatcher:
 
     def test_get_series_books_by_asin_skips_none_asin(self, matcher, mock_audible_client):
         """get_series_books_by_asin skips None/empty ASINs."""
-        books, series_asin = matcher.get_series_books_by_asin([None, ""], use_cache=False)
+        _books, _series_asin = matcher.get_series_books_by_asin([None, ""], use_cache=False)
 
         # Should skip None and empty strings, not call API
         mock_audible_client.get_catalog_product.assert_not_called()

@@ -86,7 +86,7 @@ class TestTableFormatter:
         formatter.format_items(sample_items, title="Quality Report")
         assert formatter._title == "Quality Report"
 
-    def test_set_column_style(self, sample_items):
+    def test_set_column_style(self):
         formatter = TableFormatter()
         result = formatter.set_column_style("tier", "bold green")
         assert result is formatter  # Method chaining

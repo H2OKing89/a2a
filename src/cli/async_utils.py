@@ -110,7 +110,7 @@ async def gather_with_progress(
         description: Progress description text
 
     Returns:
-        List of results in same order as tasks
+        List of results in same order as input tasks
     """
     _console = console or Console()
 

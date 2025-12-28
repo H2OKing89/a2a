@@ -180,7 +180,7 @@ class TestAsyncBatchProcessor:
         assert results == ["single"]
 
     @pytest.mark.asyncio
-    async def test_handles_exceptions_gracefully(self, capsys):
+    async def test_handles_exceptions_gracefully(self):
         processor = AsyncBatchProcessor(batch_size=2, delay_between_batches=0.001)
 
         async def maybe_fail(x: int) -> int:
