@@ -180,7 +180,7 @@ class AsyncBatchProcessor:
         self,
         batch_size: int = 10,
         delay_between_batches: float = 0.1,
-    ):
+    ) -> None:
         """
         Initialize batch processor.
 
