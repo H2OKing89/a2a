@@ -149,14 +149,51 @@ No instances of `verify=False` found in codebase. HTTPS connections use default 
 
 **Severity:** Low  
 **Location:** `src/config.py`  
-**Status:** ⬜ Open (Low Priority)
+**Status:** ✅ Fixed
 
 Default ABS host is `http://localhost:13378` which is appropriate for local development but should be documented.
 
-**Recommendation:**
+**Resolution:**
 
-- [ ] Add documentation noting production deployments should use HTTPS
-- [ ] Consider adding `ABS_VERIFY_SSL` option for self-signed certs (with warning)
+Implemented a "secure by default" configuration with user-friendly escape hatches:
+
+- ✅ **HTTP/2 automatic** - Enabled when `h2` library available, silent fallback to HTTP/1.1
+- ✅ **`allow_insecure_http`** - Inverted from `enforce_https` for clearer semantics (default: false)
+- ✅ **Localhost carve-out** - HTTP allowed for localhost/127.0.0.1 without warnings
+- ✅ **`tls_ca_bundle`** - Support for self-signed certificates via CA bundle path
+- ✅ **`insecure_tls`** - Deliberately annoying env-var-only option for disabling SSL verification
+- ✅ **URL normalization** - Hosts without scheme get `https://` by default (or `http://` for localhost)
+- ✅ **Clear error messages** - Friendly guidance when HTTP blocked for remote servers
+
+**Implementation Details:**
+
+| Component | Description |
+|-----------|-------------|
+| `config.py` | `allow_insecure_http`, `tls_ca_bundle`, `insecure_tls` in `ABSSettings` |
+| `abs/client.py` | Auto HTTP/2, URL normalization, localhost detection, TLS verification options |
+| `cli/abs.py` | Security status from client state (HTTPS, HTTP/2, CA bundle, etc.) |
+| `cli.py` | Simplified security status display |
+| `cli/common.py` | Pass new security settings to client |
+
+**Config (config.yaml):**
+
+```yaml
+abs:
+  host: https://abs.example.com  # or just "abs.example.com" (https:// added automatically)
+  api_key: "..."
+  allow_insecure_http: false     # Only localhost allowed over HTTP by default
+  tls_ca_bundle: "/path/to/ca.pem"  # Optional: for self-signed certs
+```
+
+**Environment Variables (advanced):**
+
+```bash
+# Allow HTTP for non-localhost (not recommended)
+export ABS_ALLOW_INSECURE_HTTP=true
+
+# DANGEROUS: Disable SSL verification entirely
+export ABS_INSECURE_TLS=1
+```
 
 ---
 
@@ -272,13 +309,13 @@ All issues resolved:
 - [x] Improve exception handling with logging - Added debug logging
 - [x] Add CLI command to encrypt existing credentials - `audible encrypt` command
 - [x] Add encryption status warning - `audible status` shows warning if unencrypted
+- [x] Add HTTPS enforcement option for ABS - Implemented with `allow_insecure_http`, `tls_ca_bundle`, automatic HTTP/2
 - [ ] Document security best practices in README
 
 ### Long-term (Low Priority)
 
 - [ ] Add optional keyring integration for password storage
 - [ ] Implement credential rotation reminders
-- [ ] Add HTTPS enforcement option for ABS
 
 ---
 
@@ -288,8 +325,8 @@ All issues resolved:
 |------|--------|-------|
 | `data/audible_auth.json` | ✅ | Now encrypted with AES-CBC, 600 permissions |
 | `.gitignore` | ✅ | Properly excludes sensitive files |
-| `src/config.py` | ✅ | Added encryption settings (password, format, iterations) |
-| `src/abs/client.py` | ✅ | Bearer auth, no credential logging, exception logging added |
+| `src/config.py` | ✅ | Security settings: `allow_insecure_http`, `tls_ca_bundle`, `insecure_tls` |
+| `src/abs/client.py` | ✅ | Auto HTTP/2, URL normalization, localhost carve-out, TLS options |
 | `src/audible/client.py` | ✅ | Updated with encryption support, permission checks |
 | `src/audible/async_client.py` | ✅ | Updated with encryption support |
 | `src/audible/encryption.py` | ✅ | **NEW**: Encryption helpers (load/save/detect) |
