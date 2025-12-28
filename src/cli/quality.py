@@ -266,8 +266,9 @@ def quality_low(
             # Get all items
             items_resp: dict[str, Any] = client._get(f"/libraries/{library_id}/items", params={"limit": 0})
             all_items = items_resp.get("results", [])
+            item_ids = [item.get("id") for item in all_items if item.get("id")]
 
-            console.print(f"Scanning {len(all_items)} items for quality < {threshold} kbps...\n")
+            console.print(f"Scanning {len(item_ids)} items for quality < {threshold} kbps...\n")
 
             analyzer = QualityAnalyzer()
             low_quality_items = []
@@ -279,27 +280,36 @@ def quality_low(
                 TaskProgressColumn(),
                 console=console,
             ) as progress:
-                task = progress.add_task("Scanning...", total=len(all_items))
+                task = progress.add_task("Scanning...", total=len(item_ids))
 
-                for item in all_items:
-                    item_id = item.get("id")
-                    try:
-                        full_item: dict[str, Any] = client._get(f"/items/{item_id}", params={"expanded": 1})
-                        quality = analyzer.analyze_item(full_item)
+                def progress_callback(completed: int, _total: int) -> None:
+                    progress.update(task, completed=completed)
 
-                        if quality.bitrate_kbps < threshold:
-                            low_quality_items.append(quality)
-                    except Exception as e:
-                        logger.error(
-                            f"Failed to analyze item {item_id}: {e}",
-                            exc_info=True,
-                            extra={
-                                "item_id": item_id,
-                                "item_title": item.get("media", {}).get("metadata", {}).get("title"),
-                            },
-                        )
+                # Use batch fetch for parallel requests + caching
+                expanded_items = client.batch_get_items_expanded(
+                    item_ids,
+                    use_cache=True,
+                    max_workers=20,
+                    progress_callback=progress_callback,
+                )
 
-                    progress.advance(task)
+                # Analyze each item and filter by threshold
+                for full_item in expanded_items:
+                    if full_item:
+                        try:
+                            quality = analyzer.analyze_item(full_item)
+                            if quality.bitrate_kbps < threshold:
+                                low_quality_items.append(quality)
+                        except Exception as e:
+                            # Extract item ID for logging
+                            item_id = full_item.get("id", "unknown")
+                            item_title = full_item.get("media", {}).get("metadata", {}).get("title", "Unknown")
+                            logger.exception(
+                                "Failed to analyze item %s: %s",
+                                item_id,
+                                e,
+                                extra={"item_id": item_id, "item_title": item_title},
+                            )
 
             # Sort by bitrate (lowest first)
             low_quality_items.sort(key=lambda x: x.bitrate_kbps)
@@ -563,9 +573,10 @@ def quality_upgrades(
                     except Exception as e:
                         # Find the title for this ASIN from upgrade_candidates
                         candidate_title = next((c.title for c in upgrade_candidates if c.asin == asin), "Unknown")
-                        logger.error(
-                            f"Failed to enrich ASIN {asin}: {e}",
-                            exc_info=True,
+                        logger.exception(
+                            "Failed to enrich ASIN %s: %s",
+                            asin,
+                            e,
                             extra={"asin": asin, "title": candidate_title},
                         )
 
