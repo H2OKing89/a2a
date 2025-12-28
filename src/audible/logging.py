@@ -103,6 +103,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
 def configure_logging(
     level: LogLevel | int = "info",
+    *,
     console_output: bool = True,
     file_path: str | Path | None = None,
     file_level: LogLevel | int | None = None,
