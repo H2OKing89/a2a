@@ -79,8 +79,6 @@ jobs:
 
   type-check:
     runs-on: ubuntu-latest
-    # Type checking is informational only - don't fail the build
-    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
 
@@ -96,5 +94,7 @@ jobs:
         pip install -r requirements.txt -r requirements-dev.txt
 
     - name: Run mypy
+      # Type checking is informational only - don't fail the build
+      continue-on-error: true
       run: |
         python -m mypy src --ignore-missing-imports
