@@ -5,7 +5,7 @@ pre-commit>=4.0.0,<5.0.0
 
 # Code formatting
 black>=24.10.0,<25.0.0
-isort>=5.13.0,<6.0.0
+isort>=5.13.0,<8.0.0
 
 # Linting
 flake8>=7.1.0,<8.0.0
