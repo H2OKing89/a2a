@@ -373,7 +373,11 @@ class AsyncAudibleClient:
         if use_cache and self._cache:
             cached = self._cache.get("catalog", cache_key)
             if cached:
-                return AudibleCatalogProduct.model_validate(cached)
+                try:
+                    return AudibleCatalogProduct.model_validate(cached)
+                except ValidationError:
+                    # Cached data is invalid, continue to fetch fresh
+                    pass
 
         try:
             response = await self._request(
@@ -391,6 +395,10 @@ class AsyncAudibleClient:
             return product
 
         except AsyncAudibleNotFoundError:
+            return None
+        except ValidationError as e:
+            # Product data is malformed (e.g., missing title for delisted product)
+            logger.debug("Invalid catalog product data for ASIN %s: %s", asin, str(e))
             return None
 
     async def get_multiple_products(
