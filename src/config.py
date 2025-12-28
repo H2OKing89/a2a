@@ -202,7 +202,7 @@ class EnrichmentSettings(BaseSettings):
     requests_per_minute: float = Field(default=20.0)
     burst_size: int = Field(default=5)
     backoff_multiplier: float = Field(default=2.0)
-    max_backoff_s: float = Field(default=60.0)
+    max_backoff_seconds: float = Field(default=60.0, description="Maximum backoff delay in seconds")
 
 
 class Settings(BaseSettings):

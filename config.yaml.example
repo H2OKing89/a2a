@@ -24,7 +24,7 @@ enrichment:
   requests_per_minute: 20.0
   burst_size: 5
   backoff_multiplier: 2.0
-  max_backoff_s: 60.0
+  max_backoff_seconds: 60.0
 
 paths:
   # Update these paths to match your system

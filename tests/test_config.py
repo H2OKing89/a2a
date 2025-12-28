@@ -253,7 +253,7 @@ class TestEnrichmentSettings:
         assert settings.requests_per_minute == 20.0
         assert settings.burst_size == 5
         assert settings.backoff_multiplier == 2.0
-        assert settings.max_backoff_s == 60.0
+        assert settings.max_backoff_seconds == 60.0
 
     def test_disabled_enrichment(self):
         """Test disabling enrichment."""
@@ -263,12 +263,12 @@ class TestEnrichmentSettings:
     def test_custom_settings(self):
         """Test custom enrichment settings."""
         settings = EnrichmentSettings(
-            requests_per_minute=30.0, burst_size=10, backoff_multiplier=3.0, max_backoff_s=120.0
+            requests_per_minute=30.0, burst_size=10, backoff_multiplier=3.0, max_backoff_seconds=120.0
         )
         assert settings.requests_per_minute == 30.0
         assert settings.burst_size == 10
         assert settings.backoff_multiplier == 3.0
-        assert settings.max_backoff_s == 120.0
+        assert settings.max_backoff_seconds == 120.0
 
 
 class TestSettings:
