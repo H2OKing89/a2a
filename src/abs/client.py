@@ -45,6 +45,9 @@ class ABSError(Exception):
         self.status_code = status_code
         self.response = response
 
+    def __str__(self) -> str:
+        return self.message
+
 
 class ABSConnectionError(ABSError):
     """Connection error."""

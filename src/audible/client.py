@@ -47,6 +47,9 @@ class AudibleError(Exception):
         self.message = message
         self.response = response
 
+    def __str__(self) -> str:
+        return self.message
+
 
 class AudibleAuthError(AudibleError):
     """Authentication error."""
