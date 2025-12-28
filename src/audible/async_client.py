@@ -737,6 +737,7 @@ class AsyncAudibleClient:
         asin: str,
         codecs: list[str],
         drm_types: list[str],
+        *,
         spatial: bool = False,
         quality: str = "High",
     ) -> dict | None:
@@ -751,7 +752,7 @@ class AsyncAudibleClient:
             asin: Audible ASIN
             codecs: List of codec identifiers (mp4a.40.2, mp4a.40.42, ec+3, ac-4)
             drm_types: List of DRM types (Adrm, Widevine, FairPlay)
-            spatial: Request spatial audio (for Dolby Atmos)
+            spatial: Request spatial audio (for Dolby Atmos) (keyword-only)
             quality: Quality level (High, Normal)
 
         Returns:
@@ -773,7 +774,15 @@ class AsyncAudibleClient:
                 },
             )
             return response if "content_license" in response else None
-        except AsyncAudibleError:
+        except AsyncAudibleError as e:
+            logger.debug(
+                "License request failed for ASIN %s (codecs=%s, drm=%s, spatial=%s): %s",
+                asin,
+                codecs,
+                drm_types,
+                spatial,
+                e,
+            )
             return None
 
     async def get_audio_format(
@@ -829,6 +838,7 @@ class AsyncAudibleClient:
     async def discover_content_quality(
         self,
         asin: str,
+        *,
         use_cache: bool = True,
     ) -> ContentQualityInfo:
         """
@@ -843,7 +853,7 @@ class AsyncAudibleClient:
 
         Args:
             asin: Audible ASIN
-            use_cache: Use cached results
+            use_cache: Use cached results (keyword-only)
 
         Returns:
             ContentQualityInfo with all discovered formats
@@ -879,6 +889,7 @@ class AsyncAudibleClient:
     async def discover_multiple_quality(
         self,
         asins: list[str],
+        *,
         use_cache: bool = True,
     ) -> dict[str, ContentQualityInfo]:
         """
@@ -886,20 +897,18 @@ class AsyncAudibleClient:
 
         Args:
             asins: List of Audible ASINs
-            use_cache: Use cached results
+            use_cache: Use cached results (keyword-only)
 
         Returns:
             Dict mapping ASIN to ContentQualityInfo
         """
         tasks = [self.discover_content_quality(asin, use_cache=use_cache) for asin in asins]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = await asyncio.gather(*tasks)
 
         quality_map = {}
-        for asin, result in zip(asins, results):
+        for asin, result in zip(asins, results, strict=True):
             if isinstance(result, ContentQualityInfo):
                 quality_map[asin] = result
-            elif isinstance(result, Exception):
-                logger.warning("Failed to discover quality for %s: %s", asin, result)
 
         return quality_map
 
