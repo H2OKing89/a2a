@@ -16,10 +16,11 @@ import csv
 import json
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from enum import Enum
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, TextIO
+from typing import Any, TextIO
 
 from rich.box import ROUNDED
 from rich.console import Console
@@ -97,7 +98,7 @@ class OutputFormatter(ABC):
         if self.output_target is None:
             return sys.stdout, False
         elif isinstance(self.output_target, Path):
-            return open(self.output_target, "w", newline="", encoding="utf-8"), True
+            return open(self.output_target, "w", newline="", encoding="utf-8"), True  # noqa: SIM115
         else:
             return self.output_target, False
 
@@ -358,7 +359,7 @@ def get_formatter(
         try:
             format = OutputFormat(format.lower())
         except ValueError:
-            raise ValueError(f"Unsupported output format: {format}")
+            raise ValueError(f"Unsupported output format: {format}") from None
 
     formatters: dict[OutputFormat, type[OutputFormatter]] = {
         OutputFormat.TABLE: TableFormatter,
@@ -368,6 +369,6 @@ def get_formatter(
 
     formatter_class = formatters.get(format)
     if formatter_class is None:
-        raise ValueError(f"Unsupported output format: {format}")
+        raise ValueError(f"Unsupported output format: {format}") from None
 
     return formatter_class(output=output, console=console, **kwargs)
