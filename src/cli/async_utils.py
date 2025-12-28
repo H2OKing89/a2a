@@ -208,7 +208,8 @@ class AsyncBatchProcessor:
             description: Progress description
 
         Returns:
-            List of processed results
+            List of processed results (failed items are logged and skipped,
+            so the returned list may be shorter than the input list)
         """
         _console = console or Console()
         results: list[T] = []

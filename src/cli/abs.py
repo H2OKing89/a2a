@@ -31,6 +31,7 @@ from src.cli.common import (
     resolve_library_id,
     ui,
 )
+from src.config import get_settings
 from src.utils import save_golden_sample
 from src.utils.ui import Panel, Table
 
@@ -41,8 +42,6 @@ abs_app = typer.Typer(help="📚 Audiobookshelf API commands")
 @abs_app.command("status")
 def abs_status():
     """Check ABS connection status."""
-    from src.config import get_settings
-
     settings = get_settings()
 
     ui.header("Audiobookshelf", subtitle=settings.abs.host, icon=Icons.SERVER)
