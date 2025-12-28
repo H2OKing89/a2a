@@ -248,7 +248,7 @@ class SeriesMatcher:
         """
         if not self._audible:
             return []
-            
+
         # Search catalog with series as keyword
         search_results = self._audible.search_catalog(
             keywords=series_name,

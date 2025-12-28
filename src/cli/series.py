@@ -10,14 +10,13 @@ Commands for analyzing and tracking series:
 import json
 import logging
 import time
-import traceback
 from pathlib import Path
 
 import typer
 
-from src.cli.common import console, get_abs_client, get_audible_client, resolve_library_id
+from src.cli.common import console, get_abs_client, get_audible_client, resolve_library_id, ui
 from src.series import MatchConfidence, SeriesComparisonResult, SeriesMatcher
-from src.utils.ui import BarColumn, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn
+from src.utils.ui import BarColumn, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn, Tree
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +82,8 @@ def series_analyze(
         None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
-    format: str = typer.Option("table", "--format", "-f", help="Output format: table or json"),
+    tree: bool = typer.Option(False, "--tree", "-t", help="Show as tree view"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: table, json, or tree"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output file (default: stdout for json)"),
 ):
     """Analyze a specific series and find missing books."""
@@ -199,7 +199,63 @@ def series_analyze(
                         f.write(json_output)
                     console.print(f"[green]✓[/green] Exported to {output}")
                 else:
-                    print(json_output)
+                    ui.json(export_data, title=f"Series Analysis: {result.series_match.abs_series.name}")
+                return
+
+            # Tree view format
+            if tree or format.lower() == "tree":
+                series_name_display = result.series_match.abs_series.name
+                completion_pct = result.completion_percentage
+
+                # Pick emoji based on completion
+                if completion_pct >= 100:
+                    status_icon = "✅"
+                    status_style = "green"
+                elif completion_pct >= 75:
+                    status_icon = "📚"
+                    status_style = "cyan"
+                elif completion_pct >= 50:
+                    status_icon = "📖"
+                    status_style = "yellow"
+                else:
+                    status_icon = "📕"
+                    status_style = "red"
+
+                tree_root = Tree(
+                    f"[bold {status_style}]{status_icon} {series_name_display}[/bold {status_style}] "
+                    f"[dim]({completion_pct:.0f}% complete)[/dim]"
+                )
+
+                # Add matched books branch
+                if result.matched_books:
+                    owned_branch = tree_root.add(
+                        f"[bold green]📗 In Library ({len(result.matched_books)})[/bold green]"
+                    )
+                    for match in sorted(result.matched_books, key=lambda m: m.abs_book.sequence or ""):
+                        seq = f"[dim]#{match.abs_book.sequence}[/dim] " if match.abs_book.sequence else ""
+                        confidence_icon = {
+                            MatchConfidence.EXACT: "[green]●[/green]",
+                            MatchConfidence.HIGH: "[cyan]●[/cyan]",
+                            MatchConfidence.MEDIUM: "[yellow]●[/yellow]",
+                            MatchConfidence.LOW: "[red]○[/red]",
+                        }.get(match.confidence, "○")
+                        owned_branch.add(f"{seq}{confidence_icon} {match.abs_book.title}")
+
+                # Add missing books branch
+                if result.missing_books:
+                    missing_branch = tree_root.add(f"[bold red]📕 Missing ({len(result.missing_books)})[/bold red]")
+                    for book in sorted(result.missing_books, key=lambda b: b.sequence or ""):
+                        seq = f"[dim]#{book.sequence}[/dim] " if book.sequence else ""
+                        duration = f" [dim]({book.runtime_hours:.1f}h)[/dim]" if book.runtime_hours else ""
+                        price_info = ""
+                        if book.is_in_plus_catalog:
+                            price_info = " [green bold]FREE[/green bold]"
+                        elif book.price:
+                            price_info = f" [cyan]${book.price:.2f}[/cyan]"
+                        missing_branch.add(f"{seq}[red]✗[/red] {book.title}{duration}{price_info}")
+
+                console.print()
+                console.print(tree_root)
                 return
 
             # Table output format (default)
@@ -255,7 +311,7 @@ def series_analyze(
         raise  # Re-raise typer exits without catching
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        traceback.print_exc()
+        ui.print_exception()
         raise typer.Exit(1) from e
 
 
@@ -495,7 +551,5 @@ def series_report(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        import traceback
-
-        traceback.print_exc()
+        ui.print_exception()
         raise typer.Exit(1) from e
