@@ -453,7 +453,10 @@ def abs_series(
     library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
-            response = client.get_library_series(library_id, limit=500)
+            # Fetch more items than requested to ensure proper sorting results
+            # But use user's limit directly if they want a lot of items
+            fetch_limit = max(limit * 3, 100) if limit < 200 else limit
+            response = client.get_library_series(library_id, limit=fetch_limit)
             series_list = response.get("results", [])
 
             # Sort series
@@ -464,7 +467,7 @@ def abs_series(
             elif sort == "addedAt":
                 series_list.sort(key=lambda s: s.get("addedAt", 0), reverse=reverse)
 
-            # Limit results
+            # Limit results to user's requested amount
             series_list = series_list[:limit]
 
             table = Table(
