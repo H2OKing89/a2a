@@ -82,6 +82,8 @@ def abs_status():
             user = client.get_me()
             status.update("Fetching libraries...")
             libraries = client.get_libraries()
+            status.update("Fetching server info...")
+            server_info = client.get_server_info()
 
             # Now show actual negotiated protocol (after requests)
             if client._last_http_version:
@@ -95,6 +97,9 @@ def abs_status():
 
         ui.success(f"Authenticated as: [bold]{user.username}[/bold] ({user.type})")
         console.print(f"    {Icons.BULLET} Active: {user.is_active}, Locked: {user.is_locked}")
+
+        # Server info
+        ui.success(f"Server version: [bold]{server_info.version}[/bold] ({server_info.source})")
 
         # Libraries tree
         ui.subsection(f"{Icons.BOOK} Libraries ({len(libraries)})")

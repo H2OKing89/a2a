@@ -90,7 +90,7 @@ def status():
     has_errors = False
 
     # Header
-    ui.header("Audiobook Manager", subtitle="System Status", icon=Icons.AUDIOBOOK)
+    ui.header(f"A2A v{__version__}", subtitle="System Status", icon=Icons.AUDIOBOOK)
 
     # ABS Status
     ui.section("Audiobookshelf", icon=Icons.SERVER)
@@ -124,6 +124,7 @@ def status():
 
             user = client.get_me()
             libraries = client.get_libraries()
+            server_info = client.get_server_info()
 
             # Show actual negotiated protocol after requests
             if client._last_http_version:
@@ -134,6 +135,7 @@ def status():
 
         ui.success(f"Authenticated as [bold]{user.username}[/bold]")
         ui.success(f"{len(libraries)} libraries available")
+        ui.success(f"Server v{server_info.version} ({server_info.source})")
     except (ABSError, ABSConnectionError, ABSAuthError) as e:
         # Expected errors - show friendly message only, no traceback
         ui.error("Connection failed", details=str(e))

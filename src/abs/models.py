@@ -7,6 +7,15 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+class ServerInfo(BaseModel):
+    """ABS server information from /api/authorize."""
+
+    version: str = Field(default="unknown")
+    source: str = Field(default="unknown", alias="Source")
+
+    model_config = {"extra": "ignore"}
+
+
 class Folder(BaseModel):
     """Library folder."""
 
