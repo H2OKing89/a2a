@@ -15,10 +15,10 @@ from .formatters import (
 )
 
 __all__ = [
+    "CSVFormatter",
+    "JSONFormatter",
     "OutputFormat",
     "OutputFormatter",
     "TableFormatter",
-    "JSONFormatter",
-    "CSVFormatter",
     "get_formatter",
 ]
