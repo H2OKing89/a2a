@@ -43,11 +43,15 @@ def abs_status():
 
     try:
         with ui.spinner("Connecting...") as status, get_abs_client() as client:
+            # Show resolved/normalized host (what we're actually connecting to)
+            if client.host != settings.abs.host:
+                console.print(f"  {Icons.LINK} Resolved: [accent]{client.host}[/accent]")
+
             # Display security status from client (after normalization)
             if client._is_https:
                 ui.success("Connection secured with HTTPS")
                 if client._using_ca_bundle:
-                    ui.success("Using custom CA certificate bundle")
+                    ui.success(f"Using custom CA bundle: {client._tls_ca_bundle_path}")
                 elif not client._insecure_tls:
                     ui.success("SSL certificate verification enabled")
             elif client._is_localhost:
@@ -55,7 +59,11 @@ def abs_status():
             else:
                 ui.warning(
                     "Using insecure HTTP to remote server",
-                    details="API key sent in cleartext! Configure HTTPS in Audiobookshelf.",
+                    details="API key sent in cleartext!",
+                )
+                console.print(
+                    f"    [dim]{Icons.BULLET} Fix: Put ABS behind a reverse proxy (Caddy/Nginx/Traefik) "
+                    "with HTTPS, or enable HTTPS in ABS directly.[/dim]"
                 )
 
             if client._insecure_tls:
@@ -64,17 +72,28 @@ def abs_status():
                     details="This is insecure. Use tls_ca_bundle for self-signed certificates instead.",
                 )
 
-            if client._http2_enabled:
-                ui.success("HTTP/2 enabled")
+            # HTTP/2 status: show availability vs actual negotiation
+            if client._http2_available:
+                ui.success("HTTP/2 support available")
             else:
-                console.print(f"  {Icons.BULLET} HTTP/1.1 [dim](install httpx[http2] for HTTP/2)[/dim]")
+                console.print(f"  {Icons.BULLET} HTTP/2 not available [dim](install httpx[http2])[/dim]")
 
             status.update("Fetching user info...")
             user = client.get_me()
             status.update("Fetching libraries...")
             libraries = client.get_libraries()
 
-        ui.success(f"Connected as: [bold]{user.username}[/bold] ({user.type})")
+            # Now show actual negotiated protocol (after requests)
+            if client._last_http_version:
+                if client._last_http_version == "HTTP/2":
+                    ui.success("Negotiated HTTP/2 with server")
+                else:
+                    console.print(
+                        f"  {Icons.BULLET} Using {client._last_http_version} "
+                        "[dim](server may not support HTTP/2)[/dim]"
+                    )
+
+        ui.success(f"Authenticated as: [bold]{user.username}[/bold] ({user.type})")
         console.print(f"    {Icons.BULLET} Active: {user.is_active}, Locked: {user.is_locked}")
 
         # Libraries tree
