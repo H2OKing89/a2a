@@ -87,7 +87,27 @@ class TestGatherWithProgress:
 
         tasks = [task(1), task(2), task(3)]
         results = await gather_with_progress(tasks)
-        assert sorted(results) == [2, 4, 6]
+        # Verify results maintain input order
+        assert results == [2, 4, 6]
+
+    @pytest.mark.asyncio
+    async def test_maintains_input_order(self):
+        """Verify results are in input order even when tasks complete in different order."""
+
+        async def task_with_delay(n: int, delay: float) -> int:
+            await asyncio.sleep(delay)
+            return n
+
+        # Create tasks that will complete in reverse order (3, 2, 1)
+        # but should be returned in input order (1, 2, 3)
+        tasks = [
+            task_with_delay(1, 0.03),  # Slowest
+            task_with_delay(2, 0.02),  # Medium
+            task_with_delay(3, 0.01),  # Fastest
+        ]
+        results = await gather_with_progress(tasks)
+        # Results should be in input order, not completion order
+        assert results == [1, 2, 3]
 
     @pytest.mark.asyncio
     async def test_empty_tasks(self):

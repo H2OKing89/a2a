@@ -122,14 +122,15 @@ async def gather_with_progress(
         transient=True,
     ) as progress:
         task_id = progress.add_task(description, total=len(tasks))
-        results: list[T] = []
 
-        for coro in asyncio.as_completed(tasks):
+        # Wrap each task to update progress when it completes
+        async def track_progress(coro: Awaitable[T]) -> T:
             result = await coro
-            results.append(result)
             progress.advance(task_id)
+            return result
 
-        return results
+        # Use gather to maintain input order
+        return await asyncio.gather(*[track_progress(t) for t in tasks])
 
 
 async def stream_with_progress(
