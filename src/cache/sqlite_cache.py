@@ -173,7 +173,7 @@ class SQLiteCache:
 
     def _extract_metadata(self, data: dict | list, namespace: str) -> dict:
         """Extract searchable metadata from cached data."""
-        metadata = {
+        metadata: dict[str, str | None] = {
             "asin": None,
             "title": None,
             "author": None,
