@@ -463,7 +463,7 @@ class ABSClient:
         server_settings = data.get("serverSettings", {})
         return ServerInfo(
             version=server_settings.get("version", "unknown"),
-            Source=data.get("Source", "unknown"),
+            source=data.get("Source", "unknown"),
         )
 
     # =====================
