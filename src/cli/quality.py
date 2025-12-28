@@ -480,8 +480,7 @@ def quality_upgrades(
     start_time = time.time()
 
     try:
-        with get_abs_client() as abs_client:
-            audible_client = get_audible_client()
+        with get_abs_client() as abs_client, get_audible_client() as audible_client:
             cache = get_cache()  # Get shared cache for enrichment
 
             # Get library ID from settings or pick first if not specified
