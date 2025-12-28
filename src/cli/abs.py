@@ -213,6 +213,7 @@ def abs_items(
     limit: int = typer.Option(20, "--limit", "-l", help="Number of items to show"),
     sort: str | None = typer.Option(None, "--sort", "-s", help="Sort field"),
     desc: bool = typer.Option(False, "--desc", "-d", help="Sort descending"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """List library items."""
     library_id = resolve_library_id(library_id)
@@ -224,6 +225,14 @@ def abs_items(
                 sort=sort,
                 desc=desc,
             )
+
+        if raw:
+            # Show raw JSON with syntax highlighting
+            ui.json(
+                {"total": response.total, "results": [item.model_dump(by_alias=True) for item in response.results]},
+                title=f"Library Items ({response.total} total)",
+            )
+            return
 
         table = ui.create_table(
             title=f"{Icons.BOOK} Library Items ({response.total} total)",
@@ -260,11 +269,18 @@ def abs_items(
 @abs_app.command("item")
 def abs_item(
     item_id: str = typer.Argument(..., help="Item ID"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """Show details for a specific item."""
     try:
         with get_abs_client() as client:
             item = client.get_item(item_id, expanded=True)
+
+            if raw:
+                # Show raw JSON with syntax highlighting
+                ui.json(item.model_dump(by_alias=True), title=f"Library Item: {item_id}")
+                return
+
             meta = item.media.metadata
 
             # Basic info
@@ -318,12 +334,18 @@ def abs_search(
     library_id: str | None = typer.Option(
         None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """Search a library."""
     library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
             results: dict[str, Any] = client.search_library(library_id, query)
+
+            if raw:
+                # Show raw JSON with syntax highlighting
+                ui.json(results, title=f"Search Results: '{query}'")
+                return
 
             books = results.get("book", [])
             authors = results.get("authors", [])
@@ -353,10 +375,10 @@ def abs_search(
                 console.print(f"\n[bold]Series:[/bold] {', '.join(s.get('name', '?') for s in series)}")
 
             if not books and not authors and not series:
-                console.print("[yellow]No results found[/yellow]")
+                ui.warning("No results found", details=f"Query: {query}")
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Search failed", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -371,26 +393,28 @@ def abs_export(
     library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
-            console.print(f"Fetching all items from library {library_id}...")
+            with ui.spinner("Fetching library items...") as status:
+                items = client.get_all_library_items(library_id)
+                status.update(f"Converting {len(items)} items...")
 
-            items = client.get_all_library_items(library_id)
+                # Convert to dicts for JSON export
+                export_data = {
+                    "library_id": library_id,
+                    "total_items": len(items),
+                    "items": [item.model_dump(by_alias=True) for item in items],
+                }
 
-            console.print(f"Retrieved {len(items)} items")
+                status.update("Writing to file...")
+                output.parent.mkdir(parents=True, exist_ok=True)
+                with open(output, "w") as f:
+                    json.dump(export_data, f, indent=2)
 
-            # Convert to dicts for JSON export
-            export_data = {
-                "library_id": library_id,
-                "total_items": len(items),
-                "items": [item.model_dump(by_alias=True) for item in items],
-            }
-
-            with open(output, "w") as f:
-                json.dump(export_data, f, indent=2)
-
-            console.print(f"[green]✓[/green] Exported to {output}")
+            # Show success with file size
+            file_size = output.stat().st_size / (1024 * 1024)  # MB
+            ui.success(f"Exported {len(items)} items to {output} ({file_size:.1f} MB)")
 
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Export failed", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -534,7 +558,7 @@ def abs_collections(
                 collections = client.get_collections()
 
                 if not collections:
-                    console.print("[yellow]No collections found[/yellow]")
+                    ui.warning("No collections found")
                     return
 
                 table = Table(
@@ -559,7 +583,7 @@ def abs_collections(
 
             elif action == "show":
                 if not collection_id:
-                    console.print("[red]Error:[/red] --id required for 'show'")
+                    ui.error("Missing argument", details="--id required for 'show'")
                     raise typer.Exit(1)
 
                 collection = client.get_collection(collection_id)
@@ -597,7 +621,7 @@ def abs_collections(
 
             elif action == "create":
                 if not name:
-                    console.print("[red]Error:[/red] --name required for 'create'")
+                    ui.error("Missing argument", details="--name required for 'create'")
                     raise typer.Exit(1)
 
                 lib_id = library_id or resolve_library_id(None)
@@ -612,7 +636,7 @@ def abs_collections(
 
             elif action == "add":
                 if not collection_id or not book_id:
-                    console.print("[red]Error:[/red] --id and --book required for 'add'")
+                    ui.error("Missing arguments", details="--id and --book required for 'add'")
                     raise typer.Exit(1)
 
                 client.add_book_to_collection(collection_id, book_id)
@@ -620,7 +644,7 @@ def abs_collections(
 
             elif action == "remove":
                 if not collection_id or not book_id:
-                    console.print("[red]Error:[/red] --id and --book required for 'remove'")
+                    ui.error("Missing arguments", details="--id and --book required for 'remove'")
                     raise typer.Exit(1)
 
                 client.remove_book_from_collection(collection_id, book_id)
