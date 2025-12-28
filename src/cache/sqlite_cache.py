@@ -741,7 +741,7 @@ class SQLiteCache:
     # Statistics
     # -------------------------------------------------------------------------
 
-    def get_stats(self) -> dict:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         with self._get_connection() as conn:
             # Total counts

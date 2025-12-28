@@ -1379,7 +1379,7 @@ class AudibleClient:
         else:
             return self._cache.clear_all()
 
-    def get_cache_stats(self) -> dict:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         if not self._cache:
             return {"enabled": False}

@@ -17,7 +17,7 @@ Commands for interacting with the Audible API:
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import typer
 from rich.box import ROUNDED
@@ -234,7 +234,7 @@ def audible_status():
             status.update("Verifying library access...")
             items = client.get_library(num_results=1, use_cache=False)
             library_count = len(items)
-            cache_stats: dict[str, Any] = client.get_cache_stats()
+            cache_stats: dict[str, Any] = cast(dict[str, Any], client.get_cache_stats())
 
         ui.success(f"Connected to marketplace: [bold]{client.marketplace}[/bold]")
 
@@ -491,7 +491,7 @@ def audible_cache(
             count = cache.cleanup_expired()
             console.print(f"[green]✓[/green] Removed {count} expired items")
         else:
-            stats: dict[str, Any] = cache.get_stats()
+            stats: dict[str, Any] = cast(dict[str, Any], cache.get_stats())
 
             # Format namespaces display
             namespaces_display = "\n".join(f"  {k}: {v}" for k, v in stats.get("namespaces", {}).items()) or "  (none)"
