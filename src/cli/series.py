@@ -10,6 +10,7 @@ Commands for analyzing and tracking series:
 import json
 import logging
 import time
+import traceback
 from pathlib import Path
 
 import typer
@@ -266,8 +267,6 @@ def series_analyze(
         raise  # Re-raise typer exits without catching
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        import traceback
-
         traceback.print_exc()
         raise typer.Exit(1) from e
 
@@ -322,7 +321,7 @@ def series_report(
                         result = matcher.compare_series(series)
                         results.append(result)
                     except Exception as e:
-                        logger.warning(f"Failed to analyze series '{series.name}': {e}")
+                        logger.warning("Failed to analyze series '%s': %s", series.name, e)
 
                     progress.advance(task)
 
