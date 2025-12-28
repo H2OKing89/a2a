@@ -198,7 +198,7 @@ class AsyncABSClient:
     async def get_me(self) -> User:
         """Get current user info."""
         data = await self._get("/me")
-        return User.model_validate(cast(dict[str, Any], data))
+        return User.model_validate(data)
 
     async def authorize(self) -> dict[str, Any]:
         """Verify API key is valid."""
@@ -216,7 +216,7 @@ class AsyncABSClient:
     async def get_library(self, library_id: str) -> Library:
         """Get a single library."""
         data = await self._get(f"/libraries/{library_id}")
-        return Library.model_validate(cast(dict[str, Any], data))
+        return Library.model_validate(data)
 
     async def get_library_stats(self, library_id: str, use_cache: bool = True) -> LibraryStats:
         """
@@ -236,10 +236,10 @@ class AsyncABSClient:
             cached = self._cache.get("abs_stats", cache_key)
             if cached:
                 logger.debug("Cache hit for library stats %s", library_id)
-                return LibraryStats.model_validate(cast(dict[str, Any], cached))
+                return LibraryStats.model_validate(cached)
 
         data = await self._get(f"/libraries/{library_id}/stats")
-        stats = LibraryStats.model_validate(cast(dict[str, Any], data))
+        stats = LibraryStats.model_validate(data)
 
         # Cache result
         if self._cache:
@@ -359,7 +359,7 @@ class AsyncABSClient:
             cached = self._cache.get("abs_items", cache_key)
             if cached:
                 logger.debug("Cache hit for item %s", item_id)
-                return LibraryItemExpanded.model_validate(cast(dict[str, Any], cached))
+                return LibraryItemExpanded.model_validate(cached)
 
         params: dict[str, Any] = {}
         if expanded:
@@ -368,7 +368,7 @@ class AsyncABSClient:
             params["include"] = include
 
         data = await self._get(f"/items/{item_id}", params=params)
-        item = LibraryItemExpanded.model_validate(cast(dict[str, Any], data))
+        item = LibraryItemExpanded.model_validate(data)
 
         # Cache result (only if no special includes)
         if self._cache and not include:
