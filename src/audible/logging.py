@@ -301,8 +301,8 @@ def set_level(level: LogLevel | int) -> None:
     if HAS_AUDIBLE_LOG_HELPER:
         try:
             log_helper.set_level(level if isinstance(level, str) else "info")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to set audible log_helper level: %s", e)
 
     audible_logger = logging.getLogger("audible")
     audible_logger.setLevel(log_level)

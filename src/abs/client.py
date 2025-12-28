@@ -658,8 +658,8 @@ class ABSClient:
                             cache_key = f"item_{item_id}_exp1"
                             self._cache.set("abs_items", cache_key, data, ttl_seconds=self._cache_ttl_seconds)
                         return (item_id, data)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Failed to fetch item %s in batch: %s", item_id, e)
                 return (item_id, None)
 
             completed = cache_hits
