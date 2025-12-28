@@ -4,6 +4,7 @@ This directory contains development and exploration scripts that are **not part 
 
 ## Scripts
 
+
 ### `dev.py`
 Development task runner (make-like helper for systems without GNU make).
 
@@ -15,6 +16,7 @@ python tools/dev.py coverage    # Run tests with coverage
 python tools/dev.py lint        # Run all linters
 python tools/dev.py format      # Format code with black/isort
 ```
+
 
 ### `dev_series_explore.py`
 Series matching exploration and testing script.
