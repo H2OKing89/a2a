@@ -70,7 +70,7 @@ class ABSNotFoundError(ABSError):
 def _http2_available() -> bool:
     """Check if HTTP/2 dependencies are installed."""
     try:
-        import h2  # noqa: F401
+        import h2
 
         return True
     except ImportError:
@@ -186,7 +186,7 @@ class ABSClient:
                 ca_path.read_bytes()[:1]  # Check readability
             except PermissionError as e:
                 raise ABSConnectionError(
-                    f"tls_ca_bundle file is not readable: {tls_ca_bundle}\n" "Check file permissions."
+                    f"tls_ca_bundle file is not readable: {tls_ca_bundle}\nCheck file permissions."
                 ) from e
 
         # Security validation: HTTP only allowed for localhost or if explicitly enabled
@@ -205,12 +205,12 @@ class ABSClient:
                 logger.debug("Using HTTP for localhost; TLS recommended for remote hosts")
             else:
                 logger.debug(
-                    "Using HTTP connection to remote server: %s. " "API key will be sent in cleartext!", self.host
+                    "Using HTTP connection to remote server: %s. API key will be sent in cleartext!", self.host
                 )
 
         if insecure_tls:
             logger.warning(
-                "SSL certificate verification is DISABLED. " "This is insecure and should only be used for testing."
+                "SSL certificate verification is DISABLED. This is insecure and should only be used for testing."
             )
 
         # Determine TLS verification setting
