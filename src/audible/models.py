@@ -458,7 +458,7 @@ class AudibleCategory(BaseModel):
 class AudibleCategoryLadder(BaseModel):
     """Category hierarchy (ladder)."""
 
-    ladder: list[AudibleCategory] = Field(default_factory=list)
+    ladder: list[AudibleCategory] = Field(default_factory=lambda: [])
     root: str | None = None
 
     model_config = {"extra": "ignore"}
@@ -486,8 +486,8 @@ class AudibleBook(BaseModel):
     subtitle: str | None = None
 
     # Authors and narrators
-    authors: list[AudibleAuthor] = Field(default_factory=list)
-    narrators: list[AudibleNarrator] = Field(default_factory=list)
+    authors: list[AudibleAuthor] = Field(default_factory=lambda: [])
+    narrators: list[AudibleNarrator] = Field(default_factory=lambda: [])
 
     # Publisher info
     publisher_name: str | None = None
@@ -640,7 +640,7 @@ class AudibleCatalogProduct(AudibleBook):
 class AudibleLibraryResponse(BaseModel):
     """Response from GET /1.0/library."""
 
-    items: list[AudibleLibraryItem] = Field(default_factory=list)
+    items: list[AudibleLibraryItem] = Field(default_factory=lambda: [])
     response_groups: list[str] | None = None
     total_results: int | None = Field(default=None, alias="total_results")
 
@@ -650,7 +650,7 @@ class AudibleLibraryResponse(BaseModel):
 class AudibleCatalogResponse(BaseModel):
     """Response from GET /1.0/catalog/products."""
 
-    products: list[AudibleCatalogProduct] = Field(default_factory=list)
+    products: list[AudibleCatalogProduct] = Field(default_factory=lambda: [])
     total_results: int | None = Field(default=None, alias="total_results")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -726,7 +726,7 @@ class WishlistItem(AudibleBook):
     is_preorderable: bool = Field(default=False, alias="is_preorderable")
 
     # Plans (for Plus Catalog detection)
-    plans: list[dict[str, Any]] = Field(default_factory=list)
+    plans: list[dict[str, Any]] = Field(default_factory=lambda: [])
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -745,7 +745,7 @@ class WishlistItem(AudibleBook):
 class WishlistResponse(BaseModel):
     """Response from GET /1.0/wishlist."""
 
-    products: list[WishlistItem] = Field(default_factory=list)
+    products: list[WishlistItem] = Field(default_factory=lambda: [])
     total_results: int | None = Field(default=None, alias="total_results")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -796,7 +796,7 @@ class ChapterInfo(BaseModel):
     is_accurate: bool | None = Field(default=None, alias="is_accurate")
     runtime_length_ms: int | None = Field(default=None, alias="runtime_length_ms")
     runtime_length_sec: int | None = Field(default=None, alias="runtime_length_sec")
-    chapters: list[dict[str, Any]] = Field(default_factory=list)
+    chapters: list[dict[str, Any]] = Field(default_factory=lambda: [])
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
