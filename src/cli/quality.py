@@ -19,25 +19,9 @@ from rich.box import ROUNDED
 from rich.text import Text
 
 from src.audible import AudibleEnrichmentService
-from src.cli.common import (
-    Icons,
-    console,
-    get_abs_client,
-    get_audible_client,
-    get_cache,
-    get_default_library_id,
-    ui,
-)
+from src.cli.common import Icons, console, get_abs_client, get_audible_client, get_cache, get_default_library_id, ui
 from src.quality import QualityAnalyzer, QualityReport, QualityTier
-from src.utils.ui import (
-    BarColumn,
-    Panel,
-    Progress,
-    SpinnerColumn,
-    Table,
-    TaskProgressColumn,
-    TextColumn,
-)
+from src.utils.ui import BarColumn, Panel, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn
 
 logger = logging.getLogger(__name__)
 

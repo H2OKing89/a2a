@@ -11,6 +11,8 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+    # Continue even if dependency review fails (requires Dependency Graph to be enabled)
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
 
@@ -19,5 +21,4 @@ jobs:
       with:
         fail-on-severity: high
         deny-licenses: GPL-3.0, AGPL-3.0
-        allow-dependencies-licenses: |
-          pkg:pypi/audible@*
+        comment-summary-in-pr: on-failure

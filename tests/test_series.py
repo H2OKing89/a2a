@@ -6,11 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from src.series.matcher import (
-    _normalize_series_name,
-    _normalize_title,
-    _score_to_confidence,
-)
+from src.series.matcher import _normalize_series_name, _normalize_title, _score_to_confidence
 from src.series.models import (
     ABSSeriesBook,
     ABSSeriesInfo,

@@ -15,21 +15,9 @@ from pathlib import Path
 
 import typer
 
-from src.cli.common import (
-    console,
-    get_abs_client,
-    get_audible_client,
-    resolve_library_id,
-)
+from src.cli.common import console, get_abs_client, get_audible_client, resolve_library_id
 from src.series import MatchConfidence, SeriesComparisonResult, SeriesMatcher
-from src.utils.ui import (
-    BarColumn,
-    Progress,
-    SpinnerColumn,
-    Table,
-    TaskProgressColumn,
-    TextColumn,
-)
+from src.utils.ui import BarColumn, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn
 
 logger = logging.getLogger(__name__)
 

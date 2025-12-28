@@ -1,0 +1,40 @@
+[flake8]
+max-line-length = 120
+exclude =
+    .git,
+    .venv,
+    __pycache__,
+    build,
+    dist,
+    htmlcov,
+    .pytest_cache,
+    .mypy_cache,
+    *.egg-info
+extend-ignore =
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # B008: function calls in argument defaults (common typer pattern)
+    B008,
+    # SIM105: Use contextlib.suppress (not always more readable)
+    SIM105,
+    # SIM116: Use dictionary lookup instead of if/elif (not always more readable)
+    SIM116,
+    # SIM117: combine with statements (sometimes less readable)
+    SIM117,
+    # SIM118: Use 'key in dict' instead of 'key in dict.keys()' (explicit is fine)
+    SIM118,
+    # F401: imported but unused (handled by other tools, tests often need these)
+    F401,
+    # F841: local variable assigned but never used (sometimes intentional)
+    F841
+per-file-ignores =
+    # E402: module level import not at top of file (conditional imports)
+    src/abs/logging.py:E402
+    src/audible/logging.py:E402
+    tests/*:E402
+    # E501: line too long (long strings/SQL that are hard to break)
+    src/audible/enrichment.py:E501
+    src/cache/sqlite_cache.py:E501
+    src/cli/quality.py:E501

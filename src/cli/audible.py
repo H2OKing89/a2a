@@ -32,13 +32,7 @@ from src.audible import (
     load_auth,
     save_auth,
 )
-from src.cli.common import (
-    Icons,
-    console,
-    get_audible_client,
-    get_cache,
-    ui,
-)
+from src.cli.common import Icons, console, get_audible_client, get_cache, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
 from src.utils.ui import Panel, Table

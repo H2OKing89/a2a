@@ -19,13 +19,7 @@ from src.cache import SQLiteCache
 from src.config import get_settings
 from src.utils.ui import Icons, console, ui
 
-from .async_utils import (
-    AsyncBatchProcessor,
-    async_command,
-    gather_with_progress,
-    run_async,
-    stream_with_progress,
-)
+from .async_utils import AsyncBatchProcessor, async_command, gather_with_progress, run_async, stream_with_progress
 
 __all__ = [
     "AsyncBatchProcessor",

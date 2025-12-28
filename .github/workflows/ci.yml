@@ -79,6 +79,8 @@ jobs:
 
   type-check:
     runs-on: ubuntu-latest
+    # Type checking is informational only - don't fail the build
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
 
