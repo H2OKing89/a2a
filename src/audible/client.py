@@ -219,6 +219,11 @@ class AudibleClient:
         if not auth_path.exists():
             raise AudibleAuthError(f"Auth file not found: {auth_file}. " "Run initial authentication first.")
 
+        # Check file permissions and warn if insecure
+        from ..utils.security import check_file_permissions
+
+        check_file_permissions(auth_path, fix=False, warn=True)
+
         try:
             auth = Authenticator.from_file(str(auth_path))
         except Exception as e:
@@ -708,7 +713,7 @@ class AudibleClient:
         # Build cache key from search params
         sort_value = sort_by.value if isinstance(sort_by, CatalogSortBy) else sort_by
         search_params = f"{keywords}|{title}|{author}|{narrator}|{publisher}|{sort_value}|p{page}"
-        cache_key = hashlib.md5(search_params.encode()).hexdigest()
+        cache_key = hashlib.md5(search_params.encode(), usedforsecurity=False).hexdigest()
 
         # Check cache
         if use_cache and self._cache:
