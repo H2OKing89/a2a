@@ -43,7 +43,7 @@ class AudibleError(Exception):
     """Base exception for Audible API errors."""
 
     def __init__(self, message: str, response: dict | None = None) -> None:
-        super().__init__(message)
+        super().__init__(message, response)
         self.message = message
         self.response = response
 

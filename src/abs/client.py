@@ -40,7 +40,7 @@ class ABSError(Exception):
     """Base exception for ABS API errors."""
 
     def __init__(self, message: str, status_code: int | None = None, response: dict | None = None) -> None:
-        super().__init__(message)
+        super().__init__(message, status_code, response)
         self.message = message
         self.status_code = status_code
         self.response = response
