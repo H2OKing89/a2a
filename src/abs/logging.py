@@ -4,11 +4,20 @@ Rich-enhanced logging configuration for the ABS module.
 Provides centralized logging setup with beautiful rich console output
 and configurable handlers for console and file output.
 
+.. warning::
+    By default, ``configure_logging()`` installs a **global traceback handler**
+    via Rich that affects all uncaught exceptions in the process. This is
+    great for CLI applications but may conflict with other frameworks.
+    Set ``rich_tracebacks=False`` to disable this behavior.
+
 Usage:
     from src.abs.logging import configure_logging, get_logger
 
     # Quick setup with rich console output
     configure_logging(level="info", console=True, use_rich=True)
+
+    # For library usage (avoid global side effects):
+    configure_logging(level="info", use_rich=True, rich_tracebacks=False)
 
     # Get a logger for your module
     logger = get_logger(__name__)
@@ -65,14 +74,25 @@ def configure_logging(
     """
     Configure rich-enhanced logging for the ABS module.
 
+    .. warning::
+        **Global Side Effect:** When ``use_rich=True`` and ``rich_tracebacks=True``
+        (the defaults), this function calls ``rich.traceback.install()`` which
+        **modifies Python's global exception handling**. This affects ALL uncaught
+        exceptions in the entire process, not just this module. This is ideal for
+        CLI applications but may be inappropriate for libraries or when integrating
+        with other frameworks that have their own exception handling.
+
     Args:
         level: Log level for console output
         console: Whether to enable console logging
         file_path: Optional file path for file logging
         file_log_level: Log level for file output (defaults to level)
         format_string: Custom format string for file logging
-        use_rich: Use rich handler for console (beautiful output)
-        rich_tracebacks: Enable rich tracebacks (exceptions look great)
+        use_rich: Use rich handler for console (beautiful output).
+            **Process-wide toggle** - enables Rich formatting globally.
+        rich_tracebacks: Enable rich tracebacks for beautiful exception output.
+            **Process-wide toggle** - installs a global exception hook via
+            ``sys.excepthook`` that affects all uncaught exceptions.
         show_path: Show file path in console logs
         show_time: Show timestamp in console logs
         markup: Enable rich markup in log messages
@@ -81,8 +101,15 @@ def configure_logging(
         Configured logger instance
 
     Example:
+        # Standard usage with rich output (installs global handler)
         logger = configure_logging("debug", file_path="logs/abs.log", use_rich=True)
         logger.info("[green]✓[/green] Connected to server")
+
+        # For libraries or to avoid global side effects:
+        logger = configure_logging("info", use_rich=True, rich_tracebacks=False)
+
+        # Completely disable Rich features (plain logging):
+        logger = configure_logging("info", use_rich=False)
     """
     global _configured
 
@@ -244,13 +271,13 @@ from src.utils.logging import (
 
 __all__ = [
     "configure_logging",
-    "get_logger",
-    "set_level",
     "enable_debug_logging",
-    "LogContext",
-    "log_success",
-    "log_error",
-    "log_warning",
-    "log_info",
+    "get_logger",
     "log_debug",
+    "log_error",
+    "log_info",
+    "log_success",
+    "log_warning",
+    "LogContext",
+    "set_level",
 ]

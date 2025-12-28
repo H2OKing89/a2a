@@ -4,6 +4,12 @@ Rich-enhanced logging configuration for the Audible module.
 Integrates with the audible package's log_helper and provides
 beautiful console output with rich formatting.
 
+.. warning::
+    By default, ``configure_logging()`` installs a **global traceback handler**
+    via Rich that affects all uncaught exceptions in the process. This is
+    great for CLI applications but may conflict with other frameworks.
+    Set ``rich_tracebacks=False`` to disable this behavior.
+
 Usage:
     from src.audible.logging import configure_logging, get_logger
 
@@ -18,6 +24,9 @@ Usage:
         capture_warnings=True,
         use_rich=True
     )
+
+    # For library usage (avoid global side effects):
+    configure_logging(level="info", use_rich=True, rich_tracebacks=False)
 
     # Get a logger for your module
     logger = get_logger(__name__)
@@ -112,6 +121,14 @@ def configure_logging(
     This configures both our wrapper module (src.audible) and the
     underlying audible package logging with beautiful rich output.
 
+    .. warning::
+        **Global Side Effect:** When ``use_rich=True`` and ``rich_tracebacks=True``
+        (the defaults), this function calls ``rich.traceback.install()`` which
+        **modifies Python's global exception handling**. This affects ALL uncaught
+        exceptions in the entire process, not just this module. This is ideal for
+        CLI applications but may be inappropriate for libraries or when integrating
+        with other frameworks that have their own exception handling.
+
     Args:
         level: Base log level for all loggers
         console_output: Whether to log to console (stdout)
@@ -120,8 +137,11 @@ def configure_logging(
         capture_warnings: Whether to capture Python warnings
         format_string: Custom format string for file logging
         configure_audible_package: Also configure the audible package logger
-        use_rich: Use rich handler for console (beautiful output)
-        rich_tracebacks: Enable rich tracebacks (exceptions look great)
+        use_rich: Use rich handler for console (beautiful output).
+            **Process-wide toggle** - enables Rich formatting globally.
+        rich_tracebacks: Enable rich tracebacks for beautiful exception output.
+            **Process-wide toggle** - installs a global exception hook via
+            ``sys.excepthook`` that affects all uncaught exceptions.
         show_path: Show file path in console logs
         show_time: Show timestamp in console logs
         markup: Enable rich markup in log messages
@@ -130,7 +150,7 @@ def configure_logging(
         The configured logger
 
     Example:
-        # Basic rich console logging
+        # Basic rich console logging (with global traceback handler)
         configure_logging(level="info", use_rich=True)
 
         # Debug logging with rich output
@@ -141,6 +161,16 @@ def configure_logging(
             use_rich=True,
             rich_tracebacks=True
         )
+
+        # For libraries or when you need to avoid global side effects:
+        configure_logging(
+            level="info",
+            use_rich=True,
+            rich_tracebacks=False  # Don't install global exception hook
+        )
+
+        # Completely disable Rich features (plain logging):
+        configure_logging(level="info", use_rich=False)
 
         # Then use in your code:
         logger = get_logger(__name__)
