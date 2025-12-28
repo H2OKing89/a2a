@@ -31,7 +31,13 @@ def get_version() -> str:
 def set_version(new_version: str) -> None:
     """Set version in src/__init__.py."""
     content = VERSION_FILE.read_text()
-    new_content = VERSION_PATTERN.sub(f'__version__ = "{new_version}"', content)
+    new_content, substitutions = VERSION_PATTERN.subn(f'__version__ = "{new_version}"', content)
+
+    if substitutions == 0:
+        raise ValueError(
+            f"Could not find __version__ pattern in {VERSION_FILE}\n" f'Expected format: __version__ = "X.Y.Z"'
+        )
+
     VERSION_FILE.write_text(new_content)
     print(f"✅ Updated version to {new_version}")
 
