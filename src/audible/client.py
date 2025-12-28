@@ -42,9 +42,13 @@ if TYPE_CHECKING:
 class AudibleError(Exception):
     """Base exception for Audible API errors."""
 
-    def __init__(self, message: str, response: dict | None = None):
-        super().__init__(message)
+    def __init__(self, message: str, response: dict | None = None) -> None:
+        super().__init__(message, response)
+        self.message = message
         self.response = response
+
+    def __str__(self) -> str:
+        return self.message
 
 
 class AudibleAuthError(AudibleError):

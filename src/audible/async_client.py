@@ -59,9 +59,13 @@ logger = logging.getLogger(__name__)
 class AsyncAudibleError(Exception):
     """Base exception for async Audible API errors."""
 
-    def __init__(self, message: str, response: dict | None = None):
-        super().__init__(message)
+    def __init__(self, message: str, response: dict | None = None) -> None:
+        super().__init__(message, response)
+        self.message = message
         self.response = response
+
+    def __str__(self) -> str:
+        return self.message
 
 
 class AsyncAudibleAuthError(AsyncAudibleError):

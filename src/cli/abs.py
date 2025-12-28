@@ -24,6 +24,7 @@ from rich.box import ROUNDED
 from rich.padding import Padding
 from rich.text import Text
 
+from src.abs import ABSAuthError, ABSConnectionError, ABSError
 from src.cli.common import Icons, console, get_abs_client, resolve_library_id, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
@@ -42,11 +43,57 @@ def abs_status():
 
     try:
         with ui.spinner("Connecting...") as status, get_abs_client() as client:
+            # Show resolved/normalized host (what we're actually connecting to)
+            if client.host != settings.abs.host:
+                console.print(f"  {Icons.LINK} Resolved: [accent]{client.host}[/accent]")
+
+            # Display security status from client (after normalization)
+            if client._is_https:
+                ui.success("Connection secured with HTTPS")
+                if client._using_ca_bundle:
+                    ui.success(f"Using custom CA bundle: {client._tls_ca_bundle_path}")
+                elif not client._insecure_tls:
+                    ui.success("SSL certificate verification enabled")
+            elif client._is_localhost:
+                console.print(f"  {Icons.BULLET} Using HTTP for localhost [dim](OK for local development)[/dim]")
+            else:
+                ui.warning(
+                    "Using insecure HTTP to remote server",
+                    details="API key sent in cleartext!",
+                )
+                console.print(
+                    f"    [dim]{Icons.BULLET} Fix: Put ABS behind a reverse proxy (Caddy/Nginx/Traefik) "
+                    "with HTTPS, or enable HTTPS in ABS directly.[/dim]"
+                )
+
+            if client._insecure_tls:
+                ui.warning(
+                    "SSL certificate verification is DISABLED",
+                    details="This is insecure. Use tls_ca_bundle for self-signed certificates instead.",
+                )
+
+            # HTTP/2 status: show availability vs actual negotiation
+            if client._http2_available:
+                ui.success("HTTP/2 support available")
+            else:
+                console.print(f"  {Icons.BULLET} HTTP/2 not available [dim](install httpx[http2])[/dim]")
+
+            status.update("Fetching user info...")
             user = client.get_me()
             status.update("Fetching libraries...")
             libraries = client.get_libraries()
 
-        ui.success(f"Connected as: [bold]{user.username}[/bold] ({user.type})")
+            # Now show actual negotiated protocol (after requests)
+            if client._last_http_version:
+                if client._last_http_version == "HTTP/2":
+                    ui.success("Negotiated HTTP/2 with server")
+                else:
+                    console.print(
+                        f"  {Icons.BULLET} Using {client._last_http_version} "
+                        "[dim](server may not support HTTP/2)[/dim]"
+                    )
+
+        ui.success(f"Authenticated as: [bold]{user.username}[/bold] ({user.type})")
         console.print(f"    {Icons.BULLET} Active: {user.is_active}, Locked: {user.is_locked}")
 
         # Libraries tree
@@ -57,7 +104,12 @@ def abs_status():
             tree.add(f"{icon} [bold]{lib.name}[/bold] [dim]({lib.id})[/dim] - {lib.media_type}")
         console.print(Padding(tree, (0, 4)))
 
+    except (ABSError, ABSConnectionError, ABSAuthError) as e:
+        # Expected errors - show friendly message only, no traceback
+        ui.error("Connection failed", details=str(e))
+        raise typer.Exit(1) from None
     except Exception as e:
+        # Unexpected errors - show traceback for debugging
         ui.error("Connection failed", details=str(e))
         raise typer.Exit(1) from e
 
@@ -401,7 +453,11 @@ def abs_series(
     library_id = resolve_library_id(library_id)
     try:
         with get_abs_client() as client:
-            series_list = client.get_library_series(library_id, limit=500)
+            # Fetch more items than requested to ensure proper sorting results
+            # But use user's limit directly if they want a lot of items
+            fetch_limit = max(limit * 3, 100) if limit < 200 else limit
+            response = client.get_library_series(library_id, limit=fetch_limit)
+            series_list = response.get("results", [])
 
             # Sort series
             if sort == "name":
@@ -411,7 +467,7 @@ def abs_series(
             elif sort == "addedAt":
                 series_list.sort(key=lambda s: s.get("addedAt", 0), reverse=reverse)
 
-            # Limit results
+            # Limit results to user's requested amount
             series_list = series_list[:limit]
 
             table = Table(
@@ -522,9 +578,14 @@ def abs_collections(
                     book_table.add_column("ID", style="dim cyan", max_width=24)
 
                     for i, book in enumerate(coll.books, 1):
-                        # Handle both expanded and non-expanded book data
-                        title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
-                        book_id_val = book.get("id", "")
+                        # Handle both expanded (dict) and non-expanded (str) book data
+                        if isinstance(book, dict):
+                            title = book.get("title") or book.get("media", {}).get("metadata", {}).get("title", "?")
+                            book_id_val = book.get("id", "")
+                        else:
+                            # book is a string (book ID)
+                            title = "?"
+                            book_id_val = str(book)
                         book_table.add_row(str(i), title[:50], book_id_val)
 
                     console.print(book_table)

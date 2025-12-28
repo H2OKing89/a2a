@@ -18,11 +18,16 @@ import typer
 from rich.box import ROUNDED
 from rich.padding import Padding
 from rich.text import Text
+from rich.traceback import install
 from rich.tree import Tree
+
+# Install Rich traceback handler for better error display
+install(show_locals=False, width=120, word_wrap=True)
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
+from src.abs import ABSAuthError, ABSConnectionError, ABSError
 from src.audible import AudibleAuthError
 from src.cli.abs import abs_app
 from src.cli.audible import audible_app
@@ -60,15 +65,54 @@ def status():
     # ABS Status
     ui.section("Audiobookshelf", icon=Icons.SERVER)
     console.print(f"  {Icons.LINK} Server: [accent]{settings.abs.host}[/accent]")
+
     try:
         with ui.spinner("Connecting to ABS server..."), get_abs_client() as client:
+            # Show resolved/normalized host if different from input
+            if client.host != settings.abs.host:
+                console.print(f"  {Icons.LINK} Resolved: [accent]{client.host}[/accent]")
+
+            # Display security status from client (after normalization)
+            if client._is_https:
+                ui.success("HTTPS secured")
+                if client._using_ca_bundle:
+                    ui.success(f"Using CA bundle: {client._tls_ca_bundle_path}")
+                elif not client._insecure_tls:
+                    ui.success("SSL verification enabled")
+            elif client._is_localhost:
+                console.print(f"  {Icons.BULLET} HTTP (localhost)")
+            else:
+                ui.warning("Insecure HTTP to remote server", details="API key in cleartext!")
+                console.print(f"    [dim]{Icons.BULLET} Fix: Enable HTTPS in ABS or use a reverse proxy[/dim]")
+
+            if client._insecure_tls:
+                ui.warning("SSL verification disabled", details="Use tls_ca_bundle instead")
+
+            # HTTP/2 availability
+            if client._http2_available:
+                ui.success("HTTP/2 available")
+
             user = client.get_me()
             libraries = client.get_libraries()
-        ui.success(f"Connected as [bold]{user.username}[/bold]")
+
+            # Show actual negotiated protocol after requests
+            if client._last_http_version:
+                if client._last_http_version == "HTTP/2":
+                    ui.success("Negotiated HTTP/2")
+                else:
+                    console.print(f"  {Icons.BULLET} Using {client._last_http_version}")
+
+        ui.success(f"Authenticated as [bold]{user.username}[/bold]")
         ui.success(f"{len(libraries)} libraries available")
-    except Exception as e:
+    except (ABSError, ABSConnectionError, ABSAuthError) as e:
+        # Expected errors - show friendly message only, no traceback
         ui.error("Connection failed", details=str(e))
-        logger.exception("ABS connection failed")
+        logger.debug("ABS connection failed: %s", e)
+        has_errors = True
+    except Exception as e:
+        # Unexpected errors - log full exception for debugging
+        ui.error("Connection failed", details=str(e))
+        logger.exception("Unexpected ABS error")
         has_errors = True
 
     # Audible Status

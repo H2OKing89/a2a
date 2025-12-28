@@ -28,6 +28,20 @@ class ABSSettings(BaseSettings):
     library_id: str | None = Field(default=None, description="Default library ID")
     rate_limit_delay: float = Field(default=0.0, description="Delay between requests (0 = disabled)")
 
+    # Security settings
+    allow_insecure_http: bool = Field(
+        default=False,
+        description="Allow HTTP connections (only localhost is allowed by default)",
+    )
+    tls_ca_bundle: str | None = Field(
+        default=None,
+        description="Path to CA certificate bundle for self-signed certs",
+    )
+    insecure_tls: bool = Field(
+        default=False,
+        description="DANGEROUS: Disable SSL verification entirely (env var ABS_INSECURE_TLS only)",
+    )
+
 
 class AudibleSettings(BaseSettings):
     """Audible API settings."""
@@ -236,7 +250,17 @@ class Settings(BaseSettings):
             if "audible" in yaml_config:
                 config_data["audible"] = AudibleSettings(**yaml_config["audible"])  # type: ignore
             if "abs" in yaml_config:
-                config_data["abs"] = ABSSettings(**yaml_config["abs"])  # type: ignore
+                abs_yaml = yaml_config["abs"]
+                # Enforce insecure_tls as env-only: strip from YAML and warn
+                if "insecure_tls" in abs_yaml:
+                    import logging
+
+                    logging.getLogger(__name__).warning(
+                        "insecure_tls found in config.yaml - this setting is env-var only for safety. "
+                        "Use ABS_INSECURE_TLS=1 environment variable instead. Ignoring YAML value."
+                    )
+                    del abs_yaml["insecure_tls"]
+                config_data["abs"] = ABSSettings(**abs_yaml)  # type: ignore
             if "verbose" in yaml_config:
                 config_data["verbose"] = yaml_config["verbose"]
             if "debug" in yaml_config:
