@@ -10,7 +10,7 @@ import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import ValidationError
 
@@ -449,6 +449,8 @@ class AudibleClient:
     @property
     def marketplace(self) -> str:
         """Current marketplace/locale."""
+        if self._auth.locale is None:
+            return "UNKNOWN"
         return self._auth.locale.country_code
 
     def _rate_limit(self) -> None:
@@ -516,6 +518,7 @@ class AudibleClient:
         """
         self._rate_limit()
 
+        response: Any = None
         try:
             if method.upper() == "GET":
                 response = self._client.get(endpoint, **kwargs)
@@ -544,7 +547,7 @@ class AudibleClient:
             else:
                 raise AudibleError(f"API error: {e}")
 
-        return response
+        return cast(dict[Any, Any], response)
 
     # -------------------------------------------------------------------------
     # Library Methods

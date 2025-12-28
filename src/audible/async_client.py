@@ -24,7 +24,7 @@ import asyncio
 import hashlib
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import ValidationError
 
@@ -225,6 +225,7 @@ class AsyncAudibleClient:
         async with self._semaphore:
             await self._rate_limit()
 
+            response: Any = None
             try:
                 if method.upper() == "GET":
                     response = await self._client.get(path=path, params=kwargs)
@@ -235,7 +236,7 @@ class AsyncAudibleClient:
                 else:
                     raise AsyncAudibleError(f"Unsupported method: {method}")
 
-                return response
+                return cast(dict[Any, Any], response)
 
             except audible.exceptions.NotFoundError as e:
                 raise AsyncAudibleNotFoundError(str(e)) from e
