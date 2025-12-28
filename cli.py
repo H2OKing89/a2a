@@ -71,7 +71,6 @@ def main(
     ] = None,
 ) -> None:
     """A2A - Audiobook to Audible management tool."""
-    pass
 
 
 # Register sub-apps
