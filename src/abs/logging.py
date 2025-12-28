@@ -270,6 +270,7 @@ from src.utils.logging import (
 )
 
 __all__ = [
+    "LogContext",
     "configure_logging",
     "enable_debug_logging",
     "get_logger",
@@ -278,6 +279,5 @@ __all__ = [
     "log_info",
     "log_success",
     "log_warning",
-    "LogContext",
     "set_level",
 ]
