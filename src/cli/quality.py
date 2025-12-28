@@ -243,7 +243,7 @@ def quality_low(
             if not library_id:
                 libraries = client.get_libraries()
                 if not libraries:
-                    console.print("[red]No libraries found[/red]")
+                    ui.error("No libraries found")
                     raise typer.Exit(1)
                 library_id = libraries[0].id
 
@@ -367,6 +367,7 @@ def quality_low(
 @quality_app.command("item")
 def quality_item(
     item_id: str = typer.Argument(..., help="Item ID or ASIN"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """
     Analyze quality of a specific item.
@@ -380,7 +381,7 @@ def quality_item(
                 # Try searching by ASIN
                 libraries = client.get_libraries()
                 if not libraries:
-                    console.print("[red]Item not found[/red]")
+                    ui.error("Item not found", details="No libraries available to search")
                     raise typer.Exit(1)
 
                 # Search in first library
@@ -389,7 +390,7 @@ def quality_item(
                 )
                 books = results.get("book", [])
                 if not books:
-                    console.print("[red]Item not found[/red]")
+                    ui.error("Item not found", details=f"ID: {item_id}")
                     raise typer.Exit(1)
 
                 item_id = books[0].get("libraryItem", {}).get("id")
@@ -398,6 +399,11 @@ def quality_item(
             # Analyze
             analyzer = QualityAnalyzer()
             quality = analyzer.analyze_item(full_item)
+
+            if raw:
+                # Show raw quality analysis data with syntax highlighting
+                ui.json(quality.model_dump(), title=f"Quality Analysis: {quality.title}")
+                return
 
             # Display results
             tier_color = {
@@ -473,10 +479,10 @@ def quality_upgrades(
             if not library_id:
                 libraries = abs_client.get_libraries()
                 if not libraries:
-                    console.print("[red]No libraries found[/red]")
+                    ui.error("No libraries found")
                     raise typer.Exit(1)
                 library_id = libraries[0].id
-                console.print(f"Using library: [bold]{libraries[0].name}[/bold]\n")
+                ui.info(f"Using library: [bold]{libraries[0].name}[/bold]")
 
             # Get all items
             items_resp: dict[str, Any] = abs_client._get(f"/libraries/{library_id}/items", params={"limit": 0})
@@ -604,13 +610,13 @@ def quality_upgrades(
 
             if deals_only:
                 upgrade_candidates = [c for c in upgrade_candidates if c.is_good_deal]
-                console.print(f"[cyan]Filtering to good deals (<$9): {len(upgrade_candidates)} items[/cyan]")
+                ui.info(f"Filtering to good deals (<$9): {len(upgrade_candidates)} items")
 
             # Sort by priority (highest first)
             upgrade_candidates.sort(key=lambda x: x.upgrade_priority, reverse=True)
 
             if not upgrade_candidates:
-                console.print("[yellow]No items match the selected filters[/yellow]")
+                ui.warning("No items match the selected filters")
                 return
 
             # Display table
@@ -737,7 +743,5 @@ def quality_upgrades(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        import traceback
-
-        traceback.print_exc()
+        ui.print_exception()
         raise typer.Exit(1)
