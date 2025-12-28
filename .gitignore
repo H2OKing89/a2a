@@ -151,5 +151,17 @@ keys/
 *.key
 
 # -----------------------------
+# Personal notes (not committed)
+# -----------------------------
+CHEATSHEET.md
+LOCAL_NOTES.md
+NOTES.md
+
+# -----------------------------
+# Local vendor docs (not committed)
+# -----------------------------
+docs/Audible/upstream/
+
+# -----------------------------
 # End
 # -----------------------------
