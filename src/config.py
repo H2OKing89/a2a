@@ -98,20 +98,73 @@ class CacheSettings(BaseSettings):
     max_memory_entries: int = Field(default=500, description="Max entries in memory cache layer")
 
 
-class QualitySettings(BaseSettings):
-    """Audio quality thresholds."""
+class QualityTierConfig(BaseSettings):
+    """Configuration for a single quality tier."""
 
     model_config = SettingsConfigDict(extra="ignore")
 
+    min_bitrate: float = Field(description="Minimum bitrate for this tier (kbps)")
+    formats: list[str] = Field(default_factory=list, description="Formats this tier applies to (empty = all)")
+    atmos_override: bool = Field(default=False, description="Atmos detection overrides bitrate requirement")
+
+
+class QualitySettings(BaseSettings):
+    """Audio quality thresholds and tier configuration."""
+
+    model_config = SettingsConfigDict(extra="ignore")
+
+    # Legacy thresholds (kept for backwards compatibility)
     bitrate_threshold_kbps: float = Field(default=100.0)
     ultra_bitrate_kbps: float = Field(default=256.0)
     high_bitrate_kbps: float = Field(default=128.0)
     medium_bitrate_kbps: float = Field(default=96.0)
     low_bitrate_kbps: float = Field(default=64.0)
+
+    # Quality scoring weights (must sum to 1.0)
     weight_bitrate: float = Field(default=0.4)
     weight_codec: float = Field(default=0.3)
     weight_spatial: float = Field(default=0.2)
     weight_metadata: float = Field(default=0.1)
+
+    # Tier-based configuration (new)
+    tiers: dict[str, QualityTierConfig] = Field(
+        default_factory=lambda: {
+            "excellent": QualityTierConfig(min_bitrate=256.0, atmos_override=True),
+            "better": QualityTierConfig(min_bitrate=128.0, formats=["m4b", "m4a"]),
+            "good": QualityTierConfig(min_bitrate=110.0, formats=["m4b", "m4a"]),
+            "acceptable": QualityTierConfig(min_bitrate=128.0, formats=["mp3"]),
+            "low": QualityTierConfig(min_bitrate=64.0),
+            "poor": QualityTierConfig(min_bitrate=0.0),
+        },
+        description="Quality tier definitions",
+    )
+
+    # Atmos detection settings
+    atmos_codecs: list[str] = Field(
+        default_factory=lambda: ["eac3", "truehd", "ac3"],
+        description="Codecs that indicate Dolby Atmos capability",
+    )
+    atmos_min_channels: int = Field(default=6, description="Minimum channels for Atmos (5.1+)")
+
+    # Premium formats (get tier bonus)
+    premium_formats: list[str] = Field(
+        default_factory=lambda: ["m4b", "m4a"],
+        description="Formats considered premium quality",
+    )
+
+    def get_tier_threshold(self, tier: str) -> float:
+        """Get the minimum bitrate for a tier."""
+        if tier in self.tiers:
+            return self.tiers[tier].min_bitrate
+        # Fall back to legacy settings
+        legacy_map = {
+            "excellent": self.ultra_bitrate_kbps,
+            "better": self.high_bitrate_kbps,
+            "good": self.medium_bitrate_kbps,
+            "low": self.low_bitrate_kbps,
+            "poor": 0.0,
+        }
+        return legacy_map.get(tier, 0.0)
 
 
 class EnrichmentSettings(BaseSettings):
