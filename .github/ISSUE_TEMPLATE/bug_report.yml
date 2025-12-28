@@ -30,7 +30,7 @@ body:
   attributes:
     label: A2A version
     description: Output of `python -c "import src; print(src.__version__)"` OR the CLI output from `python cli.py --version` (or `./cli --version`), or a git commit hash
-    placeholder: 0.1.0 or `python cli.py --version` or commit abc1234
+    placeholder: 0.1.0 or v0.1.0 or commit abc1234
   validations:
     required: false
 
