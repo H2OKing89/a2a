@@ -2,8 +2,7 @@
 Pydantic models for Audiobookshelf API responses.
 """
 
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -327,19 +326,24 @@ class User(BaseModel):
     libraries_accessible: list[str] = Field(default_factory=list, alias="librariesAccessible")
 
 
-class Collection(BaseModel):
-    """ABS Collection model."""
+class CollectionBase(BaseModel):
+    """Base ABS Collection model (shared fields)."""
 
     id: str
     library_id: str = Field(alias="libraryId")
     user_id: str = Field(alias="userId")
     name: str
     description: str | None = None
-    books: list[str] = Field(default_factory=list)  # List of library item IDs
     last_update: int = Field(alias="lastUpdate")
     created_at: int = Field(alias="createdAt")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class Collection(CollectionBase):
+    """ABS Collection model with book IDs."""
+
+    books: list[str] = Field(default_factory=list)  # List of library item IDs
 
     @property
     def book_count(self) -> int:
@@ -347,10 +351,15 @@ class Collection(BaseModel):
         return len(self.books)
 
 
-class CollectionExpanded(Collection):
+class CollectionExpanded(CollectionBase):
     """Collection with expanded book data."""
 
-    books: list[dict] = Field(default_factory=list)  # Full library item dicts
+    books: list[dict[str, Any]] = Field(default_factory=list)  # Full library item dicts
+
+    @property
+    def book_count(self) -> int:
+        """Number of books in collection."""
+        return len(self.books)
 
     @property
     def book_ids(self) -> list[str]:
@@ -383,3 +392,152 @@ class SeriesProgress(BaseModel):
         if not self.library_item_ids:
             return 0.0
         return (len(self.library_item_ids_finished) / len(self.library_item_ids)) * 100
+
+
+# =============================================================================
+# API Response Models for dict-returning endpoints
+# =============================================================================
+
+
+class SeriesBook(BaseModel):
+    """Book within a series response."""
+
+    id: str
+    library_id: str = Field(alias="libraryId")
+    path: str | None = None
+    added_at: int | None = Field(default=None, alias="addedAt")
+    media: BookMedia | None = None
+    sequence: str | None = None
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SeriesWithBooks(BaseModel):
+    """Series with its books."""
+
+    id: str
+    name: str
+    description: str | None = None
+    added_at: int | None = Field(default=None, alias="addedAt")
+    updated_at: int | None = Field(default=None, alias="updatedAt")
+    progress: SeriesProgress | None = None
+    books: list[SeriesBook] = Field(default_factory=list)
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def book_count(self) -> int:
+        """Number of books in series."""
+        return len(self.books)
+
+
+class SeriesListResponse(BaseModel):
+    """Response from GET /libraries/:id/series endpoint."""
+
+    results: list[SeriesWithBooks]
+    total: int
+    limit: int
+    page: int
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SearchResultBook(BaseModel):
+    """Search result for a book."""
+
+    library_item: LibraryItemMinified | None = Field(default=None, alias="libraryItem")
+    match_key: str | None = Field(default=None, alias="matchKey")
+    match_text: str | None = Field(default=None, alias="matchText")
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SearchResultSeries(BaseModel):
+    """Search result for a series."""
+
+    series: Series
+    books: list[LibraryItemMinified] = Field(default_factory=list)
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SearchResultAuthor(BaseModel):
+    """Search result for an author."""
+
+    id: str
+    name: str
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SearchResponse(BaseModel):
+    """Response from library search endpoint."""
+
+    book: list[SearchResultBook] = Field(default_factory=list)
+    series: list[SearchResultSeries] = Field(default_factory=list)
+    authors: list[SearchResultAuthor] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    narrators: list[str] = Field(default_factory=list)
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def total_results(self) -> int:
+        """Total number of search results."""
+        return len(self.book) + len(self.series) + len(self.authors) + len(self.tags)
+
+
+class AuthorSearchResult(BaseModel):
+    """Result from author search."""
+
+    id: str
+    name: str
+    asin: str | None = None
+    num_books: int = Field(default=0, alias="numBooks")
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class AuthorSearchResponse(BaseModel):
+    """Response from /search/authors endpoint."""
+
+    results: list[AuthorSearchResult] = Field(default_factory=list)
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class BookSearchResult(BaseModel):
+    """Result from metadata provider book search."""
+
+    title: str
+    author: str | None = None
+    asin: str | None = None
+    isbn: str | None = None
+    cover: str | None = None
+    description: str | None = None
+    publish_year: str | None = Field(default=None, alias="publishYear")
+    publisher: str | None = None
+    series: str | None = None
+    sequence: str | None = None
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+
+class SeriesResponse(BaseModel):
+    """Response from GET /series/:id endpoint."""
+
+    id: str
+    name: str
+    description: str | None = None
+    added_at: int | None = Field(default=None, alias="addedAt")
+    updated_at: int | None = Field(default=None, alias="updatedAt")
+    library_id: str | None = Field(default=None, alias="libraryId")
+    books: list[SeriesBook] = Field(default_factory=list)
+    progress: SeriesProgress | None = None
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def book_count(self) -> int:
+        """Number of books in series."""
+        return len(self.books)

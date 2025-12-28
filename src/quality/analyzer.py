@@ -4,25 +4,31 @@ Quality analyzer for audiobook libraries.
 
 import logging
 from collections.abc import Callable, Iterator
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import httpx
 from pydantic import ValidationError
 
-from ..abs import ABSAuthError, ABSClient, ABSConnectionError, ABSError, ABSNotFoundError
+from ..abs import ABSAuthError, ABSConnectionError, ABSError, ABSNotFoundError
 from .models import AudioQuality, FormatRank, QualityReport, QualityTier
+
+if TYPE_CHECKING:
+    from ..config import QualitySettings
 
 logger = logging.getLogger(__name__)
 
-# Bitrate thresholds (kbps)
+# Default bitrate thresholds (kbps) - can be overridden via config
 BITRATE_EXCELLENT = 256
 BITRATE_GOOD = 128
 BITRATE_ACCEPTABLE = 110
 BITRATE_LOW = 64
 
-# Atmos detection
+# Default Atmos detection settings
 ATMOS_CODECS = {"eac3", "truehd", "ac3"}  # Dolby codecs
 ATMOS_CHANNELS_MIN = 6  # 5.1 or higher
+
+# Default premium formats
+PREMIUM_FORMATS = {"m4b", "m4a"}
 
 
 class QualityAnalyzer:
@@ -60,6 +66,11 @@ class QualityAnalyzer:
         # Scan full library
         report = analyzer.scan_library(abs_client, library_id)
         print(f"Upgrade candidates: {len(report.upgrade_candidates)}")
+
+        # Using configuration
+        from src.config import get_settings
+        settings = get_settings()
+        analyzer = QualityAnalyzer.from_config(settings.quality)
     """
 
     def __init__(
@@ -68,6 +79,9 @@ class QualityAnalyzer:
         bitrate_good: float = BITRATE_GOOD,
         bitrate_acceptable: float = BITRATE_ACCEPTABLE,
         bitrate_low: float = BITRATE_LOW,
+        atmos_codecs: set[str] | None = None,
+        atmos_min_channels: int = ATMOS_CHANNELS_MIN,
+        premium_formats: set[str] | None = None,
     ):
         """
         Initialize analyzer with custom thresholds.
@@ -77,27 +91,59 @@ class QualityAnalyzer:
             bitrate_good: Minimum kbps for good tier (default 128)
             bitrate_acceptable: Minimum kbps for acceptable tier (default 110)
             bitrate_low: Minimum kbps for low tier (default 64)
+            atmos_codecs: Set of codec names indicating Atmos capability
+            atmos_min_channels: Minimum channels for Atmos detection (default 6)
+            premium_formats: Set of formats considered premium (default m4b, m4a)
         """
         self.bitrate_excellent = bitrate_excellent
         self.bitrate_good = bitrate_good
         self.bitrate_acceptable = bitrate_acceptable
         self.bitrate_low = bitrate_low
+        self.atmos_codecs = atmos_codecs or ATMOS_CODECS
+        self.atmos_min_channels = atmos_min_channels
+        self.premium_formats = premium_formats or PREMIUM_FORMATS
+
+    @classmethod
+    def from_config(cls, config: "QualitySettings") -> "QualityAnalyzer":
+        """
+        Create analyzer from QualitySettings configuration.
+
+        Args:
+            config: QualitySettings instance from config.py
+
+        Returns:
+            Configured QualityAnalyzer
+
+        Example:
+            from src.config import get_settings
+            settings = get_settings()
+            analyzer = QualityAnalyzer.from_config(settings.quality)
+        """
+        return cls(
+            bitrate_excellent=config.get_tier_threshold("excellent"),
+            bitrate_good=config.get_tier_threshold("better"),
+            bitrate_acceptable=config.get_tier_threshold("good"),
+            bitrate_low=config.get_tier_threshold("low"),
+            atmos_codecs=set(config.atmos_codecs),
+            atmos_min_channels=config.atmos_min_channels,
+            premium_formats=set(config.premium_formats),
+        )
 
     def is_atmos(self, codec: str, channels: int, channel_layout: str | None = None) -> bool:
         """
         Check if audio is Dolby Atmos.
 
         Detection criteria:
-        - Codec is eac3 (Enhanced AC-3), truehd, or ac3
-        - Channels >= 6 (5.1 or higher)
+        - Codec is in atmos_codecs set (default: eac3, truehd, ac3)
+        - Channels >= atmos_min_channels (default: 6 for 5.1+)
         """
         if not codec:
             return False
 
         codec_lower = codec.lower()
 
-        # EAC3 with surround channels is Atmos
-        if codec_lower in ATMOS_CODECS and channels >= ATMOS_CHANNELS_MIN:
+        # Check codec and channel count against configured thresholds
+        if codec_lower in self.atmos_codecs and channels >= self.atmos_min_channels:
             return True
 
         # Also check channel layout for "atmos" mention
@@ -105,6 +151,11 @@ class QualityAnalyzer:
             return True
 
         return False
+
+    def is_premium_format(self, format_rank: FormatRank) -> bool:
+        """Check if format is considered premium based on configuration."""
+        format_name = format_rank.name.lower()
+        return format_name in self.premium_formats
 
     def calculate_tier(
         self,
@@ -131,16 +182,16 @@ class QualityAnalyzer:
         if bitrate_kbps >= self.bitrate_excellent:
             return QualityTier.EXCELLENT
 
-        # Rules based on format
-        is_premium_format = format_rank in (FormatRank.M4B, FormatRank.M4A)
+        # Rules based on format (using configurable format sets)
+        is_premium = self.is_premium_format(format_rank)
         is_mp3_format = format_rank in (FormatRank.MP3, FormatRank.OPUS, FormatRank.FLAC)
 
-        if is_premium_format:
-            # M4B/M4A tiers
+        if is_premium:
+            # M4B/M4A tiers (premium formats)
             if bitrate_kbps >= self.bitrate_good:  # 128+
-                return QualityTier.GOOD
+                return QualityTier.BETTER
             elif bitrate_kbps >= self.bitrate_acceptable:  # 110-127
-                return QualityTier.ACCEPTABLE
+                return QualityTier.GOOD
             elif bitrate_kbps >= self.bitrate_low:  # 64-109
                 return QualityTier.LOW
             else:  # <64
@@ -149,7 +200,7 @@ class QualityAnalyzer:
         elif is_mp3_format:
             # MP3 tiers (stricter - one tier lower than m4b at same bitrate)
             if bitrate_kbps >= self.bitrate_good:  # 128+
-                return QualityTier.ACCEPTABLE  # MP3 128+ = Acceptable (not Good)
+                return QualityTier.GOOD  # MP3 128+ = Good (not Better)
             elif bitrate_kbps >= self.bitrate_acceptable:  # 110-127
                 return QualityTier.LOW
             else:  # <110
@@ -158,7 +209,7 @@ class QualityAnalyzer:
         else:
             # Unknown format - use generic bitrate rules
             if bitrate_kbps >= self.bitrate_good:
-                return QualityTier.ACCEPTABLE
+                return QualityTier.GOOD
             elif bitrate_kbps >= self.bitrate_low:
                 return QualityTier.LOW
             else:
@@ -231,11 +282,11 @@ class QualityAnalyzer:
         elif tier == QualityTier.LOW:
             priority += 50
             reasons.append(f"Below acceptable quality ({bitrate_kbps:.0f} kbps)")
-        elif tier == QualityTier.ACCEPTABLE:
+        elif tier == QualityTier.GOOD:
             priority += 10
             reasons.append(f"Could be improved ({bitrate_kbps:.0f} kbps)")
         else:
-            # Good/Excellent - no upgrade needed
+            # Better/Excellent - no upgrade needed
             return 0, None
 
         # ASIN bonus (easier to find replacement)

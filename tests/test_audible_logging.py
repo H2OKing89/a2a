@@ -35,7 +35,7 @@ class TestConfigureLogging:
 
     def test_configure_logging_console_only(self):
         """Test console logging configuration."""
-        configure_logging(level="info", console=True, file_path=None)
+        configure_logging(level="info", console_output=True, file_path=None)
 
         logger = get_logger("test")
         # Just verify it doesn't raise
@@ -47,7 +47,7 @@ class TestConfigureLogging:
 
     def test_configure_logging_with_level(self):
         """Test setting log level."""
-        configure_logging(level="debug", console=True)
+        configure_logging(level="debug", console_output=True)
 
         logger = get_logger("test_level")
         # Check the parent logger (MODULE_LOGGER_NAME)
@@ -56,7 +56,7 @@ class TestConfigureLogging:
 
     def test_configure_logging_invalid_level(self):
         """Test invalid log level defaults to INFO."""
-        configure_logging(level="invalid", console=True)
+        configure_logging(level="invalid", console_output=True)
 
         parent = logging.getLogger(MODULE_LOGGER_NAME)
         # Should default to INFO
@@ -68,7 +68,7 @@ class TestConfigureLogging:
         parent_logger = logging.getLogger(MODULE_LOGGER_NAME)
 
         try:
-            configure_logging(level="info", console=False, file_path=str(log_file))
+            configure_logging(level="info", console_output=False, file_path=str(log_file))
 
             logger = get_logger("test_file")
             logger.info("File test message")
@@ -99,7 +99,7 @@ class TestConfigureLogging:
 
     def test_set_level(self):
         """Test set_level changes log level."""
-        configure_logging(level="info", console=True)
+        configure_logging(level="info", console_output=True)
 
         set_level("debug")
         parent = logging.getLogger(MODULE_LOGGER_NAME)
@@ -110,7 +110,7 @@ class TestConfigureLogging:
 
     def test_enable_debug_logging(self):
         """Test enable_debug_logging sets DEBUG level."""
-        configure_logging(level="info", console=True)
+        configure_logging(level="info", console_output=True)
 
         enable_debug_logging()
         parent = logging.getLogger(MODULE_LOGGER_NAME)
@@ -146,7 +146,7 @@ class TestLogContext:
 
     def test_log_context_changes_level(self):
         """Test LogContext changes log level temporarily."""
-        configure_logging(level="info", console=True)
+        configure_logging(level="info", console_output=True)
         parent = logging.getLogger(MODULE_LOGGER_NAME)
         original_level = parent.level
 
@@ -159,7 +159,7 @@ class TestLogContext:
 
     def test_log_context_with_int_level(self):
         """Test LogContext with int log level."""
-        configure_logging(level="info", console=True)
+        configure_logging(level="info", console_output=True)
 
         with LogContext(logging.WARNING):
             parent = logging.getLogger(MODULE_LOGGER_NAME)
@@ -167,7 +167,7 @@ class TestLogContext:
 
     def test_log_context_nested(self):
         """Test nested LogContext."""
-        configure_logging(level="info", console=True)
+        configure_logging(level="info", console_output=True)
         parent = logging.getLogger(MODULE_LOGGER_NAME)
 
         with LogContext("debug"):
@@ -199,7 +199,7 @@ class TestAudiblePackageIntegration:
             patch("src.audible.logging.HAS_AUDIBLE_LOG_HELPER", True),
             patch("src.audible.logging.log_helper") as mock_log_helper,
         ):
-            configure_logging(level="debug", console=True, configure_audible_package=True)
+            configure_logging(level="debug", console_output=True, configure_audible_package=True)
             # Should call log_helper to set level
             assert mock_log_helper.set_level.called or mock_log_helper.set_console_logger.called
 
@@ -209,6 +209,6 @@ class TestAudiblePackageIntegration:
             patch("src.audible.logging.HAS_AUDIBLE_LOG_HELPER", True),
             patch("src.audible.logging.log_helper") as mock_log_helper,
         ):
-            configure_logging(level="info", console=True, configure_audible_package=False)
+            configure_logging(level="info", console_output=True, configure_audible_package=False)
             # Should NOT call log_helper
             mock_log_helper.set_level.assert_not_called()

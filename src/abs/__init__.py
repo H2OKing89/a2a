@@ -8,15 +8,23 @@ from .logging import LogContext, configure_logging, enable_debug_logging, get_lo
 from .models import (
     AudioFile,
     Author,
+    AuthorSearchResponse,
+    AuthorSearchResult,
     BookMetadata,
+    BookSearchResult,
     Collection,
     CollectionExpanded,
     Library,
     LibraryItem,
     LibraryItemExpanded,
     LibraryItemMinified,
+    SearchResponse,
+    SearchResultBook,
     Series,
+    SeriesListResponse,
     SeriesProgress,
+    SeriesResponse,
+    SeriesWithBooks,
 )
 
 __all__ = [
@@ -40,6 +48,15 @@ __all__ = [
     "Collection",
     "CollectionExpanded",
     "SeriesProgress",
+    # Response models
+    "SeriesListResponse",
+    "SeriesWithBooks",
+    "SearchResponse",
+    "SearchResultBook",
+    "SeriesResponse",
+    "AuthorSearchResponse",
+    "AuthorSearchResult",
+    "BookSearchResult",
     # Logging
     "configure_logging",
     "get_logger",

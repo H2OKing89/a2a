@@ -9,7 +9,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, Optional
 
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz
 
 from ..audible import PlusCatalogInfo, PricingInfo
 from .models import (

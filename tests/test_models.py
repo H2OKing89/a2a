@@ -17,13 +17,13 @@ class TestQualityTier:
         """Test EXCELLENT tier label."""
         assert QualityTier.EXCELLENT.label == "Excellent"
 
+    def test_quality_tier_better_label(self):
+        """Test BETTER tier label."""
+        assert QualityTier.BETTER.label == "Better"
+
     def test_quality_tier_good_label(self):
         """Test GOOD tier label."""
         assert QualityTier.GOOD.label == "Good"
-
-    def test_quality_tier_acceptable_label(self):
-        """Test ACCEPTABLE tier label."""
-        assert QualityTier.ACCEPTABLE.label == "Acceptable"
 
     def test_quality_tier_low_label(self):
         """Test LOW tier label."""
@@ -39,23 +39,23 @@ class TestQualityTier:
 
     def test_quality_tier_excellent_emoji(self):
         """Test EXCELLENT tier emoji."""
-        assert QualityTier.EXCELLENT.emoji == "⭐"
+        assert QualityTier.EXCELLENT.emoji == "💎"
+
+    def test_quality_tier_better_emoji(self):
+        """Test BETTER tier emoji."""
+        assert QualityTier.BETTER.emoji == "✨"
 
     def test_quality_tier_good_emoji(self):
         """Test GOOD tier emoji."""
-        assert QualityTier.GOOD.emoji == "✅"
-
-    def test_quality_tier_acceptable_emoji(self):
-        """Test ACCEPTABLE tier emoji."""
-        assert QualityTier.ACCEPTABLE.emoji == "👍"
+        assert QualityTier.GOOD.emoji == "👍"
 
     def test_quality_tier_low_emoji(self):
         """Test LOW tier emoji."""
-        assert QualityTier.LOW.emoji == "⚠️"
+        assert QualityTier.LOW.emoji == "👎"
 
     def test_quality_tier_poor_emoji(self):
         """Test POOR tier emoji."""
-        assert QualityTier.POOR.emoji == "❌"
+        assert QualityTier.POOR.emoji == "💩"
 
     def test_quality_tier_unknown_emoji(self):
         """Test UNKNOWN tier emoji."""
@@ -261,7 +261,7 @@ class TestAudioQuality:
             bitrate_kbps=192,
             channel_layout="mono",
             is_atmos=False,
-            tier=QualityTier.GOOD,
+            tier=QualityTier.BETTER,
             quality_score=85.0,
             upgrade_priority=1,
             upgrade_reason="Lower bitrate available on Audible",
@@ -356,19 +356,19 @@ class TestQualityReport:
         empty_report.add_item(item1)
         assert len(empty_report.excellent_items) == 1
 
-        # Good
+        # Better
         item2 = AudioQuality(
-            item_id="2", title="Book 2", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.GOOD
+            item_id="2", title="Book 2", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.BETTER
         )
         empty_report.add_item(item2)
-        assert len(empty_report.good_items) == 1
+        assert len(empty_report.better_items) == 1
 
-        # Acceptable
+        # Good
         item3 = AudioQuality(
-            item_id="3", title="Book 3", codec="aac", bitrate_kbps=110, path="/", tier=QualityTier.ACCEPTABLE
+            item_id="3", title="Book 3", codec="aac", bitrate_kbps=110, path="/", tier=QualityTier.GOOD
         )
         empty_report.add_item(item3)
-        assert len(empty_report.acceptable_items) == 1
+        assert len(empty_report.good_items) == 1
 
         # Low
         item4 = AudioQuality(item_id="4", title="Book 4", codec="aac", bitrate_kbps=64, path="/", tier=QualityTier.LOW)
@@ -491,13 +491,13 @@ class TestQualityReport:
     def test_finalize_calculates_bitrate_stats(self, empty_report):
         """Test finalize calculates bitrate statistics."""
         item1 = AudioQuality(
-            item_id="1", title="Book 1", codec="aac", bitrate_kbps=128, path="/", tier=QualityTier.GOOD
+            item_id="1", title="Book 1", codec="aac", bitrate_kbps=128, path="/", tier=QualityTier.BETTER
         )
         item2 = AudioQuality(
             item_id="2", title="Book 2", codec="aac", bitrate_kbps=256, path="/", tier=QualityTier.EXCELLENT
         )
         item3 = AudioQuality(
-            item_id="3", title="Book 3", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.GOOD
+            item_id="3", title="Book 3", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.BETTER
         )
 
         empty_report.add_item(item1)
@@ -519,7 +519,7 @@ class TestQualityReport:
             item_id="2", title="Book 2", codec="aac", bitrate_kbps=256, path="/", tier=QualityTier.EXCELLENT
         )
         item3 = AudioQuality(
-            item_id="3", title="Book 3", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.GOOD
+            item_id="3", title="Book 3", codec="aac", bitrate_kbps=192, path="/", tier=QualityTier.BETTER
         )
 
         empty_report.add_item(item1)
@@ -579,7 +579,9 @@ class TestQualityReport:
         item1 = AudioQuality(
             item_id="1", title="Book 1", codec="aac", bitrate_kbps=0, path="/", tier=QualityTier.EXCELLENT
         )
-        item2 = AudioQuality(item_id="2", title="Book 2", codec="aac", bitrate_kbps=0, path="/", tier=QualityTier.GOOD)
+        item2 = AudioQuality(
+            item_id="2", title="Book 2", codec="aac", bitrate_kbps=0, path="/", tier=QualityTier.BETTER
+        )
 
         empty_report.add_item(item1)
         empty_report.add_item(item2)

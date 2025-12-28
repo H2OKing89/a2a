@@ -54,8 +54,8 @@ class TestConfigureLogging:
 
         # Should have at least one handler
         assert len(logger.handlers) >= 1
-        # First handler should be StreamHandler
-        assert isinstance(logger.handlers[0], logging.StreamHandler)
+        # First handler should be a Handler (RichHandler or StreamHandler)
+        assert isinstance(logger.handlers[0], logging.Handler)
 
     def test_configure_logging_no_console(self):
         """Test no console handler when disabled."""

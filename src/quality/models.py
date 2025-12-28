@@ -15,8 +15,8 @@ class QualityTier(IntEnum):
     """
 
     EXCELLENT = 1  # Dolby Atmos OR m4b @ 256+ kbps
-    GOOD = 2  # m4b @ 128-255 kbps
-    ACCEPTABLE = 3  # m4b @ 110-127 kbps OR mp3 @ 128+ kbps
+    BETTER = 2  # m4b @ 128-255 kbps
+    GOOD = 3  # m4b @ 110-127 kbps OR mp3 @ 128+ kbps
     LOW = 4  # m4b @ 64-109 kbps OR mp3 @ 110-127 kbps
     POOR = 5  # Any format < 64 kbps OR mp3 < 110 kbps
     UNKNOWN = 99  # Unable to determine
@@ -26,8 +26,8 @@ class QualityTier(IntEnum):
         """Human-readable tier label."""
         return {
             QualityTier.EXCELLENT: "Excellent",
+            QualityTier.BETTER: "Better",
             QualityTier.GOOD: "Good",
-            QualityTier.ACCEPTABLE: "Acceptable",
             QualityTier.LOW: "Low",
             QualityTier.POOR: "Poor",
             QualityTier.UNKNOWN: "Unknown",
@@ -37,11 +37,11 @@ class QualityTier(IntEnum):
     def emoji(self) -> str:
         """Emoji indicator for tier."""
         return {
-            QualityTier.EXCELLENT: "⭐",
-            QualityTier.GOOD: "✅",
-            QualityTier.ACCEPTABLE: "👍",
-            QualityTier.LOW: "⚠️",
-            QualityTier.POOR: "❌",
+            QualityTier.EXCELLENT: "💎",
+            QualityTier.BETTER: "✨",
+            QualityTier.GOOD: "👍",
+            QualityTier.LOW: "👎",
+            QualityTier.POOR: "💩",
             QualityTier.UNKNOWN: "❓",
         }.get(self, "❓")
 
@@ -196,8 +196,8 @@ class QualityReport(BaseModel):
 
     # Items by tier
     excellent_items: list[AudioQuality] = Field(default_factory=list)
+    better_items: list[AudioQuality] = Field(default_factory=list)
     good_items: list[AudioQuality] = Field(default_factory=list)
-    acceptable_items: list[AudioQuality] = Field(default_factory=list)
     low_items: list[AudioQuality] = Field(default_factory=list)
     poor_items: list[AudioQuality] = Field(default_factory=list)
 
@@ -230,10 +230,10 @@ class QualityReport(BaseModel):
         # Add to tier lists
         if item.tier == QualityTier.EXCELLENT:
             self.excellent_items.append(item)
+        elif item.tier == QualityTier.BETTER:
+            self.better_items.append(item)
         elif item.tier == QualityTier.GOOD:
             self.good_items.append(item)
-        elif item.tier == QualityTier.ACCEPTABLE:
-            self.acceptable_items.append(item)
         elif item.tier == QualityTier.LOW:
             self.low_items.append(item)
         elif item.tier == QualityTier.POOR:
@@ -248,7 +248,7 @@ class QualityReport(BaseModel):
 
     def finalize(self) -> None:
         """Calculate final statistics after all items added."""
-        all_items = self.excellent_items + self.good_items + self.acceptable_items + self.low_items + self.poor_items
+        all_items = self.excellent_items + self.better_items + self.good_items + self.low_items + self.poor_items
 
         if all_items:
             bitrates = [i.bitrate_kbps for i in all_items if i.bitrate_kbps > 0]

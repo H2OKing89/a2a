@@ -37,7 +37,6 @@ from .models import (
     AudibleLibraryItem,
     AudibleListeningStats,
     CatalogSortBy,
-    ChapterInfo,
     ContentMetadata,
     LibrarySortBy,
     LibraryStatus,

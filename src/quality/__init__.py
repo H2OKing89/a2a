@@ -6,6 +6,7 @@ Provides quality scoring and tier classification for audiobooks.
 
 from .analyzer import QualityAnalyzer
 from .models import AudioQuality, FormatRank, QualityReport, QualityTier
+from .services import EnrichedUpgradeCandidate, UpgradeFinderResult, UpgradeFinderService
 
 __all__ = [
     "QualityTier",
@@ -13,4 +14,8 @@ __all__ = [
     "AudioQuality",
     "QualityReport",
     "QualityAnalyzer",
+    # Services
+    "UpgradeFinderService",
+    "UpgradeFinderResult",
+    "EnrichedUpgradeCandidate",
 ]
