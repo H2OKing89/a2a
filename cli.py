@@ -44,7 +44,7 @@ def version_callback(value: bool) -> None:
     if value:
         console.print(f"\n[bold cyan]🎧 Audiobook to Audible (A2A)[/bold cyan] [dim]v{__version__}[/dim]\n")
         console.print(f"  [dim]Python:[/dim]  {sys.version.split()[0]}")
-        console.print(f"  [dim]Source:[/dim]  https://github.com/H2OKing89/a2a")
+        console.print("  [dim]Source:[/dim]  https://github.com/H2OKing89/a2a")
         console.print()
         raise typer.Exit()
 
