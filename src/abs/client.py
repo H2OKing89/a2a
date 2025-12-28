@@ -63,6 +63,50 @@ class ABSNotFoundError(ABSError):
     pass
 
 
+def _http2_available() -> bool:
+    """Check if HTTP/2 dependencies are installed."""
+    try:
+        import h2  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _is_localhost(host: str) -> bool:
+    """Check if host is localhost or loopback address."""
+    from urllib.parse import urlparse
+
+    parsed = urlparse(host if "://" in host else f"http://{host}")
+    hostname = parsed.hostname or ""
+    return hostname in ("localhost", "127.0.0.1", "::1")
+
+
+def _normalize_host(host: str, allow_insecure_http: bool) -> str:
+    """
+    Normalize host URL by adding scheme if missing.
+
+    Args:
+        host: Host URL (may or may not have scheme)
+        allow_insecure_http: Whether to allow HTTP for non-localhost
+
+    Returns:
+        Normalized URL with scheme
+    """
+    host = host.rstrip("/")
+
+    # Already has scheme
+    if "://" in host:
+        return host
+
+    # Add scheme based on settings
+    is_local = _is_localhost(host)
+    if is_local or allow_insecure_http:
+        return f"http://{host}"
+    else:
+        return f"https://{host}"
+
+
 class ABSClient:
     """
     Audiobookshelf API client.
@@ -80,26 +124,75 @@ class ABSClient:
         cache_ttl_hours: float = 2.0,
         # Deprecated: kept for backwards compatibility
         cache_dir: Path | None = None,
+        # Security settings
+        allow_insecure_http: bool = False,
+        tls_ca_bundle: str | None = None,
+        insecure_tls: bool = False,
     ):
         """
         Initialize the ABS client.
 
         Args:
-            host: ABS server URL (e.g., https://abs.example.com)
+            host: ABS server URL (e.g., https://abs.example.com or abs.example.com:13378)
             api_key: API token for authentication
             timeout: Request timeout in seconds
             rate_limit_delay: Delay between requests
             cache: SQLiteCache instance for caching API responses
             cache_ttl_hours: Cache TTL in hours (default 2)
             cache_dir: Deprecated - use cache parameter instead
+            allow_insecure_http: Allow HTTP connections (localhost always allowed)
+            tls_ca_bundle: Path to CA certificate bundle for self-signed certs
+            insecure_tls: DANGEROUS - Disable SSL verification entirely
         """
-        self.host = host.rstrip("/")
+        # Normalize host URL (add scheme if missing)
+        self.host = _normalize_host(host, allow_insecure_http)
         self.api_key = api_key
         self.timeout = timeout
         self.rate_limit_delay = rate_limit_delay
         self._last_request_time = 0.0
         self._cache_ttl_seconds = cache_ttl_hours * 3600
 
+        # Track security state for status display
+        self._is_localhost = _is_localhost(self.host)
+        self._is_https = self.host.startswith("https://")
+        self._http2_enabled = _http2_available()
+        self._insecure_tls = insecure_tls
+        self._using_ca_bundle = bool(tls_ca_bundle)
+
+        # Security validation: HTTP only allowed for localhost or if explicitly enabled
+        if not self._is_https and not self._is_localhost and not allow_insecure_http:
+            raise ABSConnectionError(
+                f"ABS host is HTTP but insecure HTTP is not allowed: {self.host}\n"
+                "Options:\n"
+                "  1. Use HTTPS in Audiobookshelf (recommended)\n"
+                "  2. Set allow_insecure_http: true in config.yaml (not recommended)\n"
+                "  3. Set ABS_ALLOW_INSECURE_HTTP=true environment variable"
+            )
+
+        # Log security info at DEBUG level (CLI handles user-facing messages)
+        if not self._is_https:
+            if self._is_localhost:
+                logger.debug("Using HTTP for localhost; TLS recommended for remote hosts")
+            else:
+                logger.debug(
+                    "Using HTTP connection to remote server: %s. " "API key will be sent in cleartext!", self.host
+                )
+
+        if insecure_tls:
+            logger.warning(
+                "SSL certificate verification is DISABLED. " "This is insecure and should only be used for testing."
+            )
+
+        # Determine TLS verification setting
+        verify: bool | str = True
+        if self._is_https:
+            if insecure_tls:
+                verify = False
+            elif tls_ca_bundle:
+                verify = tls_ca_bundle
+                logger.debug("Using custom CA bundle: %s", tls_ca_bundle)
+
+        # Create HTTP client with automatic HTTP/2 support
         self._client = httpx.Client(
             base_url=self.host,
             headers={
@@ -107,7 +200,14 @@ class ABSClient:
                 "Content-Type": "application/json",
             },
             timeout=timeout,
+            verify=verify,
+            http2=self._http2_enabled,
         )
+
+        if self._http2_enabled:
+            logger.debug("HTTP/2 enabled (h2 library available)")
+        else:
+            logger.debug("HTTP/2 not available; using HTTP/1.1 (install httpx[http2] for HTTP/2)")
 
         # Setup caching - prefer new SQLiteCache, fall back to legacy
         self._cache: Optional["SQLiteCache"] = cache
@@ -166,23 +266,33 @@ class ABSClient:
                 json=json,
             )
         except httpx.ConnectError as e:
-            logger.exception("ABS connection error: %s", e)
+            logger.debug("ABS connection error: %s", e)
             raise ABSConnectionError(f"Failed to connect to {self.host}: {e}") from e
         except httpx.TimeoutException as e:
-            logger.exception("ABS timeout: %s", e)
+            logger.debug("ABS timeout: %s", e)
             raise ABSConnectionError(f"Request timed out: {e}") from e
 
+        # Handle redirects (301/302) - likely HTTP -> HTTPS
+        if response.status_code in (301, 302, 303, 307, 308):
+            location = response.headers.get("Location", "unknown")
+            logger.debug("ABS redirect: %d to %s", response.status_code, location)
+            if self.host.startswith("http://") and location.startswith("https://"):
+                raise ABSConnectionError(
+                    f"Server redirected HTTP to HTTPS. Update your ABS_HOST to use HTTPS: {location}"
+                )
+            raise ABSConnectionError(f"Server returned redirect {response.status_code} to: {location}")
+
         if response.status_code == 401:
-            logger.error("ABS auth error: 401 Unauthorized")
+            logger.debug("ABS auth error: 401 Unauthorized")
             raise ABSAuthError("Authentication failed. Check your API key.")
         elif response.status_code == 403:
-            logger.error("ABS auth error: 403 Forbidden")
+            logger.debug("ABS auth error: 403 Forbidden")
             raise ABSAuthError("Access forbidden. Insufficient permissions.")
         elif response.status_code == 404:
             logger.debug("ABS resource not found: %s", endpoint)
             raise ABSNotFoundError(f"Resource not found: {endpoint}")
         elif response.status_code >= 400:
-            logger.error("ABS API error: %d for %s", response.status_code, endpoint)
+            logger.debug("ABS API error: %d for %s", response.status_code, endpoint)
             raise ABSError(
                 f"API error: {response.status_code}",
                 status_code=response.status_code,
@@ -194,7 +304,22 @@ class ABSClient:
         if not response.content:
             return {}
 
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as e:
+            # Server returned non-JSON response (likely HTML error page)
+            content_preview = response.text[:500] if response.text else "(empty)"
+            logger.debug(
+                "ABS returned non-JSON response: %s - Content preview: %s",
+                e,
+                content_preview,
+            )
+            raise ABSError(
+                f"Server returned invalid JSON response. "
+                f"This usually means the server URL is incorrect or the server returned an error page. "
+                f"Status: {response.status_code}, Content preview: {content_preview[:200]}",
+                status_code=response.status_code,
+            ) from e
 
     def _get(self, endpoint: str, params: dict | None = None) -> dict:
         """Make a GET request."""
