@@ -2,10 +2,21 @@
 """
 Test script to check Audible API for bitrate, codecs, and pricing.
 Beautiful terminal output with Rich library.
+
+Run from: scripts/ directory or project root
+  cd scripts && python test_audible_codecs.py
+  python scripts/test_audible_codecs.py
 """
 
 import asyncio
+import sys
 from pathlib import Path
+
+# Add parent directory to path so we can import src modules when running from scripts/
+script_dir = Path(__file__).parent
+project_root = script_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from rich import box
 from rich.align import Align
@@ -366,7 +377,10 @@ async def analyze_audiobook(client: AsyncAudibleClient, asin: str, progress: Pro
 
 async def main():
     """Main entry point."""
-    auth_file = Path("data/audible_auth.json")
+    # Support running from scripts/ or project root
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    auth_file = project_root / "data" / "audible_auth.json"
 
     if not auth_file.exists():
         console.print(
@@ -379,15 +393,20 @@ async def main():
         return
 
     asins = [
-        "B0DWZYWQTB",
-        "B0F14RPXHR",
+        "B0DM2PBNPZ",  # Test ASIN
     ]
+
+    # Load config for auth password
+    from src.config import get_settings
+
+    settings = get_settings()
+    auth_password = settings.audible.auth_password
 
     console.print()
     console.print(create_header())
     console.print()
 
-    async with AsyncAudibleClient.from_file(auth_file) as client:
+    async with AsyncAudibleClient.from_file(auth_file, auth_password=auth_password) as client:
         for asin in asins:
             with Progress(
                 SpinnerColumn(),
