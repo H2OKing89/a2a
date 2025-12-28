@@ -2,6 +2,8 @@
 Pydantic models for Audiobookshelf API responses.
 """
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -322,9 +324,6 @@ class User(BaseModel):
     created_at: int = Field(alias="createdAt")
     permissions: UserPermissions = Field(default_factory=UserPermissions)
     libraries_accessible: list[str] = Field(default_factory=list, alias="librariesAccessible")
-
-
-from typing import Any
 
 
 class CollectionBase(BaseModel):
