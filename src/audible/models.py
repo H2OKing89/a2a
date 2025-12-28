@@ -837,7 +837,7 @@ class AudioFormat(BaseModel):
     runtime_ms: int = Field(default=0, description="Runtime in milliseconds")
     is_spatial: bool = Field(default=False, description="Is spatial/Atmos audio")
 
-    model_config = {"extra": "ignore"}
+    model_config = {"extra": "ignore", "populate_by_name": True}
 
     @property
     def size_mb(self) -> float:
@@ -852,7 +852,7 @@ class AudioFormat(BaseModel):
     @property
     def is_atmos(self) -> bool:
         """Check if this is Dolby Atmos format."""
-        return self.codec in ("ec+3", "ac-4")
+        return self.codec in (AudioCodec.EC3.value, AudioCodec.AC4.value)
 
     @property
     def quality_label(self) -> str:
@@ -883,7 +883,7 @@ class ContentQualityInfo(BaseModel):
     has_high_efficiency: bool = Field(default=False, description="HE-AAC v2 available (Widevine)")
     has_standard: bool = Field(default=False, description="Standard AAC available (Adrm)")
 
-    model_config = {"extra": "ignore"}
+    model_config = {"extra": "ignore", "populate_by_name": True}
 
     @classmethod
     def from_formats(cls, asin: str, formats: list[AudioFormat]) -> "ContentQualityInfo":
@@ -900,9 +900,9 @@ class ContentQualityInfo(BaseModel):
             for fmt in formats:
                 if fmt.is_atmos:
                     info.has_atmos = True
-                if fmt.codec == "mp4a.40.42":  # HE-AAC v2
+                if fmt.codec == AudioCodec.HE_AAC.value:  # HE-AAC v2
                     info.has_high_efficiency = True
-                if fmt.codec == "mp4a.40.2":  # AAC-LC
+                if fmt.codec == AudioCodec.AAC_LC.value:  # AAC-LC
                     info.has_standard = True
 
         return info
