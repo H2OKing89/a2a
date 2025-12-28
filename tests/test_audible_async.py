@@ -133,7 +133,8 @@ class TestAsyncAudibleClient:
     async def test_client_from_file_success(self):
         """Test client from_file with valid auth file."""
         with (
-            patch("src.audible.async_client.Authenticator") as mock_auth_class,
+            patch("src.audible.encryption.Authenticator") as mock_auth_class,
+            patch("src.audible.encryption.detect_file_encryption", return_value=None),
             patch("src.audible.async_client.Path") as mock_path,
         ):
             mock_auth = MagicMock()

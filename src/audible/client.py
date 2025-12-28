@@ -16,6 +16,13 @@ from pydantic import ValidationError
 
 from audible import Authenticator, Client
 
+from .encryption import (
+    AuthFileEncryption,
+    get_encryption_config,
+    is_file_encrypted,
+    load_auth,
+    save_auth,
+)
 from .models import (
     AudibleAccountInfo,
     AudibleCatalogProduct,
@@ -190,12 +197,16 @@ class AudibleClient:
         burst_size: int = 5,
         backoff_multiplier: float = 2.0,
         max_backoff_seconds: float = 60.0,
+        auth_password: str | None = None,
         # Deprecated parameters
         cache_dir: Path | None = None,
         cache_ttl_days: int = 10,
     ) -> "AudibleClient":
         """
         Create client from saved credentials file.
+
+        Supports encrypted auth files. If the file is encrypted, a password
+        must be provided via auth_password or AUDIBLE_AUTH_PASSWORD env var.
 
         Args:
             auth_file: Path to saved auth credentials
@@ -206,6 +217,7 @@ class AudibleClient:
             burst_size: Requests before burst delay
             backoff_multiplier: Backoff multiplier on errors
             max_backoff_seconds: Maximum backoff delay
+            auth_password: Password for encrypted auth files (or use AUDIBLE_AUTH_PASSWORD env var)
             cache_dir: Deprecated - use cache parameter instead
             cache_ttl_days: Deprecated - use cache_ttl_hours instead
 
@@ -213,7 +225,7 @@ class AudibleClient:
             Configured AudibleClient
 
         Raises:
-            AudibleAuthError: If credentials file is invalid/missing
+            AudibleAuthError: If credentials file is invalid/missing or encrypted without password
         """
         auth_path = Path(auth_file)
         if not auth_path.exists():
@@ -224,8 +236,13 @@ class AudibleClient:
 
         check_file_permissions(auth_path, fix=False, warn=True)
 
+        # Build encryption config (uses env var if no password provided)
+        enc_config = get_encryption_config(password=auth_password)
+
         try:
-            auth = Authenticator.from_file(str(auth_path))
+            auth = load_auth(auth_path, enc_config)
+        except ValueError as e:
+            raise AudibleAuthError(str(e)) from e
         except Exception as e:
             raise AudibleAuthError(f"Failed to load auth from {auth_file}: {e}") from e
 
@@ -259,6 +276,9 @@ class AudibleClient:
         otp_callback: Callable | None = None,
         cvf_callback: Callable | None = None,
         captcha_callback: Callable | None = None,
+        auth_password: str | None = None,
+        auth_encryption: str = "json",
+        auth_kdf_iterations: int = 50_000,
         # Deprecated parameters
         cache_dir: Path | None = None,
         cache_ttl_days: int = 10,
@@ -284,6 +304,9 @@ class AudibleClient:
             otp_callback: Callback for OTP/2FA codes
             cvf_callback: Callback for CVF (verification code)
             captcha_callback: Callback for CAPTCHA solving
+            auth_password: Password for encrypting auth file (or use AUDIBLE_AUTH_PASSWORD env var)
+            auth_encryption: Encryption style ('json' or 'bytes')
+            auth_kdf_iterations: PBKDF2 iterations for key derivation (default 50000)
             cache_dir: Deprecated - use cache parameter instead
             cache_ttl_days: Deprecated - use cache_ttl_hours instead
 
@@ -302,11 +325,15 @@ class AudibleClient:
         except Exception as e:
             raise AudibleAuthError(f"Login failed: {e}")
 
-        # Save credentials for future use
+        # Save credentials for future use (encrypted if password provided)
         if auth_file:
             auth_path = Path(auth_file)
-            auth_path.parent.mkdir(parents=True, exist_ok=True)
-            auth.to_file(str(auth_path))
+            enc_config = get_encryption_config(
+                password=auth_password,
+                encryption=auth_encryption,  # type: ignore[arg-type]
+                kdf_iterations=auth_kdf_iterations,
+            )
+            save_auth(auth, auth_path, enc_config)
 
         return cls(
             auth=auth,
@@ -333,6 +360,9 @@ class AudibleClient:
         burst_size: int = 5,
         backoff_multiplier: float = 2.0,
         max_backoff_seconds: float = 60.0,
+        auth_password: str | None = None,
+        auth_encryption: str = "json",
+        auth_kdf_iterations: int = 50_000,
         # Deprecated parameters
         cache_dir: Path | None = None,
         cache_ttl_days: int = 10,
@@ -352,6 +382,9 @@ class AudibleClient:
             burst_size: Requests before burst delay
             backoff_multiplier: Backoff multiplier on errors
             max_backoff_seconds: Maximum backoff delay
+            auth_password: Password for encrypting auth file (or use AUDIBLE_AUTH_PASSWORD env var)
+            auth_encryption: Encryption style ('json' or 'bytes')
+            auth_kdf_iterations: PBKDF2 iterations for key derivation (default 50000)
             cache_dir: Deprecated - use cache parameter instead
             cache_ttl_days: Deprecated - use cache_ttl_hours instead
 
@@ -363,11 +396,15 @@ class AudibleClient:
         except Exception as e:
             raise AudibleAuthError(f"External login failed: {e}")
 
-        # Save credentials
+        # Save credentials (encrypted if password provided)
         if auth_file:
             auth_path = Path(auth_file)
-            auth_path.parent.mkdir(parents=True, exist_ok=True)
-            auth.to_file(str(auth_path))
+            enc_config = get_encryption_config(
+                password=auth_password,
+                encryption=auth_encryption,  # type: ignore[arg-type]
+                kdf_iterations=auth_kdf_iterations,
+            )
+            save_auth(auth, auth_path, enc_config)
 
         return cls(
             auth=auth,
@@ -382,11 +419,34 @@ class AudibleClient:
             cache_ttl_days=cache_ttl_days,
         )
 
-    def save_auth(self, auth_file: str | Path) -> None:
-        """Save current auth credentials to file."""
+    def save_credentials(
+        self,
+        auth_file: str | Path,
+        auth_password: str | None = None,
+        auth_encryption: str = "json",
+        auth_kdf_iterations: int = 50_000,
+    ) -> None:
+        """
+        Save current auth credentials to file, optionally encrypted.
+
+        Args:
+            auth_file: Path to save credentials
+            auth_password: Password for encryption (or use AUDIBLE_AUTH_PASSWORD env var)
+            auth_encryption: Encryption style ('json' or 'bytes')
+            auth_kdf_iterations: PBKDF2 iterations for key derivation
+        """
         auth_path = Path(auth_file)
-        auth_path.parent.mkdir(parents=True, exist_ok=True)
-        self._auth.to_file(str(auth_path))
+        enc_config = get_encryption_config(
+            password=auth_password,
+            encryption=auth_encryption,  # type: ignore[arg-type]
+            kdf_iterations=auth_kdf_iterations,
+        )
+        save_auth(self._auth, auth_path, enc_config)
+
+    # Backwards compatibility alias
+    def save_auth(self, auth_file: str | Path) -> None:
+        """Save current auth credentials to file (unencrypted). Use save_credentials for encryption."""
+        self.save_credentials(auth_file, auth_password=None)
 
     @property
     def marketplace(self) -> str:

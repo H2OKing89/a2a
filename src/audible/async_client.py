@@ -31,6 +31,7 @@ from pydantic import ValidationError
 import audible
 from audible import Authenticator
 
+from .encryption import get_encryption_config, load_auth
 from .models import (
     AudibleAccountInfo,
     AudibleCatalogProduct,
@@ -132,9 +133,13 @@ class AsyncAudibleClient:
         cache_ttl_hours: float = 240.0,
         max_concurrent_requests: int = 5,
         request_delay: float = 0.2,
+        auth_password: str | None = None,
     ) -> "AsyncAudibleClient":
         """
         Create async client from saved credentials file.
+
+        Supports encrypted auth files. If the file is encrypted, a password
+        must be provided via auth_password or AUDIBLE_AUTH_PASSWORD env var.
 
         Args:
             auth_file: Path to saved auth credentials
@@ -142,16 +147,25 @@ class AsyncAudibleClient:
             cache_ttl_hours: Cache TTL in hours
             max_concurrent_requests: Max concurrent requests
             request_delay: Delay between requests
+            auth_password: Password for encrypted auth files (or use AUDIBLE_AUTH_PASSWORD env var)
 
         Returns:
             Configured AsyncAudibleClient
+
+        Raises:
+            AsyncAudibleAuthError: If credentials file is invalid/missing or encrypted without password
         """
         auth_path = Path(auth_file)
         if not auth_path.exists():
             raise AsyncAudibleAuthError(f"Auth file not found: {auth_file}")
 
+        # Build encryption config (uses env var if no password provided)
+        enc_config = get_encryption_config(password=auth_password)
+
         try:
-            auth = Authenticator.from_file(str(auth_path))
+            auth = load_auth(auth_path, enc_config)
+        except ValueError as e:
+            raise AsyncAudibleAuthError(str(e)) from e
         except Exception as e:
             raise AsyncAudibleAuthError(f"Failed to load auth: {e}") from e
 

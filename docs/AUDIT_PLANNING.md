@@ -36,7 +36,7 @@ Review credential handling, API key management, input validation, and potential 
 ### Key Questions
 
 - [x] How are Audible credentials stored in `data/audible_auth.json`?
-- [ ] Are credentials encrypted at rest?
+- [x] Are credentials encrypted at rest?
 - [x] Could API keys or tokens leak into logs?
 - [x] Is there input validation on CLI arguments to prevent injection?
 - [x] Are there any hardcoded secrets in the codebase?
@@ -60,7 +60,7 @@ Review credential handling, API key management, input validation, and potential 
 - [x] Validate all external inputs (CLI args, API responses)
 - [x] Ensure HTTPS enforcement
 - [x] Consider adding `.gitignore` patterns for sensitive files
-- [ ] Evaluate encryption for stored credentials
+- [x] Evaluate encryption for stored credentials (implemented AES encryption support)
 
 ### Tools
 

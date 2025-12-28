@@ -18,6 +18,15 @@ Provides a comprehensive client for the Audible API with:
 
 from .async_client import AsyncAudibleAuthError, AsyncAudibleClient, AsyncAudibleError, AsyncAudibleNotFoundError
 from .client import AudibleAuthError, AudibleClient, AudibleError, AudibleNotFoundError
+from .encryption import (
+    AuthFileEncryption,
+    get_auth_password_from_env,
+    get_encryption_config,
+    get_file_encryption_style,
+    is_file_encrypted,
+    load_auth,
+    save_auth,
+)
 from .enrichment import AudibleEnrichment, AudibleEnrichmentService
 from .logging import (
     LogContext,
@@ -104,6 +113,14 @@ __all__ = [
     # Pricing and Plus Catalog
     "PricingInfo",
     "PlusCatalogInfo",
+    # Encryption utilities
+    "AuthFileEncryption",
+    "get_encryption_config",
+    "load_auth",
+    "save_auth",
+    "is_file_encrypted",
+    "get_file_encryption_style",
+    "get_auth_password_from_env",
     # Enrichment service
     "AudibleEnrichment",
     "AudibleEnrichmentService",
