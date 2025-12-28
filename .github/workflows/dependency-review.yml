@@ -11,13 +11,12 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
-    # Continue even if dependency review fails (requires Dependency Graph to be enabled)
-    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
 
     - name: Dependency Review
       uses: actions/dependency-review-action@v4
+      continue-on-error: true
       with:
         fail-on-severity: high
         deny-licenses: GPL-3.0, AGPL-3.0
