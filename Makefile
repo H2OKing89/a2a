@@ -81,11 +81,41 @@ bump-minor:
 bump-major:
 	@python tools/version.py major
 
-release-patch: bump-patch
-	@git add src/__init__.py
-	@git commit -m "chore: bump version to $$(python tools/version.py | cut -d' ' -f3)"
-	@git tag v$$(python tools/version.py | cut -d' ' -f3)
-	@echo "✅ Version bumped and tagged. Run 'git push origin main --tags' to release."
+release-patch:
+	@echo "🔍 Checking release preconditions..."
+	@# Check for uncommitted changes
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "❌ Error: Working tree is not clean. Commit or stash changes first."; \
+		git status --short; \
+		exit 1; \
+	fi
+	@# Check current branch (main or repo-polish for now)
+	@CURRENT_BRANCH=$$(git branch --show-current); \
+	if [ "$$CURRENT_BRANCH" != "main" ] && [ "$$CURRENT_BRANCH" != "repo-polish" ]; then \
+		echo "❌ Error: Not on release branch (current: $$CURRENT_BRANCH)"; \
+		echo "   Switch to 'main' before releasing: git checkout main"; \
+		exit 1; \
+	fi
+	@echo "✅ Working tree clean, on branch $$(git branch --show-current)"
+	@# Bump version and capture new version string
+	@echo "📦 Bumping patch version..."
+	@python tools/version.py patch > /dev/null
+	@NEW_VERSION=$$(python tools/version.py | cut -d' ' -f3); \
+	echo "   New version: $$NEW_VERSION"; \
+	if [ -z "$$NEW_VERSION" ]; then \
+		echo "❌ Error: Failed to determine new version"; \
+		exit 1; \
+	fi; \
+	echo "💾 Committing version bump..."; \
+	git add src/__init__.py || { echo "❌ Error: git add failed"; exit 1; }; \
+	git commit -m "chore: bump version to $$NEW_VERSION" || { echo "❌ Error: git commit failed"; exit 1; }; \
+	echo "🏷️  Creating tag v$$NEW_VERSION..."; \
+	git tag "v$$NEW_VERSION" || { echo "❌ Error: git tag failed (does tag already exist?)"; exit 1; }; \
+	echo ""; \
+	echo "✅ Release v$$NEW_VERSION complete!"; \
+	echo ""; \
+	echo "📤 Next step: Push to remote with:"; \
+	echo "   git push origin $$(git branch --show-current) --tags"
 
 # Quick commands
 quick-test: format lint test
