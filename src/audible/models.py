@@ -813,3 +813,134 @@ class ChapterInfo(BaseModel):
         if self.runtime_length_ms:
             return round(self.runtime_length_ms / (1000 * 3600), 2)
         return None
+
+
+# =============================================================================
+# Content License Models (for discovering actual audio quality)
+# =============================================================================
+
+
+class AudioFormat(BaseModel):
+    """
+    Discovered audio format from license request.
+
+    This represents an actually available audio format discovered via
+    POST /1.0/content/{asin}/licenserequest, which is more reliable
+    than the catalog's available_codecs field.
+    """
+
+    codec: str = Field(description="Codec identifier (mp4a.40.2, mp4a.40.42, ec+3, ac-4)")
+    codec_name: str = Field(default="Unknown", description="Human-readable codec name")
+    drm_type: str = Field(default="Unknown", description="DRM type (Adrm, Widevine, FairPlay)")
+    bitrate_kbps: float = Field(default=0, description="Bitrate in kbps")
+    size_bytes: int = Field(default=0, description="Content size in bytes")
+    runtime_ms: int = Field(default=0, description="Runtime in milliseconds")
+    is_spatial: bool = Field(default=False, description="Is spatial/Atmos audio")
+
+    model_config = {"extra": "ignore"}
+
+    @property
+    def size_mb(self) -> float:
+        """Size in megabytes."""
+        return self.size_bytes / (1024 * 1024)
+
+    @property
+    def size_gb(self) -> float:
+        """Size in gigabytes."""
+        return self.size_bytes / (1024**3)
+
+    @property
+    def is_atmos(self) -> bool:
+        """Check if this is Dolby Atmos format."""
+        return self.codec in ("ec+3", "ac-4")
+
+    @property
+    def quality_label(self) -> str:
+        """Get quality label based on bitrate."""
+        if self.is_atmos:
+            return "Dolby Atmos"
+        if self.bitrate_kbps >= 200:
+            return "Excellent (200+ kbps)"
+        if self.bitrate_kbps >= 110:
+            return "Good (110+ kbps)"
+        if self.bitrate_kbps >= 64:
+            return "Standard (64+ kbps)"
+        return "Low"
+
+
+class ContentQualityInfo(BaseModel):
+    """
+    Complete quality information for an audiobook.
+
+    Aggregates all available formats discovered via license requests.
+    """
+
+    asin: str = Field(description="Audible ASIN")
+    formats: list[AudioFormat] = Field(default_factory=list, description="Available audio formats")
+    best_bitrate_kbps: float = Field(default=0, description="Highest available bitrate")
+    best_format: AudioFormat | None = Field(default=None, description="Best quality format")
+    has_atmos: bool = Field(default=False, description="Dolby Atmos available")
+    has_high_efficiency: bool = Field(default=False, description="HE-AAC v2 available (Widevine)")
+    has_standard: bool = Field(default=False, description="Standard AAC available (Adrm)")
+
+    model_config = {"extra": "ignore"}
+
+    @classmethod
+    def from_formats(cls, asin: str, formats: list[AudioFormat]) -> "ContentQualityInfo":
+        """Create ContentQualityInfo from list of discovered formats."""
+        info = cls(asin=asin, formats=formats)
+
+        if formats:
+            # Find best bitrate format
+            best = max(formats, key=lambda f: f.bitrate_kbps)
+            info.best_bitrate_kbps = best.bitrate_kbps
+            info.best_format = best
+
+            # Check for format types
+            for fmt in formats:
+                if fmt.is_atmos:
+                    info.has_atmos = True
+                if fmt.codec == "mp4a.40.42":  # HE-AAC v2
+                    info.has_high_efficiency = True
+                if fmt.codec == "mp4a.40.2":  # AAC-LC
+                    info.has_standard = True
+
+        return info
+
+    @property
+    def best_format_label(self) -> str:
+        """Get human-readable label for best format."""
+        if not self.best_format:
+            return "Unknown"
+        if self.has_atmos and self.best_format.is_atmos:
+            return f"Dolby Atmos ({self.best_bitrate_kbps:.0f} kbps)"
+        return f"{self.best_format.codec_name} ({self.best_bitrate_kbps:.0f} kbps)"
+
+
+# License request configuration presets
+LICENSE_TEST_CONFIGS = [
+    {
+        "name": "AAC-LC",
+        "codecs": [AudioCodec.AAC_LC.value],
+        "drm_types": [DrmType.ADRM.value],
+        "spatial": False,
+    },
+    {
+        "name": "AAC-HE v2",
+        "codecs": [AudioCodec.HE_AAC.value],
+        "drm_types": [DrmType.WIDEVINE.value],
+        "spatial": False,
+    },
+    {
+        "name": "Dolby Atmos",
+        "codecs": [AudioCodec.EC3.value],
+        "drm_types": [DrmType.WIDEVINE.value],
+        "spatial": True,
+    },
+    {
+        "name": "Dolby AC-4",
+        "codecs": [AudioCodec.AC4.value],
+        "drm_types": [DrmType.FAIR_PLAY.value],
+        "spatial": True,
+    },
+]
