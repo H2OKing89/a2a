@@ -41,7 +41,7 @@ Usage:
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from rich.box import DOUBLE, ROUNDED, SIMPLE
@@ -95,6 +95,7 @@ AUDIOBOOK_THEME = Theme(
         "tier.excellent": "bold bright_blue",
         "tier.better": "dark_green",
         "tier.good": "green",
+        "tier.acceptable": "yellow",
         "tier.low": "red",
         "tier.poor": "bold red",
         "tier.unknown": "dim",
@@ -570,7 +571,7 @@ class UIHelper:
     def timestamp(self, dt: datetime | None = None) -> Text:
         """Display a formatted timestamp."""
         if dt is None:
-            dt = datetime.now()
+            dt = datetime.now(timezone.utc)
         return Text(dt.strftime("%Y-%m-%d %H:%M:%S"), style="muted")
 
     # -------------------------------------------------------------------------
@@ -652,30 +653,28 @@ ui = UIHelper(console)
 # =============================================================================
 
 __all__ = [
-    "console",
-    "ui",
-    "Icons",
-    "UIHelper",
     "AUDIOBOOK_THEME",
-    "get_rich_handler",
-    # Progress classes for custom use
-    "Progress",
-    "SpinnerColumn",
     "BarColumn",
-    "TextColumn",
-    "TaskProgressColumn",
-    "TimeElapsedColumn",
-    "TimeRemainingColumn",
-    "MofNCompleteColumn",
-    # Other rich exports
-    "Table",
-    "Panel",
-    "Tree",
-    "Text",
-    "Rule",
     "Columns",
+    "console",
+    "get_rich_handler",
     "Group",
-    "Padding",
+    "Icons",
     "Live",
     "Markdown",
+    "MofNCompleteColumn",
+    "Padding",
+    "Panel",
+    "Progress",
+    "Rule",
+    "SpinnerColumn",
+    "Table",
+    "TaskProgressColumn",
+    "Text",
+    "TextColumn",
+    "TimeElapsedColumn",
+    "TimeRemainingColumn",
+    "Tree",
+    "ui",
+    "UIHelper",
 ]
