@@ -1,4 +1,5 @@
 # Audit Planning Document
+
 **Created:** December 27, 2025  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)  
 **Status:** Planning
@@ -12,7 +13,7 @@ This document outlines future audits to improve the quality, security, and maint
 | Audit | Priority | Effort | Status |
 |-------|----------|--------|--------|
 | [Security Audit](#1-security-audit) | 🔴 High | Medium | ✅ Complete |
-| [Dependency Audit](#2-dependency-audit) | 🔴 High | Low | ⬜ Not Started |
+| [Dependency Audit](#2-dependency-audit) | 🔴 High | Low | ✅ Complete |
 | [Documentation Audit](#3-documentation-audit) | 🟡 Medium | Medium | ⬜ Not Started |
 | [Performance Audit](#4-performance-audit) | 🟡 Medium | High | ⬜ Not Started |
 | [Observability Audit](#5-observability-audit) | 🟡 Medium | Medium | ⬜ Not Started |
@@ -29,9 +30,11 @@ This document outlines future audits to improve the quality, security, and maint
 **Report:** [SECURITY_AUDIT.md](SECURITY_AUDIT.md)
 
 ### Scope
+
 Review credential handling, API key management, input validation, and potential security vulnerabilities.
 
 ### Key Questions
+
 - [x] How are Audible credentials stored in `data/audible_auth.json`?
 - [ ] Are credentials encrypted at rest?
 - [x] Could API keys or tokens leak into logs?
@@ -41,6 +44,7 @@ Review credential handling, API key management, input validation, and potential 
 - [x] Are HTTP requests using secure connections (HTTPS)?
 
 ### Files to Review
+
 - `data/audible_auth.json` - Credential storage
 - `src/config.py` - Settings and environment variable handling
 - `src/audible/client.py` - API authentication
@@ -49,6 +53,7 @@ Review credential handling, API key management, input validation, and potential 
 - All logging calls for potential credential exposure
 
 ### Actionable Items
+
 - [x] Audit credential storage mechanism
 - [x] Check for secrets in git history
 - [x] Review logging for sensitive data exposure
@@ -58,6 +63,7 @@ Review credential handling, API key management, input validation, and potential 
 - [ ] Evaluate encryption for stored credentials
 
 ### Tools
+
 - `git log -p` - Check git history for secrets
 - `bandit` - Python security linter (already in dev dependencies)
 - `trufflehog` - Secret scanner for git repos
@@ -68,32 +74,38 @@ Review credential handling, API key management, input validation, and potential 
 
 **Priority:** 🔴 High  
 **Effort:** Low  
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete  
+**Report:** [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)
 
 ### Scope
+
 Review dependencies for vulnerabilities, outdated packages, and license compliance.
 
 ### Key Questions
-- [ ] Are there any known vulnerabilities in dependencies?
-- [ ] Which packages are outdated?
-- [ ] Are all licenses compatible with project goals?
+
+- [x] Are there any known vulnerabilities in dependencies?
+- [x] Which packages are outdated?
+- [x] Are all licenses compatible with project goals?
 - [ ] Are there unused dependencies that can be removed?
-- [ ] Are dependency versions pinned appropriately?
+- [x] Are dependency versions pinned appropriately?
 
 ### Files to Review
+
 - `requirements.txt` - Production dependencies
 - `requirements-dev.txt` - Development dependencies
 - `pyproject.toml` - Project configuration
 
 ### Actionable Items
-- [ ] Run `pip list --outdated` to find old packages
-- [ ] Run `pip-audit` or `safety check` for vulnerabilities
-- [ ] Review licenses with `pip-licenses`
+
+- [x] Run `pip list --outdated` to find old packages
+- [x] Run `pip-audit` or `safety check` for vulnerabilities
+- [x] Review licenses with `pip-licenses`
 - [ ] Remove unused dependencies
 - [ ] Consider using `dependabot` for automated updates
-- [ ] Pin versions in requirements files
+- [x] Pin versions in requirements files
 
 ### Tools
+
 ```bash
 # Check outdated packages
 pip list --outdated
@@ -120,9 +132,11 @@ pip-licenses --format=markdown
 **Status:** ⬜ Not Started
 
 ### Scope
+
 Review documentation completeness, accuracy, and accessibility for users and developers.
 
 ### Key Questions
+
 - [ ] Is there a comprehensive README with setup instructions?
 - [ ] Are all CLI commands documented with `--help`?
 - [ ] Are there usage examples for common workflows?
@@ -132,6 +146,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 - [ ] Is the architecture documented for contributors?
 
 ### Files to Review
+
 - `README.md` - Main documentation
 - `docs/` - Documentation folder
 - All `--help` outputs from CLI commands
@@ -139,6 +154,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 - `config.yaml` - Configuration reference
 
 ### Actionable Items
+
 - [ ] Create/update comprehensive README
 - [ ] Document all CLI commands with examples
 - [ ] Add quick-start guide
@@ -149,6 +165,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 - [ ] Create CHANGELOG.md
 
 ### Documentation Structure
+
 ```
 docs/
 ├── README.md           # Quick start, overview
@@ -170,9 +187,11 @@ docs/
 **Status:** ⬜ Not Started
 
 ### Scope
+
 Identify bottlenecks, memory issues, and optimization opportunities.
 
 ### Key Questions
+
 - [ ] How does the tool perform with large libraries (1000+ books)?
 - [ ] Are API calls batched efficiently?
 - [ ] Is caching effective?
@@ -181,6 +200,7 @@ Identify bottlenecks, memory issues, and optimization opportunities.
 - [ ] Is the SQLite cache schema optimized?
 
 ### Areas to Profile
+
 - Library scanning operations
 - Quality analysis of large libraries
 - Audible enrichment batch processing
@@ -188,6 +208,7 @@ Identify bottlenecks, memory issues, and optimization opportunities.
 - Series matching algorithms
 
 ### Actionable Items
+
 - [ ] Profile key operations with `cProfile`
 - [ ] Measure memory usage with `memory_profiler`
 - [ ] Benchmark with different library sizes
@@ -197,6 +218,7 @@ Identify bottlenecks, memory issues, and optimization opportunities.
 - [ ] Add performance regression tests
 
 ### Tools
+
 ```bash
 # CPU profiling
 python -m cProfile -o profile.stats cli.py quality scan -l <library>
@@ -212,6 +234,7 @@ kernprof -l -v script.py
 ```
 
 ### Benchmarks to Create
+
 - Scan 100 items
 - Scan 1000 items
 - Scan 10000 items
@@ -227,9 +250,11 @@ kernprof -l -v script.py
 **Status:** ⬜ Not Started
 
 ### Scope
+
 Review logging, metrics, and debugging capabilities.
 
 ### Key Questions
+
 - [ ] Is logging consistent across all modules?
 - [ ] Are log levels used appropriately (DEBUG, INFO, WARNING, ERROR)?
 - [ ] Can users enable verbose logging easily?
@@ -238,12 +263,14 @@ Review logging, metrics, and debugging capabilities.
 - [ ] Is there structured logging support?
 
 ### Files to Review
+
 - `src/abs/logging.py` - ABS logging config
 - `src/audible/logging.py` - Audible logging config
 - All `logger.xxx()` calls across codebase
 - CLI verbose/debug flags
 
 ### Actionable Items
+
 - [ ] Standardize logging format across modules
 - [ ] Add request IDs for tracing
 - [ ] Implement structured logging (JSON format option)
@@ -253,6 +280,7 @@ Review logging, metrics, and debugging capabilities.
 - [ ] Add log rotation for file logging
 
 ### Logging Standards
+
 ```python
 # Recommended format
 logger.info("Processing item", extra={"item_id": item_id, "action": "scan"})
@@ -268,9 +296,11 @@ logger.error("API call failed", extra={"endpoint": url, "status": status}, exc_i
 **Status:** ⬜ Not Started
 
 ### Scope
+
 Review command-line interface for consistency, usability, and user experience.
 
 ### Key Questions
+
 - [ ] Are command names intuitive and consistent?
 - [ ] Are option flags consistent (`-l` vs `--library`)?
 - [ ] Are error messages helpful and actionable?
@@ -280,6 +310,7 @@ Review command-line interface for consistency, usability, and user experience.
 - [ ] Are colors/formatting accessible?
 
 ### Commands to Review
+
 - All `abs` subcommands
 - All `audible` subcommands
 - All `quality` subcommands
@@ -287,6 +318,7 @@ Review command-line interface for consistency, usability, and user experience.
 - Global commands (`status`, `cache`)
 
 ### Actionable Items
+
 - [ ] Audit all `--help` text for clarity
 - [ ] Standardize option naming conventions
 - [ ] Add examples to help text
@@ -297,6 +329,7 @@ Review command-line interface for consistency, usability, and user experience.
 - [ ] Add `--dry-run` for destructive operations
 
 ### UX Checklist
+
 ```
 ✓ Consistent verb usage (list, show, get, create, delete)
 ✓ Short flags for common options (-l, -o, -v)
@@ -317,9 +350,11 @@ Review command-line interface for consistency, usability, and user experience.
 **Status:** ⬜ Not Started
 
 ### Scope
+
 Review end-to-end test coverage and real-world scenario testing.
 
 ### Key Questions
+
 - [ ] Are there integration tests for key workflows?
 - [ ] Is there a test environment with mock APIs?
 - [ ] Are edge cases covered (empty library, network errors)?
@@ -327,6 +362,7 @@ Review end-to-end test coverage and real-world scenario testing.
 - [ ] Is CI/CD pipeline testing complete workflows?
 
 ### Key Workflows to Test
+
 1. Full library scan and quality analysis
 2. Audible enrichment workflow
 3. Series matching end-to-end
@@ -335,6 +371,7 @@ Review end-to-end test coverage and real-world scenario testing.
 6. Configuration loading from various sources
 
 ### Actionable Items
+
 - [ ] Create mock ABS server for testing
 - [ ] Create mock Audible responses
 - [ ] Add integration test suite
@@ -344,6 +381,7 @@ Review end-to-end test coverage and real-world scenario testing.
 - [ ] Document test environment setup
 
 ### Test Fixtures Needed
+
 ```
 tests/
 ├── fixtures/
