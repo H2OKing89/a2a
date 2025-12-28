@@ -18,7 +18,7 @@ import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Optional, cast
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from .client import AudibleClient
 from .models import ContentQualityInfo, PlusCatalogInfo, PricingInfo
@@ -26,6 +26,9 @@ from .models import ContentQualityInfo, PlusCatalogInfo, PricingInfo
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
     from .async_client import AsyncAudibleClient
+else:
+    # Import for exception handling at runtime
+    from .async_client import AsyncAudibleError
 
 
 logger = logging.getLogger(__name__)
@@ -511,7 +514,7 @@ class AsyncAudibleEnrichmentService:
         self._api_calls += 1
         try:
             product = await self._client.get_catalog_product(asin, use_cache=use_cache)
-        except Exception as e:
+        except (AsyncAudibleError, ValidationError) as e:
             logger.debug("Failed to get catalog product for ASIN %s: %s", asin, str(e))
             return None
 
@@ -549,6 +552,28 @@ class AsyncAudibleEnrichmentService:
         # Check for Atmos flag
         enrichment.has_atmos = getattr(product, "has_dolby_atmos", False) or product.is_ayce
 
+        # Parse catalog bitrate from available_codecs as fallback (mirrors sync path)
+        available_codecs = getattr(product, "model_extra", {}).get("available_codecs", [])
+        if available_codecs:
+            for codec in available_codecs:
+                codec_name = codec.get("name", "")
+                if "_" in codec_name:
+                    parts = codec_name.split("_")
+                    for part in reversed(parts):
+                        if part.isdigit():
+                            bitrate = int(part)
+                            if bitrate <= 320 and bitrate > (enrichment.best_bitrate or 0):
+                                enrichment.best_bitrate = bitrate
+                            break
+
+                enhanced_codec = codec.get("enhanced_codec", "")
+                if "_" in enhanced_codec and not enrichment.best_bitrate:
+                    parts = enhanced_codec.split("_")
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        bitrate = int(parts[1])
+                        if bitrate <= 320 and bitrate > (enrichment.best_bitrate or 0):
+                            enrichment.best_bitrate = bitrate
+
         # Discover actual quality via license requests
         if discover_quality:
             self._quality_discoveries += 1
@@ -558,7 +583,7 @@ class AsyncAudibleEnrichmentService:
                 enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
                 if quality_info.best_bitrate_kbps > 0:
                     enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
-            except Exception as e:
+            except (AsyncAudibleError, ValidationError) as e:
                 logger.debug("Failed to discover quality for ASIN %s: %s", asin, str(e))
 
         # API reliability flag
