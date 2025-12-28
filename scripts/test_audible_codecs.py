@@ -294,16 +294,12 @@ async def analyze_audiobook(client: AsyncAudibleClient, asin: str, progress: Pro
     # Test codec availability
     progress.update(task, description=f"[cyan]Testing audio formats...")
 
-    test_configs = [
-        {"codecs": ["mp4a.40.2"], "drm_types": ["Adrm"], "spatial": False, "name": "AAC-LC"},
-        {"codecs": ["mp4a.40.42"], "drm_types": ["Widevine"], "spatial": False, "name": "AAC-HE v2"},
-        {"codecs": ["ec+3"], "drm_types": ["Widevine"], "spatial": True, "name": "Dolby Atmos"},
-        {"codecs": ["ac-4"], "drm_types": ["FairPlay"], "spatial": True, "name": "Dolby AC-4"},
-    ]
+    # Import shared license test configs from library
+    from src.audible.models import LICENSE_TEST_CONFIGS
 
     available_formats = []
 
-    for _, config in enumerate(test_configs):
+    for _, config in enumerate(LICENSE_TEST_CONFIGS):
         progress.update(task, description=f"[cyan]Testing {config['name']}...")
 
         try:
@@ -380,7 +376,17 @@ async def main():
     # Support running from scripts/ or project root
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
-    auth_file = project_root / "data" / "audible_auth.json"
+
+    # Load config for auth file and password
+    from src.config import get_settings
+
+    settings = get_settings()
+    auth_password = settings.audible.auth_password
+
+    # Resolve auth file path (may be relative to project_root)
+    auth_file = Path(settings.audible.auth_file)
+    if not auth_file.is_absolute():
+        auth_file = project_root / auth_file
 
     if not auth_file.exists():
         console.print(
@@ -395,12 +401,6 @@ async def main():
     asins = [
         "B0DM2PBNPZ",  # Test ASIN
     ]
-
-    # Load config for auth password
-    from src.config import get_settings
-
-    settings = get_settings()
-    auth_password = settings.audible.auth_password
 
     console.print()
     console.print(create_header())
