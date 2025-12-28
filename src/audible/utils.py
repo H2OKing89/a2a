@@ -232,6 +232,8 @@ def get_device_info(auth: Authenticator) -> DeviceInfo | None:
         DeviceInfo or None
     """
     try:
+        if auth.device_info is None:
+            return None
         return DeviceInfo(
             device_name=auth.device_info.get("device_name", "Unknown"),
             device_serial_number=auth.device_info.get("device_serial_number", "Unknown"),
@@ -318,10 +320,12 @@ def get_auth_info(auth_file: str | Path) -> dict[str, Any] | None:
     try:
         auth = Authenticator.from_file(str(auth_file))
         device = get_device_info(auth)
-        marketplace = get_marketplace(auth.locale.country_code)
+
+        locale_code = auth.locale.country_code if auth.locale else "UNKNOWN"
+        marketplace = get_marketplace(locale_code)
 
         return {
-            "locale": auth.locale.country_code,
+            "locale": locale_code,
             "marketplace": marketplace.name if marketplace else "Unknown",
             "domain": marketplace.domain if marketplace else "Unknown",
             "device_name": device.device_name if device else "Unknown",

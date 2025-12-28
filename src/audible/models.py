@@ -458,7 +458,7 @@ class AudibleCategory(BaseModel):
 class AudibleCategoryLadder(BaseModel):
     """Category hierarchy (ladder)."""
 
-    ladder: list[AudibleCategory] = Field(default_factory=list)
+    ladder: list[AudibleCategory] = Field(default_factory=lambda: [])
     root: str | None = None
 
     model_config = {"extra": "ignore"}
@@ -486,8 +486,8 @@ class AudibleBook(BaseModel):
     subtitle: str | None = None
 
     # Authors and narrators
-    authors: list[AudibleAuthor] = Field(default_factory=list)
-    narrators: list[AudibleNarrator] = Field(default_factory=list)
+    authors: list[AudibleAuthor] = Field(default_factory=lambda: [])
+    narrators: list[AudibleNarrator] = Field(default_factory=lambda: [])
 
     # Publisher info
     publisher_name: str | None = None
@@ -505,10 +505,10 @@ class AudibleBook(BaseModel):
     language: str | None = None
 
     # Series (can be None from API, defaults to empty list)
-    series: list[AudibleSeries] | None = Field(default_factory=list)
+    series: list[AudibleSeries] | None = Field(default_factory=lambda: [])
 
     # Categories (can be None from API, defaults to empty list)
-    category_ladders: list[AudibleCategoryLadder] | None = Field(default_factory=list)
+    category_ladders: list[AudibleCategoryLadder] | None = Field(default_factory=lambda: [])
 
     # Ratings
     rating: AudibleRating | None = None
@@ -572,7 +572,9 @@ class AudibleBook(BaseModel):
         if self.price:
             list_price_data = self.price.get("list_price", {})
             if list_price_data:
-                return list_price_data.get("base")
+                base = list_price_data.get("base")
+                if base is not None:
+                    return float(base)
         return None
 
     @property
@@ -624,13 +626,13 @@ class AudibleCatalogProduct(AudibleBook):
     sku_lite: str | None = None
 
     # Reviews
-    reviews: list[dict] | None = None
+    reviews: list[dict[str, Any]] | None = None
 
     # Customer rights (if authenticated)
-    customer_rights: dict | None = None
+    customer_rights: dict[str, Any] | None = None
 
     # Relationships (similar products, etc.)
-    relationships: list[dict] | None = None
+    relationships: list[dict[str, Any]] | None = None
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -638,7 +640,7 @@ class AudibleCatalogProduct(AudibleBook):
 class AudibleLibraryResponse(BaseModel):
     """Response from GET /1.0/library."""
 
-    items: list[AudibleLibraryItem] = Field(default_factory=list)
+    items: list[AudibleLibraryItem] = Field(default_factory=lambda: [])
     response_groups: list[str] | None = None
     total_results: int | None = Field(default=None, alias="total_results")
 
@@ -648,7 +650,7 @@ class AudibleLibraryResponse(BaseModel):
 class AudibleCatalogResponse(BaseModel):
     """Response from GET /1.0/catalog/products."""
 
-    products: list[AudibleCatalogProduct] = Field(default_factory=list)
+    products: list[AudibleCatalogProduct] = Field(default_factory=lambda: [])
     total_results: int | None = Field(default=None, alias="total_results")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -661,9 +663,15 @@ class AudibleListeningStats(BaseModel):
     total_listening_time_ms: int | None = Field(default=None, alias="totalListeningTimeMs")
     total_finished_titles: int | None = Field(default=None, alias="totalFinishedTitles")
 
+    # Additional stats
+    distinct_titles_listened: int | None = Field(default=None, alias="distinctTitlesListened")
+    distinct_authors_listened: int | None = Field(default=None, alias="distinctAuthorsListened")
+    current_listening_streak: int | None = Field(default=None, alias="currentListeningStreak")
+    longest_listening_streak: int | None = Field(default=None, alias="longestListeningStreak")
+
     # Daily/monthly breakdowns if requested
-    daily_listening_stats: list[dict] | None = None
-    monthly_listening_stats: list[dict] | None = None
+    daily_listening_stats: list[dict[str, Any]] | None = None
+    monthly_listening_stats: list[dict[str, Any]] | None = None
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -684,8 +692,16 @@ class AudibleAccountInfo(BaseModel):
     marketplace: str | None = None
 
     # Subscription details
-    subscription_details: dict | None = None
-    plan_summary: dict | None = None
+    subscription_details: dict[str, Any] | None = None
+    plan_summary: dict[str, Any] | None = None
+
+    # Account status
+    is_active_member: bool | None = Field(default=None, alias="isActiveMember")
+
+    # Benefits and plans
+    benefits: list[dict[str, Any]] | None = Field(default=None)
+    plan_name: str | None = Field(default=None, alias="planName")
+    credits_available: int | None = Field(default=None, alias="creditsAvailable")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -710,7 +726,7 @@ class WishlistItem(AudibleBook):
     is_preorderable: bool = Field(default=False, alias="is_preorderable")
 
     # Plans (for Plus Catalog detection)
-    plans: list[dict[str, Any]] = Field(default_factory=list)
+    plans: list[dict[str, Any]] = Field(default_factory=lambda: [])
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -729,7 +745,7 @@ class WishlistItem(AudibleBook):
 class WishlistResponse(BaseModel):
     """Response from GET /1.0/wishlist."""
 
-    products: list[WishlistItem] = Field(default_factory=list)
+    products: list[WishlistItem] = Field(default_factory=lambda: [])
     total_results: int | None = Field(default=None, alias="total_results")
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -780,7 +796,7 @@ class ChapterInfo(BaseModel):
     is_accurate: bool | None = Field(default=None, alias="is_accurate")
     runtime_length_ms: int | None = Field(default=None, alias="runtime_length_ms")
     runtime_length_sec: int | None = Field(default=None, alias="runtime_length_sec")
-    chapters: list[dict[str, Any]] = Field(default_factory=list)
+    chapters: list[dict[str, Any]] = Field(default_factory=lambda: [])
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 

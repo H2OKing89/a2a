@@ -44,9 +44,13 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any
 
+from rich import inspect as rich_inspect
+from rich.align import Align
 from rich.box import DOUBLE, ROUNDED, SIMPLE
 from rich.columns import Columns
 from rich.console import Console, Group
+from rich.highlighter import JSONHighlighter, ReprHighlighter
+from rich.json import JSON
 from rich.live import Live
 from rich.logging import RichHandler
 from rich.markdown import Markdown
@@ -65,8 +69,10 @@ from rich.progress import (
     TimeRemainingColumn,
     TransferSpeedColumn,
 )
+from rich.prompt import Confirm, Prompt
 from rich.rule import Rule
 from rich.status import Status
+from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
@@ -262,6 +268,38 @@ class UIHelper:
         """Print a muted/dim message."""
         self.console.print(f"[muted]{message}[/muted]")
 
+    def print_exception(
+        self,
+        *,
+        width: int | None = None,
+        extra_lines: int = 3,
+        word_wrap: bool = True,
+        show_locals: bool = False,
+        suppress: tuple[str, ...] = (),
+        max_frames: int = 20,
+    ) -> None:
+        """Print a rich formatted exception traceback.
+
+        This is a wrapper around console.print_exception() for consistent
+        exception display throughout the CLI.
+
+        Args:
+            width: Width of traceback (None = terminal width)
+            extra_lines: Extra lines of code context to show
+            word_wrap: Word wrap long lines
+            show_locals: Show local variables in frames
+            suppress: Sequence of module names to suppress from traceback
+            max_frames: Maximum number of frames to show
+        """
+        self.console.print_exception(
+            width=width,
+            extra_lines=extra_lines,
+            word_wrap=word_wrap,
+            show_locals=show_locals,
+            suppress=suppress,
+            max_frames=max_frames,
+        )
+
     # -------------------------------------------------------------------------
     # Headers & Sections
     # -------------------------------------------------------------------------
@@ -295,8 +333,10 @@ class UIHelper:
     def section(self, title: str, icon: str | None = None, style: str = "subheader") -> None:
         """Print a section header with rule."""
         icon_str = f"{icon} " if icon else ""
+        full_title = f"{icon_str}{title}"
         self.console.print()
-        self.console.print(Rule(f"{icon_str}{title}", style=style, align="left"))
+        # Use end="" to prevent extra newline that could cause wrapping issues
+        self.console.print(Rule(full_title, style=style, align="left", end=""))
         self.console.print()
 
     def subsection(self, title: str) -> None:
@@ -473,7 +513,7 @@ class UIHelper:
         icon: str | None = None,
     ) -> Panel:
         """Create a stats display panel."""
-        lines = []
+        lines: list[str] = []
         for key, value in stats.items():
             if isinstance(value, float):
                 value = f"{value:.2f}"
@@ -593,12 +633,210 @@ class UIHelper:
         return response if response else (default or "")
 
     # -------------------------------------------------------------------------
-    # Markdown
+    # Markdown & Syntax Highlighting
     # -------------------------------------------------------------------------
 
     def markdown(self, text: str) -> None:
         """Print markdown-formatted text."""
         self.console.print(Markdown(text))
+
+    def syntax(
+        self,
+        code: str,
+        lexer: str = "python",
+        theme: str = "monokai",
+        line_numbers: bool = False,
+        word_wrap: bool = True,
+        title: str | None = None,
+    ) -> None:
+        """Print syntax-highlighted code.
+
+        Args:
+            code: Code string to highlight
+            lexer: Language lexer (python, json, yaml, bash, etc.)
+            theme: Color theme
+            line_numbers: Show line numbers
+            word_wrap: Wrap long lines
+            title: Optional title for the code block
+        """
+        syntax = Syntax(
+            code,
+            lexer,
+            theme=theme,
+            line_numbers=line_numbers,
+            word_wrap=word_wrap,
+        )
+        if title:
+            self.console.print(Panel(syntax, title=title, border_style="dim"))
+        else:
+            self.console.print(syntax)
+
+    def json(
+        self,
+        data: Any,
+        indent: int = 2,
+        title: str | None = None,
+        highlight: bool = True,
+    ) -> None:
+        """Print JSON data with syntax highlighting.
+
+        Args:
+            data: Data to format as JSON (dict, list, or JSON string)
+            indent: Indentation level
+            title: Optional title panel
+            highlight: Enable syntax highlighting
+        """
+        import json as json_module
+
+        if isinstance(data, str):
+            json_str = data
+        else:
+            json_str = json_module.dumps(data, indent=indent, default=str)
+
+        if highlight:
+            rich_json = JSON(json_str, indent=indent, highlight=True)
+            if title:
+                self.console.print(Panel(rich_json, title=title, border_style="cyan"))
+            else:
+                self.console.print(rich_json)
+        else:
+            self.console.print(json_str)
+
+    def inspect(
+        self,
+        obj: Any,
+        title: str | None = None,
+        methods: bool = False,
+        docs: bool = True,
+        private: bool = False,
+        all_: bool = False,
+    ) -> None:
+        """Inspect an object with rich formatting.
+
+        Useful for debugging and exploring data structures.
+
+        Args:
+            obj: Object to inspect
+            title: Optional title
+            methods: Show methods
+            docs: Show docstrings
+            private: Show private attributes
+            all_: Show all attributes
+        """
+        if title:
+            self.console.print(f"\n[bold cyan]═══ {title} ═══[/bold cyan]")
+        rich_inspect(obj, console=self.console, methods=methods, docs=docs, private=private, all=all_)
+
+    # -------------------------------------------------------------------------
+    # Layout & Columns
+    # -------------------------------------------------------------------------
+
+    def columns(
+        self,
+        *renderables: Any,
+        equal: bool = False,
+        expand: bool = True,
+        padding: int = 1,
+    ) -> Columns:
+        """Create a columns layout for side-by-side display.
+
+        Args:
+            *renderables: Items to display in columns
+            equal: Equal width columns
+            expand: Expand to fill width
+            padding: Padding between columns
+
+        Returns:
+            Columns object (print with console.print())
+        """
+        return Columns(renderables, equal=equal, expand=expand, padding=(0, padding))
+
+    def center(self, renderable: Any) -> Align:
+        """Center a renderable object."""
+        return Align.center(renderable)
+
+    def right(self, renderable: Any) -> Align:
+        """Right-align a renderable object."""
+        return Align.right(renderable)
+
+    # -------------------------------------------------------------------------
+    # Live Display
+    # -------------------------------------------------------------------------
+
+    @contextmanager
+    def live(
+        self,
+        renderable: Any = None,
+        refresh_per_second: float = 4,
+        transient: bool = False,
+    ) -> Generator[Live]:
+        """Context manager for live-updating displays.
+
+        Args:
+            renderable: Initial content to display
+            refresh_per_second: Update frequency
+            transient: Remove display when done
+
+        Yields:
+            Live object for updating content
+
+        Example:
+            with ui.live() as live:
+                for i in range(100):
+                    live.update(f"Progress: {i}%")
+                    time.sleep(0.1)
+        """
+        with Live(
+            renderable,
+            console=self.console,
+            refresh_per_second=refresh_per_second,
+            transient=transient,
+        ) as live:
+            yield live
+
+    # -------------------------------------------------------------------------
+    # Rich Prompts (better than basic input)
+    # -------------------------------------------------------------------------
+
+    def ask(
+        self,
+        prompt: str,
+        default: str = "",
+        password: bool = False,
+        choices: list[str] | None = None,
+    ) -> str:
+        """Ask for user input with rich prompt.
+
+        Args:
+            prompt: Prompt message
+            default: Default value (empty string if not provided)
+            password: Hide input (for passwords)
+            choices: Valid choices (will validate)
+
+        Returns:
+            User input string
+        """
+        kwargs: dict[str, Any] = {
+            "console": self.console,
+            "password": password,
+        }
+        if default:
+            kwargs["default"] = default
+        if choices:
+            kwargs["choices"] = choices
+        return Prompt.ask(prompt, **kwargs)
+
+    def ask_confirm(self, prompt: str, default: bool = False) -> bool:
+        """Ask for yes/no confirmation with rich prompt.
+
+        Args:
+            prompt: Prompt message
+            default: Default value
+
+        Returns:
+            True for yes, False for no
+        """
+        return Confirm.ask(prompt, console=self.console, default=default)
 
 
 # =============================================================================
@@ -653,21 +891,28 @@ ui = UIHelper(console)
 # =============================================================================
 
 __all__ = [
+    "Align",
     "AUDIOBOOK_THEME",
     "BarColumn",
     "Columns",
+    "Confirm",
     "console",
     "get_rich_handler",
     "Group",
     "Icons",
+    "JSON",
+    "JSONHighlighter",
     "Live",
     "Markdown",
     "MofNCompleteColumn",
     "Padding",
     "Panel",
     "Progress",
+    "Prompt",
+    "ReprHighlighter",
     "Rule",
     "SpinnerColumn",
+    "Syntax",
     "Table",
     "TaskProgressColumn",
     "Text",

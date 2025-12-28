@@ -1,101 +1,118 @@
-# Copilot Instructions for Audiobook Management Tool
+# Copilot Instructions for A2A (Audiobook to Audible)
 
 ## Project Overview
-CLI tool for managing audiobook libraries via **Audiobookshelf (ABS)** and **Audible** APIs. Core use case: analyze audio quality in ABS libraries and identify books that could be upgraded from Audible.
+CLI tool for audiobook library management via **Audiobookshelf (ABS)** and **Audible** APIs. Analyzes audio quality in ABS libraries and identifies upgrade candidates from Audible.
 
 ## Architecture
 
-### Module Structure
+### Module Structure & Data Flow
 ```
-src/
-├── abs/          # Audiobookshelf API client
-├── audible/      # Audible API client  
-├── cache/        # SQLite caching layer (shared by both clients)
-├── quality/      # Audio quality analysis (analyzer, enrichment, models)
-└── utils/        # Helpers (sample data generation)
+cli.py              → Entry point, assembles Typer subcommands from src/cli/
+src/cli/            → Command implementations (abs.py, audible.py, quality.py, series.py)
+src/abs/            → ABS API client (sync + async)
+src/audible/        → Audible API client (sync + async) + enrichment service
+src/quality/        → Quality tier analysis (analyzer.py, models.py)
+src/series/         → Series matching with rapidfuzz
+src/cache/          → SQLite caching layer (shared by both API clients)
+src/config.py       → Pydantic-settings configuration
 ```
 
-### Key Data Flow
-1. `ABSClient` fetches library items from Audiobookshelf server
-2. `QualityAnalyzer` evaluates each item's audio quality (bitrate, codec, format)
-3. `AudibleClient` enriches data with Audible metadata for upgrade candidates
-4. `SQLiteCache` provides unified caching across both API clients
+**Data Flow**: `ABSClient` → `QualityAnalyzer` → `AudibleEnrichmentService` → `SQLiteCache`
 
-### Client Pattern
-Both API clients follow the same pattern:
-- Constructor injection for `SQLiteCache` instance (optional)
-- Context manager support (`with get_abs_client() as client:`)
-- Rate limiting built into `_request()` methods
-- Pydantic models for all API responses
+### Client Pattern (Both ABS and Audible)
+```python
+# Always use context managers for clients
+from src.cli.common import get_abs_client, get_audible_client
+
+with get_abs_client() as client:
+    items = client.get_library_items(library_id)
+
+# Clients support optional cache injection
+client = ABSClient(host, api_key, cache=get_cache())
+```
 
 ## Code Conventions
 
-### Pydantic Models
-- Use `Field(alias="camelCase")` for API responses, snake_case for Python attributes
-- Always set `model_config = {"extra": "ignore"}` to handle unknown API fields
-- See [src/abs/models.py](src/abs/models.py) for ABS response models
-- See [src/audible/models.py](src/audible/models.py) for Audible response models
+### Pydantic Models (Critical Pattern)
+```python
+# API responses use camelCase aliases, Python uses snake_case
+class AudioFile(BaseModel):
+    bit_rate: int = Field(default=0, alias="bitRate")
+    channel_layout: str | None = Field(default=None, alias="channelLayout")
 
-### Configuration
-- Settings via `pydantic-settings` in [src/config.py](src/config.py)
-- Layered: `config.yaml` → `.env` → environment variables
-- Access via `get_settings()` singleton
-- Each subsystem has its own settings class (`ABSSettings`, `AudibleSettings`, `CacheSettings`)
+    model_config = {"extra": "ignore", "populate_by_name": True}
+```
+- Always `extra="ignore"` - APIs return undocumented fields
+- See [src/abs/models.py](../src/abs/models.py) and [src/audible/models.py](../src/audible/models.py)
 
-### Error Handling
-Custom exceptions per client:
-- ABS: `ABSError`, `ABSConnectionError`, `ABSAuthError`, `ABSNotFoundError`
-- Audible: `AudibleError`, `AudibleAuthError`, `AudibleRateLimitError`
+### Configuration (Layered)
+```python
+from src.config import get_settings
+settings = get_settings()  # Singleton, loads config.yaml → .env → env vars
 
-### Quality Tier Logic
-Defined in [src/quality/models.py](src/quality/models.py#L10):
-- `EXCELLENT`: Dolby Atmos OR 256+ kbps
-- `GOOD`: m4b @ 128-255 kbps
-- `ACCEPTABLE`: m4b @ 110-127 kbps OR mp3 @ 128+ kbps
-- `LOW/POOR`: Below thresholds
+# Subsystem settings:
+settings.abs.host          # ABSSettings
+settings.audible.locale    # AudibleSettings  
+settings.cache.db_path     # CacheSettings
+settings.quality.bitrate_threshold_kbps  # QualitySettings
+```
+
+### Error Hierarchy
+```python
+# ABS: ABSError → ABSConnectionError, ABSAuthError, ABSNotFoundError
+# Audible: AudibleError → AudibleAuthError, AudibleNotFoundError, AudibleRateLimitError
+```
+
+### Quality Tiers ([src/quality/models.py](../src/quality/models.py))
+```python
+QualityTier.EXCELLENT  # Dolby Atmos OR 256+ kbps
+QualityTier.BETTER     # m4b @ 128-255 kbps  
+QualityTier.GOOD       # m4b @ 110-127 kbps OR mp3 @ 128+ kbps
+QualityTier.LOW        # m4b @ 64-109 kbps OR mp3 @ 110-127 kbps
+QualityTier.POOR       # < 64 kbps
+```
 
 ## Developer Workflow
 
-### Setup & Run
 ```bash
-make install-dev    # Install all dependencies
-python cli.py status  # Test ABS connection
-python cli.py quality analyze <library-id>  # Analyze quality
+make install-dev       # Setup with dev dependencies
+python cli.py status   # Verify ABS/Audible connections
+make test              # pytest (use -k "pattern" for specific tests)
+make format            # black + isort (120 char line length)
+make lint              # flake8 + mypy + bandit
 ```
 
-### Testing
+### CLI Structure
 ```bash
-make test           # Run pytest
-make coverage       # With coverage report
-pytest -k "test_quality"  # Run specific tests
+python cli.py abs libraries      # List ABS libraries
+python cli.py quality scan -l ID # Scan library for quality
+python cli.py audible library    # Show Audible library
+python cli.py series analyze ID  # Series completion analysis
 ```
-
-### Code Quality
-```bash
-make format         # black + isort
-make lint           # flake8 + mypy + bandit
-make pre-commit     # Run all hooks
-```
-
-### Configuration (120 char line length)
-- Black and isort configured for Python 3.13
-- Type hints encouraged but `disallow_untyped_defs = false`
 
 ## Testing Patterns
 
-### Fixtures ([tests/conftest.py](tests/conftest.py))
-Mock clients available for different scenarios:
-- `mock_abs_client` - Success path
-- `mock_abs_client_conn_error` - Connection failures
-- `mock_abs_client_timeout` - Timeout simulation
-- `mock_abs_client_malformed_response` - Bad data handling
+### Mock Fixtures ([tests/conftest.py](../tests/conftest.py))
+```python
+def test_something(mock_abs_client):              # Success path
+def test_connection(mock_abs_client_conn_error):  # Network failure
+def test_timeout(mock_abs_client_timeout):        # Timeout handling
+def test_bad_data(mock_abs_client_malformed_response):  # Invalid API data
+```
 
-### Sample Data
-Golden samples in `data/samples/` for testing without live APIs.
-Use `src/utils/samples.py` to generate new samples.
+## Key Implementation Details
 
-## Key Files for Reference
-- [cli.py](cli.py) - Typer CLI entry point with subcommands (`audible`, `quality`, `abs`)
-- [src/cache/sqlite_cache.py](src/cache/sqlite_cache.py) - Caching with TTL, namespaces, FTS
-- [src/quality/analyzer.py](src/quality/analyzer.py) - Quality tier calculation logic
-- [config.yaml](config.yaml) - Default configuration values
+### Enrichment Service ([src/audible/enrichment.py](../src/audible/enrichment.py))
+Combines catalog data, library ownership, Plus Catalog status, and pricing into `AudibleEnrichment` model. Used by quality analysis and series matching.
+
+### Series Matching ([src/series/matcher.py](../src/series/matcher.py))
+Uses rapidfuzz for fuzzy string matching between ABS and Audible series names. Handles title normalization (removes "The ", "Series", book numbers).
+
+### SQLite Cache ([src/cache/sqlite_cache.py](../src/cache/sqlite_cache.py))
+```python
+cache.set("audible_library", asin, data, ttl_hours=240)  # Namespace + TTL
+cache.search_by_title("Project Hail Mary")  # Full-text search
+```
+
+### Async Clients
+Both clients have async variants (`AsyncABSClient`, `AsyncAudibleClient`) for concurrent operations. Use `async with` context managers.

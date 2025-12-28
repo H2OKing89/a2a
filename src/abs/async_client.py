@@ -21,7 +21,7 @@ Usage:
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import httpx
 
@@ -101,7 +101,12 @@ class AsyncABSClient:
         await self._ensure_client()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
         """Async context manager exit."""
         await self.close()
 
@@ -121,9 +126,9 @@ class AsyncABSClient:
         self,
         method: str,
         endpoint: str,
-        params: dict | None = None,
-        json: dict | None = None,
-    ) -> dict:
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Make an async API request with rate limiting and semaphore.
 
@@ -174,13 +179,15 @@ class AsyncABSClient:
             if not response.content:
                 return {}
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def _get(self, endpoint: str, params: dict | None = None) -> dict:
+    async def _get(self, endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Make an async GET request."""
         return await self._request("GET", endpoint, params=params)
 
-    async def _post(self, endpoint: str, json: dict | None = None, params: dict | None = None) -> dict:
+    async def _post(
+        self, endpoint: str, json: dict[str, Any] | None = None, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Make an async POST request."""
         return await self._request("POST", endpoint, json=json, params=params)
 
@@ -193,7 +200,7 @@ class AsyncABSClient:
         data = await self._get("/me")
         return User.model_validate(data)
 
-    async def authorize(self) -> dict:
+    async def authorize(self) -> dict[str, Any]:
         """Verify API key is valid."""
         return await self._post("/authorize")
 
@@ -250,7 +257,7 @@ class AsyncABSClient:
         filter_by: str | None = None,
         minified: bool = False,
         expanded: bool = False,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Get library items with pagination.
 
@@ -286,7 +293,7 @@ class AsyncABSClient:
         library_id: str,
         limit: int = 0,
         page: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Get library series."""
         params = {"limit": limit, "page": page}
         return await self._get(f"/libraries/{library_id}/series", params=params)
@@ -392,16 +399,17 @@ class AsyncABSClient:
         # Use gather to preserve order (results correspond to input order)
         gathered = await asyncio.gather(*tasks, return_exceptions=True)
 
-        results = []
+        results: list[LibraryItemExpanded] = []
         for i, result in enumerate(gathered):
-            if isinstance(result, ABSNotFoundError):
+            # Filter exceptions and add successful results
+            if not isinstance(result, BaseException):
+                results.append(result)
+            elif isinstance(result, ABSNotFoundError):
                 logger.debug("Item %s not found during batch fetch", item_ids[i])
             elif isinstance(result, ABSError):
                 logger.warning("Error fetching item %s during batch: %s", item_ids[i], result)
-            elif isinstance(result, Exception):
-                logger.warning("Unexpected error fetching item %s: %s", item_ids[i], result)
             else:
-                results.append(result)
+                logger.warning("Unexpected error fetching item %s: %s", item_ids[i], result)
 
         logger.debug("Batch fetched %d/%d items", len(results), len(item_ids))
         return results
@@ -410,7 +418,7 @@ class AsyncABSClient:
     # Authors
     # =====================
 
-    async def get_author(self, author_id: str, include: str | None = None) -> dict:
+    async def get_author(self, author_id: str, include: str | None = None) -> dict[str, Any]:
         """Get an author."""
         params = {"include": include} if include else None
         return await self._get(f"/authors/{author_id}", params=params)
@@ -420,7 +428,7 @@ class AsyncABSClient:
         author_id: str,
         include_series: bool = True,
         use_cache: bool = True,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Get an author with their library items and series.
 
@@ -438,7 +446,7 @@ class AsyncABSClient:
             cached = self._cache.get("abs_authors", cache_key)
             if cached:
                 logger.debug("Cache hit for author %s", author_id)
-                return cached
+                return cast(dict[str, Any], cached)
 
         include_parts = ["items"]
         if include_series:
@@ -460,12 +468,12 @@ class AsyncABSClient:
     # Series
     # =====================
 
-    async def get_series(self, series_id: str, include: str | None = None) -> dict:
+    async def get_series(self, series_id: str, include: str | None = None) -> dict[str, Any]:
         """Get a series."""
         params = {"include": include} if include else None
         return await self._get(f"/series/{series_id}", params=params)
 
-    async def get_series_with_progress(self, series_id: str, use_cache: bool = True) -> dict:
+    async def get_series_with_progress(self, series_id: str, use_cache: bool = True) -> dict[str, Any]:
         """
         Get a series with progress info.
 
@@ -482,7 +490,7 @@ class AsyncABSClient:
             cached = self._cache.get("abs_series", cache_key)
             if cached:
                 logger.debug("Cache hit for series %s", series_id)
-                return cached
+                return cast(dict[str, Any], cached)
 
         result = await self.get_series(series_id, include="progress")
 
@@ -496,12 +504,12 @@ class AsyncABSClient:
     # Collections
     # =====================
 
-    async def get_collections(self) -> list[dict]:
+    async def get_collections(self) -> list[dict[str, Any]]:
         """Get all collections."""
         result = await self._get("/collections")
-        return result.get("collections", [])
+        return cast(list[dict[str, Any]], result.get("collections", []))
 
-    async def get_collection(self, collection_id: str) -> dict:
+    async def get_collection(self, collection_id: str) -> dict[str, Any]:
         """Get a collection by ID."""
         return await self._get(f"/collections/{collection_id}")
 
@@ -511,7 +519,7 @@ class AsyncABSClient:
         name: str,
         description: str | None = None,
         book_ids: list[str] | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Create a new collection."""
         payload: dict[str, Any] = {
             "libraryId": library_id,
@@ -526,7 +534,7 @@ class AsyncABSClient:
         logger.info("Created collection '%s'", name)
         return result
 
-    async def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+    async def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> dict[str, Any]:
         """Add multiple books to a collection."""
         result = await self._post(f"/collections/{collection_id}/batch/add", json={"books": book_ids})
         logger.info("Added %d books to collection %s", len(book_ids), collection_id)
@@ -538,7 +546,7 @@ class AsyncABSClient:
         name: str | None = None,
         description: str | None = None,
         book_ids: list[str] | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Update a collection.
 
@@ -577,7 +585,7 @@ class AsyncABSClient:
         logger.info("Deleted collection %s", collection_id)
         return True
 
-    async def add_book_to_collection(self, collection_id: str, book_id: str) -> dict:
+    async def add_book_to_collection(self, collection_id: str, book_id: str) -> dict[str, Any]:
         """
         Add a single book to a collection.
 
@@ -592,7 +600,7 @@ class AsyncABSClient:
         logger.debug("Added book %s to collection %s", book_id, collection_id)
         return result
 
-    async def remove_book_from_collection(self, collection_id: str, book_id: str) -> dict:
+    async def remove_book_from_collection(self, collection_id: str, book_id: str) -> dict[str, Any]:
         """
         Remove a book from a collection.
 
@@ -607,7 +615,7 @@ class AsyncABSClient:
         logger.debug("Removed book %s from collection %s", book_id, collection_id)
         return result
 
-    async def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> dict:
+    async def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> dict[str, Any]:
         """
         Remove multiple books from a collection.
 
@@ -627,7 +635,7 @@ class AsyncABSClient:
         library_id: str,
         name: str,
         description: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Find or create a collection by name."""
         collections = await self.get_collections()
 
@@ -642,7 +650,7 @@ class AsyncABSClient:
     # Search
     # =====================
 
-    async def search_library(self, library_id: str, query: str, limit: int = 12) -> dict:
+    async def search_library(self, library_id: str, query: str, limit: int = 12) -> dict[str, Any]:
         """Search a library."""
         params = {"q": query, "limit": limit}
         return await self._get(f"/libraries/{library_id}/search", params=params)
@@ -652,7 +660,7 @@ class AsyncABSClient:
         title: str = "",
         author: str = "",
         provider: str = "audible",
-    ) -> list[dict]:
+    ) -> dict[str, Any]:
         """Search for books using metadata provider."""
         params = {"title": title, "author": author, "provider": provider}
         return await self._get("/search/books", params=params)
