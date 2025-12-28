@@ -9,6 +9,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/H2OKing89/a2a?utm_source=oss&utm_medium=github&utm_campaign=H2OKing89%2Fa2a&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 
 <p align="center">
   <a href="#-features">Features</a> •
@@ -467,13 +468,13 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) for 
 </td>
 <td align="center" width="25%">
 <a href="https://github.com/mkb79/audible">
-<img src="https://raw.githubusercontent.com/mkb79/audible/master/docs/source/_static/logo.png" width="60" alt="audible"/><br/>
+<img src="https://avatars.githubusercontent.com/u/40368641?s=48&v=4" width="60" alt="audible"/><br/>
 <sub><b>audible</b></sub>
 </a>
 </td>
 <td align="center" width="25%">
 <a href="https://typer.tiangolo.com/">
-<img src="https://typer.tiangolo.com/img/icon-white.svg" width="60" alt="Typer"/><br/>
+<img src="https://typer.tiangolo.com/img/logo-margin/logo-margin-white-vector.svg#only-dark" width="60" alt="Typer"/><br/>
 <sub><b>Typer</b></sub>
 </a>
 </td>
