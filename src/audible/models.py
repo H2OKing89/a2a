@@ -626,13 +626,13 @@ class AudibleCatalogProduct(AudibleBook):
     sku_lite: str | None = None
 
     # Reviews
-    reviews: list[dict] | None = None
+    reviews: list[dict[str, Any]] | None = None
 
     # Customer rights (if authenticated)
-    customer_rights: dict | None = None
+    customer_rights: dict[str, Any] | None = None
 
     # Relationships (similar products, etc.)
-    relationships: list[dict] | None = None
+    relationships: list[dict[str, Any]] | None = None
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
@@ -670,8 +670,8 @@ class AudibleListeningStats(BaseModel):
     longest_listening_streak: int | None = Field(default=None, alias="longestListeningStreak")
 
     # Daily/monthly breakdowns if requested
-    daily_listening_stats: list[dict] | None = None
-    monthly_listening_stats: list[dict] | None = None
+    daily_listening_stats: list[dict[str, Any]] | None = None
+    monthly_listening_stats: list[dict[str, Any]] | None = None
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
