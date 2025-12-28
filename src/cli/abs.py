@@ -24,6 +24,7 @@ from rich.box import ROUNDED
 from rich.padding import Padding
 from rich.text import Text
 
+from src.abs import ABSAuthError, ABSConnectionError, ABSError
 from src.cli.common import Icons, console, get_abs_client, resolve_library_id, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
@@ -42,6 +43,33 @@ def abs_status():
 
     try:
         with ui.spinner("Connecting...") as status, get_abs_client() as client:
+            # Display security status from client (after normalization)
+            if client._is_https:
+                ui.success("Connection secured with HTTPS")
+                if client._using_ca_bundle:
+                    ui.success("Using custom CA certificate bundle")
+                elif not client._insecure_tls:
+                    ui.success("SSL certificate verification enabled")
+            elif client._is_localhost:
+                console.print(f"  {Icons.BULLET} Using HTTP for localhost [dim](OK for local development)[/dim]")
+            else:
+                ui.warning(
+                    "Using insecure HTTP to remote server",
+                    details="API key sent in cleartext! Configure HTTPS in Audiobookshelf.",
+                )
+
+            if client._insecure_tls:
+                ui.warning(
+                    "SSL certificate verification is DISABLED",
+                    details="This is insecure. Use tls_ca_bundle for self-signed certificates instead.",
+                )
+
+            if client._http2_enabled:
+                ui.success("HTTP/2 enabled")
+            else:
+                console.print(f"  {Icons.BULLET} HTTP/1.1 [dim](install httpx[http2] for HTTP/2)[/dim]")
+
+            status.update("Fetching user info...")
             user = client.get_me()
             status.update("Fetching libraries...")
             libraries = client.get_libraries()
@@ -57,7 +85,12 @@ def abs_status():
             tree.add(f"{icon} [bold]{lib.name}[/bold] [dim]({lib.id})[/dim] - {lib.media_type}")
         console.print(Padding(tree, (0, 4)))
 
+    except (ABSError, ABSConnectionError, ABSAuthError) as e:
+        # Expected errors - show friendly message only, no traceback
+        ui.error("Connection failed", details=str(e))
+        raise typer.Exit(1)
     except Exception as e:
+        # Unexpected errors - show traceback for debugging
         ui.error("Connection failed", details=str(e))
         raise typer.Exit(1) from e
 
