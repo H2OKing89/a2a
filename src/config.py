@@ -28,6 +28,20 @@ class ABSSettings(BaseSettings):
     library_id: str | None = Field(default=None, description="Default library ID")
     rate_limit_delay: float = Field(default=0.0, description="Delay between requests (0 = disabled)")
 
+    # Security settings
+    allow_insecure_http: bool = Field(
+        default=False,
+        description="Allow HTTP connections (only localhost is allowed by default)",
+    )
+    tls_ca_bundle: str | None = Field(
+        default=None,
+        description="Path to CA certificate bundle for self-signed certs",
+    )
+    insecure_tls: bool = Field(
+        default=False,
+        description="DANGEROUS: Disable SSL verification entirely (env var ABS_INSECURE_TLS only)",
+    )
+
 
 class AudibleSettings(BaseSettings):
     """Audible API settings."""

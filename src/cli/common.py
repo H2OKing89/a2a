@@ -114,6 +114,9 @@ def get_abs_client() -> ABSClient:
         rate_limit_delay=settings.abs.rate_limit_delay,
         cache=cache,
         cache_ttl_hours=settings.cache.abs_ttl_hours,
+        allow_insecure_http=settings.abs.allow_insecure_http,
+        tls_ca_bundle=settings.abs.tls_ca_bundle,
+        insecure_tls=settings.abs.insecure_tls,
     )
 
 
