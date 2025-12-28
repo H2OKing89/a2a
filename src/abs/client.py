@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import httpx
 from pydantic import ValidationError
@@ -441,7 +441,7 @@ class ABSClient:
             User: The authenticated user
         """
         data = self._get("/me")
-        return User.model_validate(data)
+        return User.model_validate(cast(dict[str, Any], data))
 
     def authorize(self) -> dict:
         """
@@ -459,11 +459,13 @@ class ABSClient:
         Returns:
             ServerInfo with version and source
         """
-        data = self.authorize()
+        data = cast(dict[str, Any], self.authorize())
         server_settings = data.get("serverSettings", {})
-        return ServerInfo(
-            version=server_settings.get("version", "unknown"),
-            source=data.get("Source", "unknown"),
+        return ServerInfo.model_validate(
+            {
+                "version": server_settings.get("version", "unknown"),
+                "Source": data.get("Source", "unknown"),
+            }
         )
 
     # =====================
@@ -478,7 +480,7 @@ class ABSClient:
             List of libraries
         """
         data = self._get("/libraries")
-        response = LibrariesResponse.model_validate(data)
+        response = LibrariesResponse.model_validate(cast(dict[str, Any], data))
         return response.libraries
 
     def get_library(self, library_id: str, include_filterdata: bool = False) -> Library:
@@ -496,11 +498,11 @@ class ABSClient:
         if include_filterdata:
             params["include"] = "filterdata"
 
-        data = self._get(f"/libraries/{library_id}", params=params if params else None)
+        data = cast(dict[str, Any], self._get(f"/libraries/{library_id}", params=params if params else None))
 
         # If filterdata was requested, library is in 'library' key
         if include_filterdata and "library" in data:
-            return Library.model_validate(data["library"])
+            return Library.model_validate(cast(dict[str, Any], data["library"]))
         return Library.model_validate(data)
 
     def get_library_items(
@@ -532,7 +534,7 @@ class ABSClient:
         Returns:
             LibraryItemsResponse with results
         """
-        params = {
+        params: dict[str, int | str] = {
             "limit": limit,
             "page": page,
             "minified": 1 if minified else 0,
@@ -549,7 +551,7 @@ class ABSClient:
             params["include"] = include
 
         data = self._get(f"/libraries/{library_id}/items", params=params)
-        return LibraryItemsResponse.model_validate(data)
+        return LibraryItemsResponse.model_validate(cast(dict[str, Any], data))
 
     def get_all_library_items(
         self,
@@ -613,10 +615,10 @@ class ABSClient:
         if use_cache and self._cache:
             cached = self._cache.get("abs_stats", cache_key)
             if cached:
-                return LibraryStats.model_validate(cached)
+                return LibraryStats.model_validate(cast(dict[str, Any], cached))
 
         data = self._get(f"/libraries/{library_id}/stats")
-        stats = LibraryStats.model_validate(data)
+        stats = LibraryStats.model_validate(cast(dict[str, Any], data))
 
         # Cache result
         if self._cache:
@@ -675,7 +677,7 @@ class ABSClient:
         Returns:
             Dict with results, total, limit, page
         """
-        params = {"limit": limit, "page": page}
+        params: dict[str, int | str] = {"limit": limit, "page": page}
         if sort:
             params["sort"] = sort
         if desc:
@@ -705,7 +707,7 @@ class ABSClient:
             SeriesListResponse model
         """
         data = self.get_library_series(library_id, limit, page, sort, desc)
-        return SeriesListResponse.model_validate(data)
+        return SeriesListResponse.model_validate(cast(dict[str, Any], data))
 
     def search_library(self, library_id: str, query: str, limit: int = 12) -> dict:
         """
@@ -735,7 +737,7 @@ class ABSClient:
             SearchResponse model
         """
         data = self.search_library(library_id, query, limit)
-        return SearchResponse.model_validate(data)
+        return SearchResponse.model_validate(cast(dict[str, Any], data))
 
     # =====================
     # Library Items
@@ -766,14 +768,14 @@ class ABSClient:
         if use_cache and self._cache and not include:
             cached = self._cache.get("abs_items", cache_key)
             if cached:
-                return LibraryItemExpanded.model_validate(cached)
+                return LibraryItemExpanded.model_validate(cast(dict[str, Any], cached))
 
-        params = {"expanded": 1 if expanded else 0}
+        params: dict[str, int | str] = {"expanded": 1 if expanded else 0}
         if include:
             params["include"] = include
 
         data = self._get(f"/items/{item_id}", params=params)
-        item = LibraryItemExpanded.model_validate(data)
+        item = LibraryItemExpanded.model_validate(cast(dict[str, Any], data))
 
         # Cache result (only if no special includes)
         if self._cache and not include:
@@ -792,7 +794,7 @@ class ABSClient:
             List of LibraryItemExpanded
         """
         data = self._post("/items/batch/get", json={"libraryItemIds": item_ids})
-        return [LibraryItemExpanded.model_validate(item) for item in data.get("libraryItems", [])]
+        return [LibraryItemExpanded.model_validate(item) for item in cast(dict[str, Any], data).get("libraryItems", [])]
 
     def batch_get_items_expanded(
         self,
@@ -818,7 +820,7 @@ class ABSClient:
         """
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        results = {}
+        results: dict[str, dict[str, Any]] = {}
         cache_hits = 0
         to_fetch = []
 
@@ -838,13 +840,13 @@ class ABSClient:
         # Fetch remaining items in parallel
         if to_fetch:
 
-            def fetch_item(item_id: str) -> tuple[str, dict | None]:
+            def fetch_item(item_id: str) -> tuple[str, dict[str, Any] | None]:
                 try:
                     # Direct request without rate limiting for speed
                     url = f"/api/items/{item_id}"
                     response = self._client.get(url, params={"expanded": 1})
                     if response.status_code == 200:
-                        data = response.json()
+                        data = cast(dict[str, Any], response.json())
                         # Cache the result
                         if self._cache:
                             cache_key = f"item_{item_id}_exp1"
@@ -869,7 +871,7 @@ class ABSClient:
                         progress_callback(completed, total)
 
         # Return in original order
-        return [results.get(item_id) for item_id in item_ids if item_id in results]
+        return [results[item_id] for item_id in item_ids if item_id in results]
 
     def scan_item(self, item_id: str) -> dict:
         """
@@ -993,7 +995,7 @@ class ABSClient:
         title: str = "",
         author: str = "",
         provider: str = "audible",
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """
         Search for books using metadata provider.
 
@@ -1006,7 +1008,7 @@ class ABSClient:
             List of search results
         """
         params = {"title": title, "author": author, "provider": provider}
-        return self._get("/search/books", params=params)
+        return cast(list[dict[str, Any]], self._get("/search/books", params=params))
 
     def search_books_parsed(
         self,
@@ -1062,7 +1064,7 @@ class ABSClient:
         # The search_authors endpoint returns a list directly
         if isinstance(data, list):
             return AuthorSearchResponse(results=data)
-        return AuthorSearchResponse.model_validate(data)
+        return AuthorSearchResponse.model_validate(cast(dict[str, Any], data))
 
     # =====================
     # Enhanced Author Methods
@@ -1073,7 +1075,7 @@ class ABSClient:
         author_id: str,
         include_series: bool = True,
         use_cache: bool = True,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Get an author with their library items and series.
 
@@ -1100,14 +1102,14 @@ class ABSClient:
             cached = self._cache.get("abs_authors", cache_key)
             if cached:
                 logger.debug("Cache hit for author %s", author_id)
-                return cached
+                return cast(dict[str, Any], cached)
 
         include_parts = ["items"]
         if include_series:
             include_parts.append("series")
 
         params = {"include": ",".join(include_parts)}
-        result = self._get(f"/authors/{author_id}", params=params)
+        result = cast(dict[str, Any], self._get(f"/authors/{author_id}", params=params))
 
         if self._cache:
             self._cache.set("abs_authors", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
@@ -1127,7 +1129,7 @@ class ABSClient:
         self,
         series_id: str,
         use_cache: bool = True,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Get a series with progress information.
 
@@ -1149,9 +1151,9 @@ class ABSClient:
             cached = self._cache.get("abs_series", cache_key)
             if cached:
                 logger.debug("Cache hit for series %s", series_id)
-                return cached
+                return cast(dict[str, Any], cached)
 
-        result = self._get(f"/series/{series_id}", params={"include": "progress"})
+        result = cast(dict[str, Any], self._get(f"/series/{series_id}", params={"include": "progress"}))
 
         if self._cache:
             self._cache.set("abs_series", cache_key, result, ttl_seconds=self._cache_ttl_seconds)
@@ -1186,7 +1188,7 @@ class ABSClient:
             CollectionExpanded model with books array
         """
         result = self._get(f"/collections/{collection_id}")
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     def create_collection(
         self,
@@ -1224,7 +1226,7 @@ class ABSClient:
             payload["books"] = book_ids
 
         result = self._post("/collections", json=payload)
-        collection = CollectionExpanded.model_validate(result)
+        collection = CollectionExpanded.model_validate(cast(dict[str, Any], result))
         logger.info("Created collection '%s' (id=%s)", name, collection.id)
         return collection
 
@@ -1257,7 +1259,7 @@ class ABSClient:
 
         result = self._request("PATCH", f"/collections/{collection_id}", json=payload)
         logger.info("Updated collection %s", collection_id)
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     def delete_collection(self, collection_id: str) -> bool:
         """
@@ -1286,7 +1288,7 @@ class ABSClient:
         """
         result = self._post(f"/collections/{collection_id}/book", json={"id": book_id})
         logger.debug("Added book %s to collection %s", book_id, collection_id)
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     def remove_book_from_collection(self, collection_id: str, book_id: str) -> CollectionExpanded:
         """
@@ -1301,7 +1303,7 @@ class ABSClient:
         """
         result = self._request("DELETE", f"/collections/{collection_id}/book/{book_id}")
         logger.debug("Removed book %s from collection %s", book_id, collection_id)
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     def batch_add_to_collection(self, collection_id: str, book_ids: list[str]) -> CollectionExpanded:
         """
@@ -1316,7 +1318,7 @@ class ABSClient:
         """
         result = self._post(f"/collections/{collection_id}/batch/add", json={"books": book_ids})
         logger.info("Added %d books to collection %s", len(book_ids), collection_id)
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     def batch_remove_from_collection(self, collection_id: str, book_ids: list[str]) -> CollectionExpanded:
         """
@@ -1331,7 +1333,7 @@ class ABSClient:
         """
         result = self._post(f"/collections/{collection_id}/batch/remove", json={"books": book_ids})
         logger.info("Removed %d books from collection %s", len(book_ids), collection_id)
-        return CollectionExpanded.model_validate(result)
+        return CollectionExpanded.model_validate(cast(dict[str, Any], result))
 
     # =====================
     # Utility Methods
