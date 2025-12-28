@@ -22,7 +22,7 @@ SECURE_DIR_MODE = 0o700  # Owner read/write/execute only
 INSECURE_BITS = stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
 
 
-def check_file_permissions(path: Path, fix: bool = False, warn: bool = True) -> bool:
+def check_file_permissions(path: Path, *, fix: bool = False, warn: bool = True) -> bool:
     """
     Check if a file has secure permissions (owner-only access).
 
@@ -52,7 +52,7 @@ def check_file_permissions(path: Path, fix: bool = False, warn: bool = True) -> 
         if current_perms & INSECURE_BITS:
             if warn:
                 logger.warning(
-                    "File '%s' has insecure permissions (%o). " "Recommended: %o (owner read/write only)",
+                    "File '%s' has insecure permissions (%o). Recommended: %o (owner read/write only)",
                     path,
                     current_perms,
                     SECURE_FILE_MODE,
@@ -65,8 +65,8 @@ def check_file_permissions(path: Path, fix: bool = False, warn: bool = True) -> 
 
         return True
 
-    except OSError as e:
-        logger.error("Failed to check permissions for '%s': %s", path, e)
+    except OSError:
+        logger.exception("Failed to check permissions for '%s'", path)
         return False
 
 
@@ -88,8 +88,8 @@ def fix_file_permissions(path: Path, mode: int = SECURE_FILE_MODE) -> bool:
         os.chmod(path, mode)
         logger.info("Fixed permissions for '%s' to %o", path, mode)
         return True
-    except OSError as e:
-        logger.error("Failed to fix permissions for '%s': %s", path, e)
+    except OSError:
+        logger.exception("Failed to fix permissions for '%s'", path)
         return False
 
 
@@ -123,14 +123,15 @@ def secure_file_create(path: Path, content: str | bytes, mode: int = SECURE_FILE
         True if file was created successfully, False otherwise
     """
     try:
-        # Ensure parent directory exists
-        path.parent.mkdir(parents=True, exist_ok=True)
+        # Ensure parent directory exists with secure permissions
+        if not path.parent.exists():
+            ensure_secure_directory(path.parent)
 
         # Set umask to ensure file is created with correct permissions
         old_umask = os.umask(0o077)
         try:
-            # Open with explicit mode
-            flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+            # Open with explicit mode - O_EXCL ensures atomic creation (no overwrites)
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
             fd = os.open(path, flags, mode)
             try:
                 if isinstance(content, str):
@@ -144,8 +145,8 @@ def secure_file_create(path: Path, content: str | bytes, mode: int = SECURE_FILE
         logger.debug("Created secure file '%s' with mode %o", path, mode)
         return True
 
-    except OSError as e:
-        logger.error("Failed to create secure file '%s': %s", path, e)
+    except OSError:
+        logger.exception("Failed to create secure file '%s'", path)
         return False
 
 
@@ -230,6 +231,6 @@ def ensure_secure_directory(path: Path) -> bool:
         logger.error("Path '%s' exists but is not a directory", path)
         return False
 
-    except OSError as e:
-        logger.error("Failed to ensure secure directory '%s': %s", path, e)
+    except OSError:
+        logger.exception("Failed to ensure secure directory '%s'", path)
         return False

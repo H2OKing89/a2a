@@ -713,7 +713,7 @@ class AudibleClient:
         # Build cache key from search params
         sort_value = sort_by.value if isinstance(sort_by, CatalogSortBy) else sort_by
         search_params = f"{keywords}|{title}|{author}|{narrator}|{publisher}|{sort_value}|p{page}"
-        cache_key = hashlib.md5(search_params.encode(), usedforsecurity=False).hexdigest()  # noqa: S324
+        cache_key = hashlib.md5(search_params.encode(), usedforsecurity=False).hexdigest()
 
         # Check cache
         if use_cache and self._cache:

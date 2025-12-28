@@ -417,7 +417,7 @@ class AsyncAudibleClient:
         """Search the Audible catalog."""
         sort_value = sort_by.value if isinstance(sort_by, CatalogSortBy) else sort_by
         search_params = f"{keywords}|{title}|{author}|{narrator}|{sort_value}"
-        cache_key = hashlib.md5(search_params.encode(), usedforsecurity=False).hexdigest()  # noqa: S324
+        cache_key = hashlib.md5(search_params.encode(), usedforsecurity=False).hexdigest()
 
         if use_cache and self._cache:
             cached = self._cache.get("search", cache_key)

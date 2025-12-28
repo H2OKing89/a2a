@@ -213,7 +213,7 @@ Cache database has `644` permissions, which is less restrictive than ideal.
 
 ## Bandit Scan Results
 
-```
+```text
 Total issues: 0 ✅
 
 All issues resolved:
