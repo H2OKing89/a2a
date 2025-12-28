@@ -82,11 +82,11 @@ def main() -> int:
         new_version = bump_version(arg)
         set_version(new_version)
         print(f"   {old_version} -> {new_version}")
-        print(f"\nTo release, run:")
-        print(f"   git add src/__init__.py")
+        print("\nTo release, run:")
+        print("   git add src/__init__.py")
         print(f"   git commit -m 'chore: bump version to {new_version}'")
         print(f"   git tag v{new_version}")
-        print(f"   git push origin main --tags")
+        print("   git push origin main --tags")
     elif re.match(r"^\d+\.\d+\.\d+$", arg):
         # Set specific version
         old_version = get_version()
