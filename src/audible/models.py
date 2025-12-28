@@ -572,7 +572,9 @@ class AudibleBook(BaseModel):
         if self.price:
             list_price_data = self.price.get("list_price", {})
             if list_price_data:
-                return list_price_data.get("base")
+                base = list_price_data.get("base")
+                if base is not None:
+                    return float(base)
         return None
 
     @property
