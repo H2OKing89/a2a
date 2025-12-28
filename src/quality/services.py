@@ -177,7 +177,7 @@ class UpgradeFinderService:
         abs_client: "ABSClient",
         audible_client: "AudibleClient | None" = None,
         cache: "SQLiteCache | None" = None,
-    ):
+    ) -> None:
         """
         Initialize the upgrade finder service.
 
@@ -256,8 +256,10 @@ class UpgradeFinderService:
 
         result.scan_time_seconds = time.time() - phase1_start
         logger.info(
-            f"Phase 1 complete: {result.total_below_threshold} items below threshold, "
-            f"{result.total_with_asin} with ASIN, took {result.scan_time_seconds:.1f}s"
+            "Phase 1 complete: %d items below threshold, %d with ASIN, took %.1fs",
+            result.total_below_threshold,
+            result.total_with_asin,
+            result.scan_time_seconds,
         )
 
         # Phase 2: Enrich with Audible data (if client available)
@@ -276,7 +278,7 @@ class UpgradeFinderService:
                     if enrichment:
                         enrichments[asin] = enrichment
                 except Exception as e:
-                    logger.debug(f"Failed to enrich ASIN {asin}: {e}")
+                    logger.warning("Failed to enrich ASIN %s: %s", asin, e)
 
             # Apply enrichment to candidates
             for candidate in candidates:
@@ -289,9 +291,11 @@ class UpgradeFinderService:
             result.api_calls = stats["api_calls"]
             result.enrichment_time_seconds = time.time() - phase2_start
             logger.info(
-                f"Phase 2 complete: {result.total_enriched} enriched, "
-                f"{result.cache_hits} cache hits, {result.api_calls} API calls, "
-                f"took {result.enrichment_time_seconds:.1f}s"
+                "Phase 2 complete: %d enriched, %d cache hits, %d API calls, took %.1fs",
+                result.total_enriched,
+                result.cache_hits,
+                result.api_calls,
+                result.enrichment_time_seconds,
             )
 
         # Apply filters
