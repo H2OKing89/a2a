@@ -84,7 +84,7 @@ def series_list(
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @series_app.command("analyze")
