@@ -84,10 +84,13 @@ LIBRARY_RESPONSE_GROUPS = (
 CATALOG_RESPONSE_GROUPS = (
     "contributors,"
     "media,"
+    "price,"
     "product_attrs,"
     "product_desc,"
     "product_details,"
     "product_extended_attrs,"
+    "product_plan_details,"
+    "product_plans,"
     "rating,"
     "series,"
     "category_ladders,"
