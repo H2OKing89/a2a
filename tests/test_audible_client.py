@@ -555,7 +555,7 @@ class TestContextManager:
 
     def test_exit_closes_client(self, mock_auth):
         """__exit__ calls close."""
-        with patch("src.audible.client.Client") as mock_audible:
+        with patch("src.audible.client.Client"):
             client = AudibleClient(auth=mock_auth)
 
             with client:
