@@ -292,7 +292,7 @@ async def analyze_audiobook(client: AsyncAudibleClient, asin: str, progress: Pro
 
     available_formats = []
 
-    for i, config in enumerate(test_configs):
+    for _, config in enumerate(test_configs):
         progress.update(task, description=f"[cyan]Testing {config['name']}...")
 
         try:
