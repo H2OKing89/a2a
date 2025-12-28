@@ -74,7 +74,24 @@ jobs:
         # Run flake8
         python -m flake8 src tests
 
-        # Run bandit security scanner
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: pip
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Run Bandit security scanner
+      run: |
         python -m bandit -r src -c pyproject.toml
 
   type-check:
