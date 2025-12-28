@@ -33,24 +33,30 @@
 <td width="50%">
 
 ### 🔍 Quality Analysis
+
 Analyze audio quality (bitrate, codec, format) across your entire library with intelligent tier classification.
 
 ### 📊 Upgrade Recommendations  
+
 Identify low-quality audiobooks and find matching Audible versions with pricing data.
 
 ### 🔗 Audible Integration
+
 Seamless authentication, library access, catalog search, and metadata enrichment.
 
 </td>
 <td width="50%">
 
 ### 📚 Series Management
+
 Track series completion, find missing books, and match ABS series with Audible catalogs.
 
 ### 💾 Smart Caching
+
 SQLite-based caching with TTL and namespaces to minimize API calls and speed up operations.
 
 ### 🎨 Rich CLI Experience
+
 Beautiful terminal output with progress bars, styled tables, spinners, and visual feedback.
 
 </td>
@@ -331,6 +337,7 @@ src/
 <td width="50%">
 
 ### ✅ Credential Protection
+
 - **Encrypted storage**: AES-CBC encryption for Audible credentials
 - **Secure permissions**: Auth files set to `600` (owner-only)
 - **Password protection**: Via environment variable or prompt
@@ -339,6 +346,7 @@ src/
 <td width="50%">
 
 ### ✅ Network Security
+
 - **HTTPS by default**: Auto-upgrades connections
 - **Localhost exception**: HTTP allowed for local development
 - **Custom CA support**: For self-signed certificates
