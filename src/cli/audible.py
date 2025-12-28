@@ -35,7 +35,7 @@ from src.audible import (
 from src.cli.common import Icons, console, get_audible_client, get_cache, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
-from src.utils.ui import Panel, Table
+from src.utils.ui import Markdown, Panel, Table
 
 # Create Audible sub-app
 audible_app = typer.Typer(help="🎧 Audible API commands")
@@ -69,16 +69,16 @@ def audible_login(
             console.print("[muted]Your credentials will be encrypted with a password.[/muted]")
             console.print("[muted]You'll need this password each time you use Audible commands.[/muted]")
             console.print("[muted]Tip: Set AUDIBLE_AUTH_PASSWORD env var to avoid prompts.[/muted]\n")
-            auth_password = typer.prompt("Encryption password", hide_input=True)
-            confirm = typer.prompt("Confirm password", hide_input=True)
+            auth_password = ui.ask("Encryption password", password=True)
+            confirm = ui.ask("Confirm password", password=True)
             if auth_password != confirm:
-                console.print("[red]✗[/red] Passwords do not match")
+                ui.error("Password mismatch", details="Passwords do not match")
                 raise typer.Exit(1)
             console.print()
 
     try:
         if external:
-            console.print("[yellow]Opening browser for login...[/yellow]")
+            ui.info("Opening browser for login...")
             client = AudibleClient.from_login_external(
                 locale=locale,
                 auth_file=auth_file,
@@ -88,14 +88,14 @@ def audible_login(
                 cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
             )
         else:
-            email = typer.prompt("Email")
-            password = typer.prompt("Password", hide_input=True)
+            email = ui.ask("Email")
+            password = ui.ask("Password", password=True)
 
             def otp_callback() -> str:
-                return str(typer.prompt("Enter OTP/2FA code"))
+                return ui.ask("Enter OTP/2FA code")
 
             def cvf_callback() -> str:
-                return str(typer.prompt("Enter CVF verification code"))
+                return ui.ask("Enter CVF verification code")
 
             client = AudibleClient.from_login(
                 email=email,
@@ -103,7 +103,7 @@ def audible_login(
                 locale=locale,
                 auth_file=auth_file,
                 auth_password=auth_password,
-                auth_encryption=settings.audible.auth_encryption,
+                auth_encryption=settings.audible.auth_encryption,  # type: ignore[arg-type]
                 auth_kdf_iterations=settings.audible.auth_kdf_iterations,
                 cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
                 otp_callback=otp_callback,
@@ -156,7 +156,7 @@ def audible_encrypt(
     if already_encrypted:
         console.print("[yellow]Credentials are currently encrypted.[/yellow]")
         console.print("You'll need the current password to re-encrypt.\n")
-        current_password = typer.prompt("Current encryption password", hide_input=True)
+        current_password = ui.ask("Current encryption password", password=True)
     else:
         current_password = None
         console.print("[yellow]Credentials are currently stored in plaintext.[/yellow]\n")
@@ -167,8 +167,8 @@ def audible_encrypt(
         console.print("[bold]New Encryption Password[/bold]")
         console.print("[muted]Choose a strong password. You'll need it for all Audible commands.[/muted]")
         console.print("[muted]Tip: Set AUDIBLE_AUTH_PASSWORD env var to avoid prompts.[/muted]\n")
-        new_password = typer.prompt("New encryption password", hide_input=True)
-        confirm = typer.prompt("Confirm password", hide_input=True)
+        new_password = ui.ask("New encryption password", password=True)
+        confirm = ui.ask("Confirm password", password=True)
         if new_password != confirm:
             ui.error("Passwords do not match")
             raise typer.Exit(1)
@@ -264,6 +264,7 @@ def audible_library(
     limit: int = typer.Option(20, "--limit", "-l", help="Number of items to show"),
     sort: str = typer.Option("-PurchaseDate", "--sort", "-s", help="Sort by field"),
     no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """List your Audible library."""
     try:
@@ -273,6 +274,11 @@ def audible_library(
                 sort_by=sort,
                 use_cache=not no_cache,
             )
+
+        if raw:
+            # Show raw JSON with syntax highlighting
+            ui.json([item.model_dump() for item in items], title=f"Audible Library ({len(items)} items)")
+            return
 
         table = ui.create_table(
             title=f"{Icons.AUDIOBOOK} Audible Library ({len(items)} items)",
@@ -319,6 +325,7 @@ def audible_library(
 def audible_item(
     asin: str = typer.Argument(..., help="Audible ASIN"),
     catalog: bool = typer.Option(False, "--catalog", "-c", help="Look up in catalog (not just library)"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """Show details for an audiobook by ASIN."""
     try:
@@ -335,6 +342,11 @@ def audible_item(
             if not book:
                 console.print(f"[yellow]Not found:[/yellow] {asin}")
                 raise typer.Exit(1)
+
+            if raw:
+                # Show raw JSON with syntax highlighting
+                ui.json(book.model_dump(), title=f"Audible Book: {asin}")
+                return
 
             # Build series string
             series_str = "N/A"
@@ -372,12 +384,18 @@ def audible_item(
                 )
             )
 
-            # Description
+            # Description with Markdown rendering
             if book.publisher_summary:
-                summary = book.publisher_summary[:500]
-                if len(book.publisher_summary) > 500:
-                    summary += "..."
-                console.print(Panel(summary, title="Description"))
+                # Clean up HTML-like tags that might be in the summary
+                summary = book.publisher_summary
+                # Truncate for display but show full in markdown
+                if len(summary) > 800:
+                    summary = summary[:800] + "..."
+                # Replace common HTML entities and tags
+                summary = summary.replace("<p>", "\n\n").replace("</p>", "")
+                summary = summary.replace("<br>", "\n").replace("<br/>", "\n")
+                summary = summary.replace("&nbsp;", " ").replace("&amp;", "&")
+                console.print(Panel(Markdown(summary), title="📖 Description"))
 
     except AudibleAuthError as e:
         console.print(f"[red]✗[/red] Auth failed: {e}")
@@ -391,6 +409,7 @@ def audible_item(
 def audible_search(
     query: str = typer.Argument(..., help="Search query"),
     limit: int = typer.Option(10, "--limit", "-l", help="Max results"),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Show raw JSON data with syntax highlighting"),
 ):
     """Search the Audible catalog."""
     try:
@@ -401,8 +420,13 @@ def audible_search(
             )
 
             if not products:
-                console.print("[yellow]No results found[/yellow]")
+                ui.warning("No results found", details=f"Query: {query}")
                 raise typer.Exit(0)
+
+            if raw:
+                # Show raw JSON with syntax highlighting
+                ui.json([p.model_dump() for p in products], title=f"Search Results: '{query}'")
+                return
 
             table = Table(title=f"Search Results: '{query}'")
             table.add_column("ASIN", style="cyan")
@@ -438,28 +462,30 @@ def audible_export(
     """Export full Audible library to JSON."""
     try:
         with get_audible_client() as client:
-            console.print("Fetching Audible library...")
+            with ui.spinner("Fetching Audible library...") as status:
+                items = client.get_all_library_items(use_cache=not no_cache)
+                status.update(f"Converting {len(items)} items...")
 
-            items = client.get_all_library_items(use_cache=not no_cache)
+                export_data = {
+                    "marketplace": client.marketplace,
+                    "total_items": len(items),
+                    "items": [item.model_dump() for item in items],
+                }
 
-            console.print(f"Retrieved {len(items)} items")
+                status.update("Writing to file...")
+                output.parent.mkdir(parents=True, exist_ok=True)
+                with open(output, "w") as f:
+                    json.dump(export_data, f, indent=2)
 
-            export_data = {
-                "marketplace": client.marketplace,
-                "total_items": len(items),
-                "items": [item.model_dump() for item in items],
-            }
-
-            with open(output, "w") as f:
-                json.dump(export_data, f, indent=2)
-
-            console.print(f"[green]✓[/green] Exported to {output}")
+            # Show success with file size
+            file_size = output.stat().st_size / (1024 * 1024)  # MB
+            ui.success(f"Exported {len(items)} items to {output} ({file_size:.1f} MB)")
 
     except AudibleAuthError as e:
-        console.print(f"[red]✗[/red] Auth failed: {e}")
+        ui.error("Auth failed", details=str(e))
         raise typer.Exit(1) from e
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Export failed", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -472,12 +498,12 @@ def audible_cache(
     settings = get_settings()
 
     if not settings.cache.enabled:
-        console.print("[yellow]Caching is disabled in settings[/yellow]")
+        ui.warning("Caching is disabled in settings")
         raise typer.Exit(1)
 
     cache = get_cache()
     if not cache:
-        console.print("[yellow]Cache not initialized[/yellow]")
+        ui.warning("Cache not initialized")
         raise typer.Exit(1)
 
     try:
@@ -543,8 +569,7 @@ def audible_wishlist(
                 items = client.get_all_wishlist(use_cache=not no_cache)
 
                 if not items:
-                    console.print("[yellow]Your wishlist is empty[/yellow]")
-                    console.print("[dim]Add books with: audible wishlist add --asin <ASIN>[/dim]")
+                    ui.warning("Your wishlist is empty", details="Add books with: audible wishlist add --asin <ASIN>")
                     return
 
                 # Limit results
@@ -593,43 +618,42 @@ def audible_wishlist(
 
             elif action == "add":
                 if not asin:
-                    console.print("[red]Error:[/red] --asin required for 'add'")
+                    ui.error("Missing argument", details="--asin required for 'add'")
                     raise typer.Exit(1)
 
                 # First verify the book exists
                 book = client.get_catalog_product(asin)
                 if not book:
-                    console.print(f"[red]Error:[/red] Book not found: {asin}")
+                    ui.error("Book not found", details=f"ASIN: {asin}")
                     raise typer.Exit(1)
 
                 success = client.add_to_wishlist(asin)
                 if success:
-                    console.print(f"[green]✓[/green] Added to wishlist: [bold]{book.title}[/bold]")
+                    ui.success(f"Added to wishlist: [bold]{book.title}[/bold]")
                     console.print(f"  Author: {book.primary_author or 'Unknown'}")
                 else:
-                    console.print(f"[yellow]Could not add {asin} (may already be in wishlist)[/yellow]")
+                    ui.warning(f"Could not add {asin}", details="May already be in wishlist")
 
             elif action == "remove":
                 if not asin:
-                    console.print("[red]Error:[/red] --asin required for 'remove'")
+                    ui.error("Missing argument", details="--asin required for 'remove'")
                     raise typer.Exit(1)
 
                 success = client.remove_from_wishlist(asin)
                 if success:
-                    console.print(f"[green]✓[/green] Removed [cyan]{asin}[/cyan] from wishlist")
+                    ui.success(f"Removed [cyan]{asin}[/cyan] from wishlist")
                 else:
-                    console.print(f"[yellow]Could not remove {asin} (may not be in wishlist)[/yellow]")
+                    ui.warning(f"Could not remove {asin}", details="May not be in wishlist")
 
             else:
-                console.print(f"[red]Error:[/red] Unknown action '{action}'")
-                console.print("Valid actions: list, add, remove")
+                ui.error("Unknown action", details=f"'{action}' is not valid. Use: list, add, remove")
                 raise typer.Exit(1)
 
     except AudibleAuthError as e:
-        console.print(f"[red]✗[/red] Auth failed: {e}")
+        ui.error("Auth failed", details=str(e))
         raise typer.Exit(1) from e
     except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
+        ui.error("Wishlist error", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -684,7 +708,7 @@ def audible_stats():
 
             benefits_list = []
             if account.benefits:
-                benefits_list = [b.benefit_id for b in account.benefits[:5]]
+                benefits_list = [b.get("benefit_id", "") for b in account.benefits[:5]]
             benefits_str = ", ".join(benefits_list) if benefits_list else "[dim](none)[/dim]"
 
             account_text = Text()
@@ -732,7 +756,7 @@ def audible_recommendations(
             items = client.get_recommendations(num_results=min(limit, 50), use_cache=not no_cache)
 
             if not items:
-                console.print("[yellow]No recommendations available[/yellow]")
+                ui.warning("No recommendations available")
                 return
 
             table = Table(
