@@ -7,14 +7,18 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# Virtual environments
 .venv/
 venv/
 ENV/
 env/
-config.yaml
-# Byte-compiled / optimized / DLL files
-*.so
-*.pyd
 
 # Distribution / packaging
 build/
@@ -31,12 +35,19 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # -----------------------------
-# Virtualenvs and local env files
+# Local configuration & secrets (IMPORTANT!)
 # -----------------------------
-.venv/
-venv/
+# User-specific config (use config.yaml.example as template)
+config.yaml
+
+# Audible authentication file (NEVER commit this!)
+data/audible_auth.json
+audible_auth.json
+
+# Environment files
 .env
 .env.*
+!.env.example
 
 # -----------------------------
 # Caches & test outputs
@@ -54,20 +65,20 @@ htmlcov/
 # -----------------------------
 # Project-specific caches & data
 # -----------------------------
-# All runtime data goes in data/ subdirectories
+# SQLite databases (generated at runtime)
+*.db
+*.sqlite
+*.sqlite3
+
+# Data directory runtime/generated files
 data/cache/
 data/scans/
 data/reports/
 data/test/
 
-# Migration test data (large sample files)
+# Legacy cache files
 #migration/golden_samples/
 docs/Audible/audible-readthedocs-io-en-latest.pdf
-# Legacy locations (if any remain)
-*.db
-*.sqlite3
-*.sqlite
-data/
 # Old cache file locations (now in data/cache/)
 .mediainfo_cache.json
 .audible_api_cache.json
@@ -84,6 +95,7 @@ data/
 
 # Default output files
 low_bitrate_audiobooks.json
+report_*.json
 *.csv
 
 # -----------------------------
@@ -137,6 +149,18 @@ secrets/
 keys/
 *.pem
 *.key
+
+# -----------------------------
+# Personal notes (not committed)
+# -----------------------------
+CHEATSHEET.md
+LOCAL_NOTES.md
+NOTES.md
+
+# -----------------------------
+# Local vendor docs (not committed)
+# -----------------------------
+docs/Audible/upstream/
 
 # -----------------------------
 # End

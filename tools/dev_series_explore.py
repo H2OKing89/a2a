@@ -18,8 +18,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Setup path
-sys.path.insert(0, str(Path(__file__).parent))
+# Setup import path to repository root (so `import src.*` works)
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 from rapidfuzz import fuzz
 from rich.console import Console

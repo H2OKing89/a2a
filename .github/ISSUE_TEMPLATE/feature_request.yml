@@ -1,0 +1,100 @@
+name: Feature request
+description: Suggest an idea for this project
+title: 'feat: '
+labels: [enhancement]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thanks for the suggestion! Please keep requests focused, provide context, and explain the value this would bring.
+
+- type: dropdown
+  id: component
+  attributes:
+    label: Feature area
+    description: Which part of the tool would this enhance?
+    options:
+    - ABS (Audiobookshelf integration)
+    - Audible (Audible API integration)
+    - Quality Analysis
+    - Series Management
+    - Caching / Performance
+    - CLI / UX
+    - Authentication / Security
+    - Reporting / Export
+    - Other
+  validations:
+    required: true
+
+- type: textarea
+  id: problem
+  attributes:
+    label: Problem / Use Case
+    description: What problem are you trying to solve? What's the current limitation?
+    placeholder: |
+      As a user who manages large libraries, I find it difficult to...
+      Currently, I have to manually...
+  validations:
+    required: true
+
+- type: textarea
+  id: proposal
+  attributes:
+    label: Proposed solution
+    description: How would you like this to work? Be specific.
+    placeholder: |
+      Add a new command: `python cli.py quality report --format html`
+      This would generate an HTML report with...
+  validations:
+    required: true
+
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance criteria (optional)
+    description: How would you verify this feature works correctly?
+    placeholder: |
+      - [ ] Command generates valid HTML file
+      - [ ] Report includes quality distribution chart
+      - [ ] Output can be styled with custom CSS
+  validations:
+    required: false
+
+- type: textarea
+  id: alternatives
+  attributes:
+    label: Alternatives considered
+    description: Have you considered other approaches or workarounds?
+  validations:
+    required: false
+
+- type: dropdown
+  id: priority
+  attributes:
+    label: Priority
+    description: How important is this feature to you?
+    options:
+    - Critical - Blocking my workflow
+    - High - Would significantly improve my experience
+    - Medium - Nice to have
+    - Low - Minor enhancement
+  validations:
+    required: false
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional context
+    description: Screenshots, examples, references to similar features in other tools
+  validations:
+    required: false
+
+- type: checkboxes
+  id: checks
+  attributes:
+    label: Pre-submission checklist
+    options:
+    - label: I searched existing issues and this is not a duplicate
+      required: true
+    - label: This feature aligns with the project's goals (audiobook library management)
+      required: true

@@ -12,7 +12,7 @@ the src/cli/ modules.
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Optional
 
 import typer
 from rich.box import ROUNDED
@@ -27,6 +27,7 @@ install(show_locals=False, width=120, word_wrap=True)
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
+from src import __version__
 from src.abs import ABSAuthError, ABSConnectionError, ABSError
 from src.audible import AudibleAuthError
 from src.cli.abs import abs_app
@@ -37,12 +38,40 @@ from src.cli.series import series_app
 from src.config import get_settings
 from src.utils.ui import Panel
 
+
+def version_callback(value: bool) -> None:
+    """Show version and exit."""
+    if value:
+        console.print(f"\n[bold cyan]🎧 Audiobook to Audible (A2A)[/bold cyan] [dim]v{__version__}[/dim]\n")
+        console.print(f"  [dim]Python:[/dim]  {sys.version.split()[0]}")
+        console.print("  [dim]Source:[/dim]  https://github.com/H2OKing89/a2a")
+        console.print()
+        raise typer.Exit()
+
+
 # Create main app
 app = typer.Typer(
-    name="audiobook-tool",
-    help="🎧 Audiobook management tool using ABS and Audible APIs",
+    name="a2a",
+    help=f"🎧 A2A v{__version__} — Audiobook management tool using ABS and Audible APIs",
     rich_markup_mode="rich",
 )
+
+
+@app.callback()
+def main(
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            "-V",
+            help="Show version and exit.",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ] = None,
+) -> None:
+    """A2A - Audiobook to Audible management tool."""
+
 
 # Register sub-apps
 app.add_typer(abs_app, name="abs")
@@ -60,7 +89,7 @@ def status():
     has_errors = False
 
     # Header
-    ui.header("Audiobook Manager", subtitle="System Status", icon=Icons.AUDIOBOOK)
+    ui.header(f"A2A v{__version__}", subtitle="System Status", icon=Icons.AUDIOBOOK)
 
     # ABS Status
     ui.section("Audiobookshelf", icon=Icons.SERVER)
@@ -94,6 +123,7 @@ def status():
 
             user = client.get_me()
             libraries = client.get_libraries()
+            server_info = client.get_server_info()
 
             # Show actual negotiated protocol after requests
             if client._last_http_version:
@@ -104,6 +134,7 @@ def status():
 
         ui.success(f"Authenticated as [bold]{user.username}[/bold]")
         ui.success(f"{len(libraries)} libraries available")
+        ui.success(f"Server v{server_info.version} ({server_info.source})")
     except (ABSError, ABSConnectionError, ABSAuthError) as e:
         # Expected errors - show friendly message only, no traceback
         ui.error("Connection failed", details=str(e))

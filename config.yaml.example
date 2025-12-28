@@ -1,0 +1,46 @@
+# Example configuration for A2A
+# Copy to `config.yaml` and fill in values, or use environment variables.
+
+abs:
+  #host: http://localhost:13378
+  #api_key: ""
+  #library_id: ""
+  rate_limit_delay: 0
+  allow_insecure_http: false
+  #tls_ca_bundle: ""
+
+audible:
+  # Path to the encrypted auth blob created by `python cli.py audible auth`
+  auth_file: ./data/audible_auth.json
+  locale: us
+  rate_limit_delay: 0.5
+  requests_per_minute: 20.0
+  burst_size: 5
+  backoff_multiplier: 2.0
+  max_backoff_seconds: 60.0
+
+enrichment:
+  enabled: true
+  requests_per_minute: 20.0
+  burst_size: 5
+  backoff_multiplier: 2.0
+  max_backoff_seconds: 60.0
+
+paths:
+  # Update these paths to match your system
+  library_root: /path/to/audiobooks
+  data_dir: ./data
+  cache_dir: ./data/cache
+  reports_dir: ./data/reports
+  scans_dir: ./data/scans
+
+quality:
+  bitrate_threshold_kbps: 100.0
+
+cache:
+  enabled: true
+  db_path: ./data/cache/cache.db
+  default_ttl_hours: 2.0
+  abs_ttl_hours: 2.0
+  audible_ttl_hours: 240.0
+  max_memory_entries: 500

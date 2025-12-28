@@ -26,6 +26,7 @@ from .models import (
     SearchResponse,
     SeriesListResponse,
     SeriesResponse,
+    ServerInfo,
     User,
 )
 
@@ -450,6 +451,20 @@ class ABSClient:
             Dict with user, userDefaultLibraryId, serverSettings
         """
         return self._post("/authorize")
+
+    def get_server_info(self) -> ServerInfo:
+        """
+        Get server version and source (installation type).
+
+        Returns:
+            ServerInfo with version and source
+        """
+        data = self.authorize()
+        server_settings = data.get("serverSettings", {})
+        return ServerInfo(
+            version=server_settings.get("version", "unknown"),
+            source=data.get("Source", "unknown"),
+        )
 
     # =====================
     # Libraries

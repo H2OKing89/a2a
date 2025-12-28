@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test coverage lint format pre-commit clean
+.PHONY: help install install-dev test coverage lint format pre-commit clean version
 
 # Default target
 help:
@@ -12,6 +12,10 @@ help:
 	@echo "  make pre-commit    - Run all pre-commit hooks"
 	@echo "  make setup-hooks   - Setup pre-commit git hooks"
 	@echo "  make clean         - Remove cache and build artifacts"
+	@echo "  make version       - Show current version"
+	@echo "  make bump-patch    - Bump patch version (0.1.0 -> 0.1.1)"
+	@echo "  make bump-minor    - Bump minor version (0.1.0 -> 0.2.0)"
+	@echo "  make bump-major    - Bump major version (0.1.0 -> 1.0.0)"
 
 # Installation
 install:
@@ -63,6 +67,55 @@ clean:
 	find . -type f -name "*.coverage" -delete
 	rm -rf .pytest_cache/ .mypy_cache/ htmlcov/ .coverage
 	@echo "Cleaned cache and build artifacts"
+
+# Version management
+version:
+	@python tools/version.py
+
+bump-patch:
+	@python tools/version.py patch
+
+bump-minor:
+	@python tools/version.py minor
+
+bump-major:
+	@python tools/version.py major
+
+release-patch:
+	@echo "🔍 Checking release preconditions..."
+	@# Check for uncommitted changes
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "❌ Error: Working tree is not clean. Commit or stash changes first."; \
+		git status --short; \
+		exit 1; \
+	fi
+	@# Check current branch (main or repo-polish for now)
+	@CURRENT_BRANCH=$$(git branch --show-current); \
+	if [ "$$CURRENT_BRANCH" != "main" ] && [ "$$CURRENT_BRANCH" != "repo-polish" ]; then \
+		echo "❌ Error: Not on release branch (current: $$CURRENT_BRANCH)"; \
+		echo "   Switch to 'main' before releasing: git checkout main"; \
+		exit 1; \
+	fi
+	@echo "✅ Working tree clean, on branch $$(git branch --show-current)"
+	@# Bump version and capture new version string
+	@echo "📦 Bumping patch version..."
+	@python tools/version.py patch > /dev/null
+	@NEW_VERSION=$$(python tools/version.py | cut -d' ' -f3); \
+	echo "   New version: $$NEW_VERSION"; \
+	if [ -z "$$NEW_VERSION" ]; then \
+		echo "❌ Error: Failed to determine new version"; \
+		exit 1; \
+	fi; \
+	echo "💾 Committing version bump..."; \
+	git add src/__init__.py || { echo "❌ Error: git add failed"; exit 1; }; \
+	git commit -m "chore: bump version to $$NEW_VERSION" || { echo "❌ Error: git commit failed"; exit 1; }; \
+	echo "🏷️  Creating tag v$$NEW_VERSION..."; \
+	git tag "v$$NEW_VERSION" || { echo "❌ Error: git tag failed (does tag already exist?)"; exit 1; }; \
+	echo ""; \
+	echo "✅ Release v$$NEW_VERSION complete!"; \
+	echo ""; \
+	echo "📤 Next step: Push to remote with:"; \
+	echo "   git push origin $$(git branch --show-current) --tags"
 
 # Quick commands
 quick-test: format lint test
