@@ -24,13 +24,7 @@ from rich.box import ROUNDED
 from rich.padding import Padding
 from rich.text import Text
 
-from src.cli.common import (
-    Icons,
-    console,
-    get_abs_client,
-    resolve_library_id,
-    ui,
-)
+from src.cli.common import Icons, console, get_abs_client, resolve_library_id, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
 from src.utils.ui import Panel, Table

@@ -7,13 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.abs.client import (
-    ABSAuthError,
-    ABSClient,
-    ABSConnectionError,
-    ABSError,
-    ABSNotFoundError,
-)
+from src.abs.client import ABSAuthError, ABSClient, ABSConnectionError, ABSError, ABSNotFoundError
 from src.abs.models import Collection, Library, LibraryItem, Series
 
 

@@ -235,41 +235,47 @@ class TestDeviceInfo:
 
 
 class TestRealAuthFile:
-    """Test utilities with real auth file (if exists)."""
+    """Test utilities with real auth file (if exists and unencrypted)."""
 
     @pytest.fixture
     def auth_file_path(self):
         """Path to test auth file."""
         return Path("data/audible_auth.json")
 
-    def test_real_auth_file_if_exists(self, auth_file_path):
-        """Test with real auth file if it exists."""
-        if auth_file_path.exists():
-            # Test is_auth_valid
-            assert is_auth_valid(str(auth_file_path)) is True
-
-            # Test get_auth_info
-            info = get_auth_info(str(auth_file_path))
-            assert info is not None
-            assert "locale" in info
-            assert len(info["locale"]) == 2
-
-            # Test get_activation_bytes_from_file
-            activation = get_activation_bytes_from_file(str(auth_file_path))
-            assert isinstance(activation, str)
-            assert len(activation) == 8  # 4 bytes = 8 hex chars
-        else:
+    @pytest.fixture
+    def skip_if_encrypted_or_missing(self, auth_file_path):
+        """Skip test if auth file is missing or encrypted."""
+        if not auth_file_path.exists():
             pytest.skip("Real auth file not found")
 
-    def test_marketplace_for_real_auth(self, auth_file_path):
-        """Test getting marketplace from real auth."""
-        if auth_file_path.exists():
-            info = get_auth_info(str(auth_file_path))
-            locale = info.get("locale")
+        # Check if encrypted (can't test without password)
+        from src.audible.encryption import is_file_encrypted
 
-            if locale:
-                mp = get_marketplace(locale)
-                assert mp is not None
-                assert mp.country_code == locale.lower()
-        else:
-            pytest.skip("Real auth file not found")
+        if is_file_encrypted(auth_file_path):
+            pytest.skip("Auth file is encrypted - cannot test without password")
+
+    def test_real_auth_file_if_exists(self, auth_file_path, skip_if_encrypted_or_missing):
+        """Test with real auth file if it exists and is unencrypted."""
+        # Test is_auth_valid
+        assert is_auth_valid(str(auth_file_path)) is True
+
+        # Test get_auth_info
+        info = get_auth_info(str(auth_file_path))
+        assert info is not None
+        assert "locale" in info
+        assert len(info["locale"]) == 2
+
+        # Test get_activation_bytes_from_file
+        activation = get_activation_bytes_from_file(str(auth_file_path))
+        assert isinstance(activation, str)
+        assert len(activation) == 8  # 4 bytes = 8 hex chars
+
+    def test_marketplace_for_real_auth(self, auth_file_path, skip_if_encrypted_or_missing):
+        """Test getting marketplace from real auth if unencrypted."""
+        info = get_auth_info(str(auth_file_path))
+        locale = info.get("locale")
+
+        if locale:
+            mp = get_marketplace(locale)
+            assert mp is not None
+            assert mp.country_code == locale.lower()

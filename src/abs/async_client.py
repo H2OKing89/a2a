@@ -26,13 +26,7 @@ from typing import TYPE_CHECKING, Any, Optional
 import httpx
 
 from .client import ABSAuthError, ABSConnectionError, ABSError, ABSNotFoundError
-from .models import (
-    Author,
-    Library,
-    LibraryItemExpanded,
-    LibraryStats,
-    User,
-)
+from .models import Author, Library, LibraryItemExpanded, LibraryStats, User
 
 if TYPE_CHECKING:
     from ..cache import SQLiteCache

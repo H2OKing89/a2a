@@ -261,13 +261,7 @@ class LogContext:
 # Convenience log functions - re-exported from shared utilities
 # =============================================================================
 
-from src.utils.logging import (
-    log_debug,
-    log_error,
-    log_info,
-    log_success,
-    log_warning,
-)
+from src.utils.logging import log_debug, log_error, log_info, log_success, log_warning
 
 __all__ = [
     "LogContext",

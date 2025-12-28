@@ -18,11 +18,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from src.utils.samples import (
-    list_golden_samples,
-    load_golden_sample,
-    save_golden_sample,
-)
+from src.utils.samples import list_golden_samples, load_golden_sample, save_golden_sample
 
 
 class SampleModel(BaseModel):

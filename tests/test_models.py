@@ -2,12 +2,7 @@
 
 import pytest
 
-from src.quality.models import (
-    AudioQuality,
-    FormatRank,
-    QualityReport,
-    QualityTier,
-)
+from src.quality.models import AudioQuality, FormatRank, QualityReport, QualityTier
 
 
 class TestQualityTier:

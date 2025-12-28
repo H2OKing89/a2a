@@ -23,14 +23,16 @@ import typer
 from rich.box import ROUNDED
 from rich.text import Text
 
-from src.audible import AudibleAuthError, AudibleBook, AudibleClient
-from src.cli.common import (
-    Icons,
-    console,
-    get_audible_client,
-    get_cache,
-    ui,
+from src.audible import (
+    AudibleAuthError,
+    AudibleBook,
+    AudibleClient,
+    get_encryption_config,
+    is_file_encrypted,
+    load_auth,
+    save_auth,
 )
+from src.cli.common import Icons, console, get_audible_client, get_cache, ui
 from src.config import get_settings
 from src.utils import save_golden_sample
 from src.utils.ui import Panel, Table
@@ -43,11 +45,13 @@ audible_app = typer.Typer(help="🎧 Audible API commands")
 def audible_login(
     locale: str = typer.Option("us", "--locale", "-l", help="Marketplace locale (us, uk, de, etc.)"),
     external: bool = typer.Option(False, "--external", "-e", help="Use external browser for login"),
+    encrypt: bool = typer.Option(True, "--encrypt/--no-encrypt", help="Encrypt credentials (prompts for password)"),
 ):
     """
     Login to Audible and save credentials.
 
     First-time setup - will prompt for email/password or open browser.
+    By default, credentials are encrypted with a password you provide.
     """
     settings = get_settings()
     auth_file = settings.audible.auth_file
@@ -55,12 +59,32 @@ def audible_login(
     console.print(f"\n[bold]Audible Login[/bold] (marketplace: {locale})")
     console.print(f"Credentials will be saved to: {auth_file}\n")
 
+    # Get encryption password if encrypting
+    auth_password = None
+    if encrypt:
+        # Check env var first
+        auth_password = settings.audible.auth_password
+        if not auth_password:
+            console.print("[bold]Credential Encryption[/bold]")
+            console.print("[muted]Your credentials will be encrypted with a password.[/muted]")
+            console.print("[muted]You'll need this password each time you use Audible commands.[/muted]")
+            console.print("[muted]Tip: Set AUDIBLE_AUTH_PASSWORD env var to avoid prompts.[/muted]\n")
+            auth_password = typer.prompt("Encryption password", hide_input=True)
+            confirm = typer.prompt("Confirm password", hide_input=True)
+            if auth_password != confirm:
+                console.print("[red]✗[/red] Passwords do not match")
+                raise typer.Exit(1)
+            console.print()
+
     try:
         if external:
             console.print("[yellow]Opening browser for login...[/yellow]")
             client = AudibleClient.from_login_external(
                 locale=locale,
                 auth_file=auth_file,
+                auth_password=auth_password,
+                auth_encryption=settings.audible.auth_encryption,
+                auth_kdf_iterations=settings.audible.auth_kdf_iterations,
                 cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
             )
         else:
@@ -78,6 +102,9 @@ def audible_login(
                 password=password,
                 locale=locale,
                 auth_file=auth_file,
+                auth_password=auth_password,
+                auth_encryption=settings.audible.auth_encryption,
+                auth_kdf_iterations=settings.audible.auth_kdf_iterations,
                 cache_dir=settings.paths.cache_dir / "audible" if settings.cache.enabled else None,
                 otp_callback=otp_callback,
                 cvf_callback=cvf_callback,
@@ -86,9 +113,93 @@ def audible_login(
         console.print("\n[green]✓[/green] Login successful!")
         console.print(f"  Marketplace: {client.marketplace}")
         console.print(f"  Credentials saved to: {auth_file}")
+        if auth_password:
+            console.print("  Encryption: [success]Enabled[/success]")
+        else:
+            console.print("  Encryption: [warning]Disabled[/warning]")
+            console.print("\n[muted]Tip: Run 'audible encrypt' to encrypt your credentials.[/muted]")
 
     except Exception as e:
         console.print(f"[red]✗[/red] Login failed: {e}")
+        raise typer.Exit(1) from e
+
+
+@audible_app.command("encrypt")
+def audible_encrypt(
+    force: bool = typer.Option(False, "--force", "-f", help="Re-encrypt even if already encrypted"),
+):
+    """
+    Encrypt existing Audible credentials.
+
+    Encrypts your auth file with AES encryption using a password you provide.
+    The password is derived using PBKDF2 with 50,000 iterations for security.
+
+    You can also set AUDIBLE_AUTH_PASSWORD environment variable to avoid prompts.
+    """
+    settings = get_settings()
+    auth_file = settings.audible.auth_file
+
+    ui.header("Audible", subtitle="Encrypt Credentials", icon=Icons.AUDIOBOOK)
+
+    if not auth_file.exists():
+        ui.error("Auth file not found", details=f"No credentials at {auth_file}")
+        console.print("[muted]Run 'audible login' first.[/muted]")
+        raise typer.Exit(1)
+
+    # Check current encryption status
+    already_encrypted = is_file_encrypted(auth_file)
+    if already_encrypted and not force:
+        ui.success("Credentials are already encrypted!")
+        console.print("[muted]Use --force to re-encrypt with a new password.[/muted]")
+        return
+
+    if already_encrypted:
+        console.print("[yellow]Credentials are currently encrypted.[/yellow]")
+        console.print("You'll need the current password to re-encrypt.\n")
+        current_password = typer.prompt("Current encryption password", hide_input=True)
+    else:
+        current_password = None
+        console.print("[yellow]Credentials are currently stored in plaintext.[/yellow]\n")
+
+    # Get new encryption password
+    new_password = settings.audible.auth_password
+    if not new_password:
+        console.print("[bold]New Encryption Password[/bold]")
+        console.print("[muted]Choose a strong password. You'll need it for all Audible commands.[/muted]")
+        console.print("[muted]Tip: Set AUDIBLE_AUTH_PASSWORD env var to avoid prompts.[/muted]\n")
+        new_password = typer.prompt("New encryption password", hide_input=True)
+        confirm = typer.prompt("Confirm password", hide_input=True)
+        if new_password != confirm:
+            ui.error("Passwords do not match")
+            raise typer.Exit(1)
+
+    try:
+        with ui.spinner("Encrypting credentials..."):
+            # Load existing auth (with current password if encrypted)
+            current_enc = get_encryption_config(password=current_password, use_env_password=False)
+            auth = load_auth(auth_file, current_enc)
+
+            # Save with new encryption
+            new_enc = get_encryption_config(
+                password=new_password,
+                encryption=settings.audible.auth_encryption,  # type: ignore[arg-type]
+                kdf_iterations=settings.audible.auth_kdf_iterations,
+                use_env_password=False,
+            )
+            save_auth(auth, auth_file, new_enc)
+
+        ui.success("Credentials encrypted successfully!")
+        console.print(f"  {Icons.FILE} File: {auth_file}")
+        console.print(f"  {Icons.SUCCESS} Encryption: [success]Enabled[/success]")
+        console.print(f"  {Icons.BULLET} KDF iterations: {settings.audible.auth_kdf_iterations:,}")
+        console.print()
+        console.print("[muted]Remember your password! Set AUDIBLE_AUTH_PASSWORD to avoid prompts.[/muted]")
+
+    except ValueError as e:
+        ui.error(f"Failed to encrypt credentials at {auth_file}", details=str(e))
+        raise typer.Exit(1) from e
+    except Exception as e:
+        ui.error(f"Failed to encrypt credentials at {auth_file}", details=str(e))
         raise typer.Exit(1) from e
 
 
@@ -105,6 +216,18 @@ def audible_status():
     if not settings.audible.auth_file.exists():
         ui.warning("Auth file not found", details="Run 'audible login' first")
         raise typer.Exit(1)
+
+    # Check encryption status
+    encrypted = is_file_encrypted(settings.audible.auth_file)
+    if encrypted:
+        console.print(f"  {Icons.SUCCESS} Encryption: [success]Enabled[/success]")
+    else:
+        console.print(f"  {Icons.WARNING} Encryption: [warning]Disabled[/warning]")
+        console.print()
+        ui.warning(
+            "Auth file is NOT encrypted",
+            details="Your credentials are stored in plaintext. Run 'audible encrypt' to encrypt them.",
+        )
 
     try:
         with ui.spinner("Connecting to Audible...") as status, get_audible_client() as client:

@@ -48,6 +48,20 @@ class AudibleSettings(BaseSettings):
     email: str | None = Field(default=None, description="Audible/Amazon email")
     password: str | None = Field(default=None, description="Audible/Amazon password")
 
+    # Auth file encryption settings
+    auth_password: str | None = Field(
+        default=None,
+        description="Password for encrypting auth file (recommended for security)",
+    )
+    auth_encryption: str = Field(
+        default="json",
+        description="Encryption format for auth file ('json' or 'bytes')",
+    )
+    auth_kdf_iterations: int = Field(
+        default=50_000,
+        description="PBKDF2 iterations for auth file encryption (max 65535)",
+    )
+
     # Rate limiting
     rate_limit_delay: float = Field(default=0.5, description="Base delay between requests in seconds")
     requests_per_minute: float = Field(default=20.0, description="Maximum requests per minute")

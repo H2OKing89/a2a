@@ -1,6 +1,6 @@
 # Security Audit Report
 
-**Date:** December 27, 2025  
+**Date:** December 28, 2025  
 **Auditor:** Copilot Security Review  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)  
 **Status:** ✅ Complete
@@ -11,7 +11,7 @@
 
 | Category | Status | Risk Level | Findings |
 |----------|--------|------------|----------|
-| Credential Storage | ⚠️ Needs Attention | 🟡 Medium | Plaintext credentials (encryption TBD) |
+| Credential Storage | ✅ Secured | 🟢 Low | AES encryption implemented |
 | Secret Management | ✅ Good | 🟢 Low | Proper .gitignore, no secrets in git history |
 | Logging Security | ✅ Good | 🟢 Low | No credential exposure in logs |
 | Network Security | ✅ Good | 🟢 Low | SSL verification enabled, no insecure connections |
@@ -22,15 +22,15 @@
 
 ## Detailed Findings
 
-### 1. Credential Storage 🟡
+### 1. Credential Storage ✅
 
 #### Finding 1.1: Plaintext Credentials in Auth File
 
 **Severity:** Medium  
 **Location:** `data/audible_auth.json`  
-**Status:** ⬜ Open
+**Status:** ✅ Fixed
 
-The Audible authentication file stores sensitive credentials in plaintext JSON:
+The Audible authentication file previously stored sensitive credentials in plaintext JSON:
 
 - Access tokens
 - Refresh tokens
@@ -38,24 +38,34 @@ The Audible authentication file stores sensitive credentials in plaintext JSON:
 - Session cookies
 - Personal information (name, user_id)
 
-**Evidence:**
+**Resolution:**
 
-```json
-{
-    "access_token": "Atna|EwICIJaC6fv...",
-    "refresh_token": "Atnr|EwICII7apDU...",
-    "device_private_key": "-----BEGIN RSA PRIVATE KEY-----...",
-    "adp_token": "{enc:EA2qJxr/WMjeMM1z...",
-    ...
-}
-```
+Implemented AES-CBC encryption using the upstream `audible` library's built-in encryption:
 
-**Recommendation:**
+- ✅ Created `src/audible/encryption.py` with centralized encryption helpers
+- ✅ Added `AuthFileEncryption` dataclass for encryption configuration
+- ✅ PBKDF2 key derivation with 50,000 iterations (configurable)
+- ✅ Supports both "json" (encrypted JSON) and "bytes" (binary) formats
+- ✅ Password via `AUDIBLE_AUTH_PASSWORD` environment variable
+- ✅ CLI `audible encrypt` command to encrypt existing credentials
+- ✅ CLI `audible login --encrypt` flag (default) for new logins
+- ✅ CLI `audible status` shows encryption warning if unencrypted
+- ✅ Auto-detection of encrypted vs plaintext files on load
 
-- [ ] Encrypt credentials at rest using OS keychain or encryption library
-- [ ] Consider using `keyring` library for cross-platform secure storage
-- [ ] Add warning to documentation about credential file sensitivity
-- [ ] Implement credential rotation reminders
+**Implementation Details:**
+
+| Component | Description |
+|-----------|-------------|
+| `encryption.py` | `load_auth()`, `save_auth()`, `is_file_encrypted()`, `get_encryption_config()` |
+| `client.py` | Added `auth_password`, `auth_encryption`, `auth_kdf_iterations` params |
+| `cli/audible.py` | New `encrypt` command, updated `login` and `status` |
+| `config.py` | `AudibleSettings.auth_password`, `auth_encryption`, `auth_kdf_iterations` |
+
+**Remaining Recommendations:**
+
+- [ ] Consider `keyring` library for cross-platform secure password storage
+- [ ] Add credential rotation reminders
+- [ ] Document security best practices in README
 
 ---
 
@@ -65,20 +75,14 @@ The Audible authentication file stores sensitive credentials in plaintext JSON:
 **Location:** `data/audible_auth.json`  
 **Status:** ✅ Fixed
 
-File permissions are `644` (world-readable) instead of `600` (owner-only).
-
-**Evidence:**
-
-```bash
-$ ls -la data/audible_auth.json
--rw-r--r-- 1 quentin quentin 5815 Dec 26 05:58 data/audible_auth.json
-```
+File permissions were `644` (world-readable) instead of `600` (owner-only).
 
 **Resolution:**
 
-- ✅ Created `src/utils/security.py` with permission checking/fixing utilities
-- ✅ Added permission check in `AudibleClient.from_file()` that warns on insecure permissions
-- ✅ Security helper includes `fix_file_permissions()` for manual or automatic fixing
+- ✅ `save_auth()` in `encryption.py` now sets `chmod 600` after every save
+- ✅ Permission check in `AudibleClient.from_file()` warns on insecure permissions
+- ✅ `audible status` command displays permission warnings
+- ✅ Test coverage for permission enforcement (`test_audible_encryption.py`)
 
 ---
 
@@ -258,19 +262,21 @@ All issues resolved:
 
 ### Immediate (High Priority)
 
-- [x] Fix auth file permissions to 600 - Created `src/utils/security.py` helper
+- [x] Fix auth file permissions to 600 - `save_auth()` now enforces 600 on every save
 - [x] Add permission check on auth file load - Added to `AudibleClient.from_file()`
+- [x] Encrypt credentials at rest - Implemented AES-CBC encryption via `audible` library
 
 ### Short-term (Medium Priority)
 
 - [x] Add `usedforsecurity=False` to MD5 calls - Fixed in both client files
 - [x] Improve exception handling with logging - Added debug logging
+- [x] Add CLI command to encrypt existing credentials - `audible encrypt` command
+- [x] Add encryption status warning - `audible status` shows warning if unencrypted
 - [ ] Document security best practices in README
 
 ### Long-term (Low Priority)
 
-- [ ] Consider credential encryption at rest
-- [ ] Add optional keyring integration
+- [ ] Add optional keyring integration for password storage
 - [ ] Implement credential rotation reminders
 - [ ] Add HTTPS enforcement option for ABS
 
@@ -280,22 +286,22 @@ All issues resolved:
 
 | File | Status | Notes |
 |------|--------|-------|
-| `data/audible_auth.json` | ⚠️ | Plaintext credentials (encryption TBD) |
+| `data/audible_auth.json` | ✅ | Now encrypted with AES-CBC, 600 permissions |
 | `.gitignore` | ✅ | Properly excludes sensitive files |
-| `src/config.py` | ✅ | Settings via environment/files, no hardcoded secrets |
+| `src/config.py` | ✅ | Added encryption settings (password, format, iterations) |
 | `src/abs/client.py` | ✅ | Bearer auth, no credential logging, exception logging added |
-| `src/audible/client.py` | ✅ | Fixed: MD5, permission check added |
-| `src/audible/async_client.py` | ✅ | Fixed: MD5 now uses `usedforsecurity=False` |
+| `src/audible/client.py` | ✅ | Updated with encryption support, permission checks |
+| `src/audible/async_client.py` | ✅ | Updated with encryption support |
+| `src/audible/encryption.py` | ✅ | **NEW**: Encryption helpers (load/save/detect) |
 | `src/abs/logging.py` | ✅ | No sensitive data logged |
 | `src/audible/logging.py` | ✅ | Fixed: Exception logging added |
 | `src/cache/sqlite_cache.py` | ✅ | No credentials stored |
-| `src/utils/security.py` | ✅ | **NEW**: Security utilities for permissions |
+| `src/cli/audible.py` | ✅ | Added `encrypt` command, updated `login`/`status` |
+| `tests/test_audible_encryption.py` | ✅ | **NEW**: 29 tests for encryption functionality |
 
 ---
 
-## Update AUDIT_PLANNING.md
-
-Update the Security Audit status to "In Progress" and check off completed items.
+*Report updated: December 28, 2025*
 
 ---
 

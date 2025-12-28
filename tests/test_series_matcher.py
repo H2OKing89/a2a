@@ -8,18 +8,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.series.matcher import (
-    SeriesMatcher,
-    _normalize_series_name,
-    _normalize_title,
-    _score_to_confidence,
-)
-from src.series.models import (
-    ABSSeriesBook,
-    ABSSeriesInfo,
-    AudibleSeriesBook,
-    MatchConfidence,
-)
+from src.series.matcher import SeriesMatcher, _normalize_series_name, _normalize_title, _score_to_confidence
+from src.series.models import ABSSeriesBook, ABSSeriesInfo, AudibleSeriesBook, MatchConfidence
 
 # ============================================================================
 # Module-level Function Tests

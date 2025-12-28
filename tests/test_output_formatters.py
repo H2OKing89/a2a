@@ -9,13 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from src.output import (
-    CSVFormatter,
-    JSONFormatter,
-    OutputFormat,
-    TableFormatter,
-    get_formatter,
-)
+from src.output import CSVFormatter, JSONFormatter, OutputFormat, TableFormatter, get_formatter
 
 
 class TestOutputFormat:

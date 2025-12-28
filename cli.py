@@ -26,14 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.audible import AudibleAuthError
 from src.cli.abs import abs_app
 from src.cli.audible import audible_app
-from src.cli.common import (
-    Icons,
-    console,
-    get_abs_client,
-    get_audible_client,
-    get_cache,
-    ui,
-)
+from src.cli.common import Icons, console, get_abs_client, get_audible_client, get_cache, ui
 from src.cli.quality import quality_app
 from src.cli.series import series_app
 from src.config import get_settings
