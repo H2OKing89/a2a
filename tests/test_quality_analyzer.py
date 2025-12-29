@@ -254,10 +254,11 @@ class TestQualityAnalyzer:
             },
         }
 
-        # Pydantic model requires codec to be a string, not None
-        # Should raise ValidationError
-        with pytest.raises(ValidationError):
-            analyzer.analyze_item(item)
+        # Codec field is now nullable, so None is allowed
+        # Should not raise ValidationError
+        result = analyzer.analyze_item(item)
+        assert result is not None
+        assert result.codec is None  # Codec should be None
 
     def test_analyze_item_null_channels(self):
         """Test handling audio file with None/null channels - should raise ValidationError."""

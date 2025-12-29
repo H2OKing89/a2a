@@ -204,8 +204,8 @@ class TestAudioQuality:
             path="/path",
             format_rank=FormatRank.MP3,
         )
-        # Note: MP3, OPUS, FLAC all have value=3, so they alias to FLAC (last defined)
-        assert quality.format_label == "FLAC"
+        # MP3 now has unique value=3 (not aliased to FLAC anymore)
+        assert quality.format_label == "MP3"
 
     def test_format_label_property_opus(self):
         """Test format_label property for Opus."""
@@ -217,8 +217,8 @@ class TestAudioQuality:
             path="/path",
             format_rank=FormatRank.OPUS,
         )
-        # Note: MP3, OPUS, FLAC all have value=3, so they alias to FLAC (last defined)
-        assert quality.format_label == "FLAC"
+        # OPUS now has unique value=4 (not aliased to FLAC anymore)
+        assert quality.format_label == "Opus"
 
     def test_format_label_property_flac(self):
         """Test format_label property for FLAC."""
