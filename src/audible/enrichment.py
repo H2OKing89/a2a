@@ -281,6 +281,10 @@ class AudibleEnrichmentService:
         self._api_calls += 1
         try:
             response = self._get_catalog_product(asin)
+            if not response:
+                logger.debug("No catalog response for ASIN %s", asin)
+                return None
+
             product = response.get("product", response)
         except Exception as e:
             logger.debug(
@@ -553,7 +557,9 @@ class AsyncAudibleEnrichmentService:
         enrichment.has_atmos = getattr(product, "has_dolby_atmos", False) or product.is_ayce
 
         # Parse catalog bitrate from available_codecs as fallback (mirrors sync path)
-        available_codecs = getattr(product, "model_extra", {}).get("available_codecs", [])
+        # Note: model_extra can be None even when attribute exists, so use `or {}`
+        model_extra = getattr(product, "model_extra", None) or {}
+        available_codecs = model_extra.get("available_codecs", []) if isinstance(model_extra, dict) else []
         if available_codecs:
             for codec in available_codecs:
                 codec_name = codec.get("name", "")
