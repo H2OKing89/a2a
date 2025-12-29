@@ -50,15 +50,24 @@ class FormatRank(IntEnum):
     """
     Audio format ranking.
 
-    Lower number = better format.
+    Each format has a unique value to avoid enum aliasing.
+    Use rank_score property for quality comparison.
     """
 
     M4B = 1  # Best - single file with chapters
     M4A = 2  # Good - AAC audio
     MP3 = 3  # Lower - older format, less efficient
-    OPUS = 3  # Equal to MP3
-    FLAC = 3  # Equal to MP3 (lossless but large)
-    OTHER = 4  # Unknown formats
+    OPUS = 4  # Similar to MP3
+    FLAC = 5  # Lossless but large
+    OTHER = 99  # Unknown formats
+
+    @property
+    def rank_score(self) -> int:
+        """Quality rank for comparison (lower = better)."""
+        # MP3, OPUS, FLAC are considered equal quality tier
+        if self in (FormatRank.MP3, FormatRank.OPUS, FormatRank.FLAC):
+            return 3
+        return int(self)
 
     @classmethod
     def from_filename(cls, filename: str) -> "FormatRank":
@@ -116,7 +125,7 @@ class AudioQuality(BaseModel):
     primary_filename: str | None = Field(default=None, description="Primary audio filename")
 
     # Audio properties
-    codec: str = Field(description="Audio codec (aac, mp3, eac3, etc.)")
+    codec: str | None = Field(default=None, description="Audio codec (aac, mp3, eac3, etc.)")
     bitrate_kbps: float = Field(description="Bitrate in kbps")
     channels: int = Field(default=2, description="Number of audio channels")
     channel_layout: str | None = Field(default=None, description="Channel layout (stereo, 5.1, etc.)")
@@ -201,6 +210,7 @@ class QualityReport(BaseModel):
     good_items: list[AudioQuality] = Field(default_factory=list)
     low_items: list[AudioQuality] = Field(default_factory=list)
     poor_items: list[AudioQuality] = Field(default_factory=list)
+    unknown_items: list[AudioQuality] = Field(default_factory=list)
 
     # Special categories
     atmos_items: list[AudioQuality] = Field(default_factory=list)
@@ -225,8 +235,9 @@ class QualityReport(BaseModel):
         fmt = item.format_label
         self.format_counts[fmt] = self.format_counts.get(fmt, 0) + 1
 
-        # Codec counts
-        self.codec_counts[item.codec] = self.codec_counts.get(item.codec, 0) + 1
+        # Codec counts - guard against None
+        codec = item.codec or "unknown"
+        self.codec_counts[codec] = self.codec_counts.get(codec, 0) + 1
 
         # Add to tier lists
         if item.tier == QualityTier.EXCELLENT:
@@ -239,6 +250,8 @@ class QualityReport(BaseModel):
             self.low_items.append(item)
         elif item.tier == QualityTier.POOR:
             self.poor_items.append(item)
+        else:  # UNKNOWN or any future tiers
+            self.unknown_items.append(item)
 
         # Special categories
         if item.is_atmos:
@@ -249,7 +262,14 @@ class QualityReport(BaseModel):
 
     def finalize(self) -> None:
         """Calculate final statistics after all items added."""
-        all_items = self.excellent_items + self.better_items + self.good_items + self.low_items + self.poor_items
+        all_items = (
+            self.excellent_items
+            + self.better_items
+            + self.good_items
+            + self.low_items
+            + self.poor_items
+            + self.unknown_items
+        )
 
         if all_items:
             bitrates = [i.bitrate_kbps for i in all_items if i.bitrate_kbps > 0]
