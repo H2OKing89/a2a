@@ -340,6 +340,8 @@ All issues resolved:
 
 ## Report updated: December 28, 2025
 
+**Update note:** Updated to reflect implementation of credential encryption (Finding 1.1), file permission enforcement (Finding 1.2), network security improvements (Finding 4.2), code security fixes (Findings 5.1–5.2), and expanded remediation checklist with completion status.
+
 ---
 
 ## Report generated: December 27, 2025
