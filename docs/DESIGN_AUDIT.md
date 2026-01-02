@@ -1,4 +1,5 @@
 # Design and Logic Audit Report
+
 **Date:** December 27, 2025  
 **Auditor:** GitHub Copilot  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)
@@ -10,7 +11,7 @@
 This audit evaluates the architecture, design patterns, business logic, and overall application structure. The application is well-designed for its purpose with clear separation of concerns, but has several areas for improvement in data flow consistency, error handling strategy, and business logic encapsulation.
 
 | Category | Rating | Notes |
-|----------|--------|-------|
+| --- | --- | --- |
 | Architecture | ⭐⭐⭐⭐ | Clean module separation, good layering |
 | Data Flow | ⭐⭐⭐ | Some inconsistencies in return types |
 | Business Logic | ⭐⭐⭐⭐ | Well-defined tiers, clear algorithms |
@@ -22,9 +23,11 @@ This audit evaluates the architecture, design patterns, business logic, and over
 
 ## 🏗️ Architecture Analysis
 
+**Timeline Note:** This audit identifies issues from the initial design review. Many issues have been resolved through subsequent refactoring—see the **Recommended Improvements** section (line 579+) for completion status. Where an issue is marked as ✅ COMPLETED, it refers to improvements implemented after this analysis.
+
 ### Module Structure (Good ✅)
 
-```
+```text
 src/
 ├── abs/           # ABS API client (isolated, self-contained)
 ├── audible/       # Audible API client (isolated, self-contained)  
@@ -35,18 +38,20 @@ src/
 ```
 
 **Strengths:**
+
 - Clear separation between API clients (`abs/`, `audible/`) and business logic (`quality/`, `series/`)
 - Shared infrastructure (`cache/`) properly isolated
 - Each module has its own models, reducing coupling
 - Factory functions in `cli.py` (`get_abs_client()`, `get_audible_client()`) enable DI
 
 **Concerns:**
+
 - `cli.py` at 2,819 lines is too large - acts as both entry point and orchestrator
 - Some business logic lives in CLI commands rather than service classes
 
 ### Dependency Graph (Mostly Clean ✅)
 
-```
+```text
 cli.py
   ├── src/abs/client.py (API)
   ├── src/audible/client.py (API)
@@ -67,6 +72,7 @@ src/audible/enrichment.py
 ```
 
 **Issue: Circular Import Prevention** ✅
+
 - Uses `TYPE_CHECKING` guards properly to avoid circular imports
 - Clean separation between runtime and type-checking imports
 
@@ -75,7 +81,8 @@ src/audible/enrichment.py
 ## 📊 Data Flow Analysis
 
 ### Primary Data Flow
-```
+
+```text
 ABS Library → QualityAnalyzer → AudioQuality → EnrichmentService → AudibleEnrichment → CLI Output
 ```
 
@@ -84,7 +91,7 @@ ABS Library → QualityAnalyzer → AudioQuality → EnrichmentService → Audib
 **Problem:** Some methods return Pydantic models, others return raw dicts.
 
 | Method | Returns | Should Return |
-|--------|---------|---------------|
+| --- | --- | --- |
 | `ABSClient.get_library_series()` | `dict` | `SeriesListResponse` model |
 | `ABSClient.search_library()` | `dict` | `SearchResponse` model |
 | `ABSClient._get()` / `_post()` | `dict` | Internal (OK for private methods) |
@@ -92,6 +99,7 @@ ABS Library → QualityAnalyzer → AudioQuality → EnrichmentService → Audib
 | `AudibleClient.get_library()` | `list[AudibleLibraryItem]` | ✅ Correct |
 
 **Recommendation:** Wrap all public API client methods with Pydantic models for consistency:
+
 ```python
 # Current (inconsistent)
 def get_library_series(self, library_id: str, ...) -> dict:
@@ -115,6 +123,7 @@ for raw in results:
 ```
 
 **Recommendation:** Define API response models in `abs/models.py` and use `model_validate()`:
+
 ```python
 # Recommended - model-driven
 for raw in results:
@@ -140,11 +149,13 @@ POOR: < 64 kbps OR MP3 < 110 kbps
 ```
 
 **Strengths:**
+
 - Atmos detection as "trump card" is correct
 - Format-aware tiering (M4B > MP3 at same bitrate)
 - Configurable thresholds via constructor
 
 **Minor Enhancement:** Consider extracting tier rules to configuration:
+
 ```yaml
 quality:
   tiers:
@@ -166,6 +177,7 @@ def calculate_upgrade_priority(tier, bitrate, size, has_asin):
 ```
 
 **Suggestion:** Add weighting for Audible availability:
+
 ```python
 # Current
 if has_asin:
@@ -196,10 +208,12 @@ def _normalize_series_name(name: str) -> str:
 ```
 
 **Strengths:**
+
 - Score-to-confidence mapping is reasonable (100=EXACT, 90+=HIGH, etc.)
 - Multiple matching strategies (search, ASIN lookup, /sims discovery)
 
 **Issue:** Duplicate logic in `_normalize_title()` and `_normalize_series_name()`:
+
 ```python
 # Both functions do:
 title = title.lower().strip()
@@ -216,6 +230,7 @@ if title.startswith("the "):
 ### ABS Models (Good ✅)
 
 Well-structured Pydantic models with proper aliasing:
+
 ```python
 class BookMetadata(BaseModel):
     title: str
@@ -224,6 +239,7 @@ class BookMetadata(BaseModel):
 ```
 
 **Issue:** `Collection` vs `CollectionExpanded` inheritance:
+
 ```python
 class Collection(CollectionBase):
     books: list[str]  # IDs only
@@ -233,6 +249,7 @@ class CollectionExpanded(CollectionBase):
 ```
 
 **Recommendation:** Use composition instead of inheritance:
+
 ```python
 class CollectionExpanded(CollectionBase):
     expanded_books: list[dict[str, Any]] = Field(alias="books")
@@ -245,6 +262,7 @@ class CollectionExpanded(CollectionBase):
 ### Audible Models (Good ✅)
 
 Comprehensive enum definitions for API constants:
+
 ```python
 class SimilarityType(str, Enum):
     IN_SAME_SERIES = "InTheSameSeries"
@@ -253,6 +271,7 @@ class SimilarityType(str, Enum):
 ```
 
 **Excellent patterns:**
+
 - `ResponseGroups` class centralizes API field selections
 - `PricingInfo.from_api_response()` factory for complex parsing
 - `PlusCatalogInfo` properly encapsulates Plus Catalog detection
@@ -263,7 +282,7 @@ class SimilarityType(str, Enum):
 
 ### Exception Hierarchy (Good ✅)
 
-```python
+```text
 # ABS
 ABSError (base)
 ├── ABSConnectionError
@@ -280,6 +299,7 @@ AudibleError (base)
 ### Issue: Inconsistent Error Recovery 🟡
 
 **Problem 1:** Some methods silently swallow errors:
+
 ```python
 # In scan_library_streaming()
 except ABSNotFoundError:
@@ -292,6 +312,7 @@ except AudibleNotFoundError:
 ```
 
 **Problem 2:** CLI error handling is inconsistent:
+
 ```python
 # Some commands
 except Exception as e:
@@ -305,6 +326,7 @@ except Exception as e:
 ```
 
 **Recommendation:** Standardize error display:
+
 ```python
 def handle_error(e: Exception, context: str = "") -> NoReturn:
     """Standardized error handler for CLI commands."""
@@ -334,6 +356,7 @@ class SQLiteCache:
 ```
 
 **Strengths:**
+
 - TTL-based expiration with configurable per-namespace TTLs
 - ASIN mapping table for ABS↔Audible cross-referencing
 - Full-text search support for title/author queries
@@ -342,6 +365,7 @@ class SQLiteCache:
 ### Issue: Cache Invalidation 🟡
 
 **Problem:** No explicit cache invalidation when data changes:
+
 ```python
 # After adding to collection, wishlist cache not invalidated
 def add_to_wishlist(self, asin: str) -> bool:
@@ -351,6 +375,7 @@ def add_to_wishlist(self, asin: str) -> bool:
 ```
 
 **Recommendation:** More granular invalidation:
+
 ```python
 def add_to_wishlist(self, asin: str) -> bool:
     self._request("POST", "1.0/wishlist", ...)
@@ -365,7 +390,7 @@ def add_to_wishlist(self, asin: str) -> bool:
 
 ### Command Structure (Excellent ✅)
 
-```
+```text
 audiobook-tool
 ├── status           # Global status
 ├── cache            # Cache management
@@ -392,6 +417,7 @@ audiobook-tool
 ```
 
 **Strengths:**
+
 - Logical grouping by domain
 - Consistent option naming (`--library/-l`, `--limit/-n`)
 - Rich UI with progress bars, spinners, styled tables
@@ -399,13 +425,15 @@ audiobook-tool
 ### Issue: CLI is Too Large 🟡
 
 At 2,819 lines, `cli.py` handles:
+
 1. Factory functions for clients
 2. All command definitions
 3. Output formatting
 4. Business logic orchestration
 
 **Recommendation:** Split into:
-```
+
+```text
 cli/
 ├── __init__.py      # app = typer.Typer()
 ├── abs.py           # abs_app commands
@@ -429,8 +457,10 @@ auth_file: Path = Field(default=Path("./data/audible_auth.json"))
 **Current state:** File-based auth storage is standard for the `audible` library.
 
 **Recommendations:**
+
 1. Ensure `data/` is in `.gitignore` ✅ (already done)
 2. Consider adding file permission checks:
+
 ```python
 def validate_auth_file(path: Path) -> None:
     if path.exists():
@@ -442,11 +472,13 @@ def validate_auth_file(path: Path) -> None:
 ### API Keys (Good ✅)
 
 ABS API key loaded from environment:
+
 ```python
 api_key: str = Field(default="", description="ABS API key/token")
 ```
 
 **Recommendation:** Add validation for non-empty key:
+
 ```python
 @field_validator('api_key')
 def validate_api_key(cls, v):
@@ -474,6 +506,7 @@ def batch_get_items_expanded(
 ```
 
 **Strengths:**
+
 - Parallel fetching for large libraries
 - Progress callbacks for UI updates
 - Cache-first strategy reduces API calls
@@ -481,6 +514,7 @@ def batch_get_items_expanded(
 ### Issue: N+1 Query Pattern 🟡
 
 **Problem:** Quality scan fetches each item individually:
+
 ```python
 for item in all_items:
     full_item = abs_client._get(f"/items/{item_id}", params={"expanded": 1})
@@ -490,6 +524,7 @@ for item in all_items:
 This is mitigated by `batch_get_items_expanded()`, but not all commands use it.
 
 **Recommendation:** Ensure all commands use batch fetching:
+
 ```python
 # Current (N+1)
 for item in items:
@@ -506,6 +541,7 @@ full_items = client.batch_get_items_expanded([i.id for i in items])
 ### Dependency Injection (Good ✅)
 
 Clients accept optional cache injection:
+
 ```python
 def __init__(
     self,
@@ -518,6 +554,7 @@ def __init__(
 ### Mock-Friendly Design (Good ✅)
 
 The `_request()` method pattern makes mocking easy:
+
 ```python
 # In tests
 client._request = Mock(return_value={"items": [...]})
@@ -526,6 +563,7 @@ client._request = Mock(return_value={"items": [...]})
 ### Issue: Hard-Coded Dependencies 🟡
 
 Some code creates dependencies internally:
+
 ```python
 # In AudibleEnrichmentService
 def _get_catalog_product(self, asin: str) -> dict:
@@ -538,6 +576,8 @@ def _get_catalog_product(self, asin: str) -> dict:
 
 ## 🛠️ Recommended Improvements
 
+**Note on Status:** The following recommendations are organized by priority and impact. Items marked ✅ COMPLETED were implemented after the initial design analysis. Items without checkmarks remain for future consideration.
+
 ### Priority 1: High Impact, Low Effort ✅ COMPLETED
 
 1. **Split `cli.py` into modules** ✅ - CLI modularized into `src/cli/` with domain-specific modules
@@ -546,17 +586,17 @@ def _get_catalog_product(self, asin: str) -> dict:
 
 ### Priority 2: Medium Impact, Medium Effort ✅ COMPLETED
 
-4. **Create service layer for business operations** ✅
+1. **Create service layer for business operations** ✅
    - Added `src/quality/services.py` with `UpgradeFinderService`
    - Encapsulates quality scanning and Audible enrichment workflows
    - New models: `EnrichedUpgradeCandidate`, `UpgradeFinderResult`
 
-5. **Add response models for all ABS endpoints** ✅
+2. **Add response models for all ABS endpoints** ✅
    - Added `SeriesListResponse`, `SearchResponse`, `SeriesResponse`
    - Added `AuthorSearchResponse`, `BookSearchResult`
    - New `*_parsed()` methods on `ABSClient`
 
-6. **Implement granular cache invalidation** ✅
+3. **Implement granular cache invalidation** ✅
    - Added `delete_by_pattern()` for wildcard key deletion
    - Added `delete_by_asin()` for ASIN-specific invalidation
    - Added `invalidate_related()` for cross-namespace invalidation
@@ -565,13 +605,13 @@ def _get_catalog_product(self, asin: str) -> dict:
 
 ### Priority 3: Nice to Have ✅ COMPLETED
 
-7. **Configuration-driven quality tiers** ✅
+1. **Configuration-driven quality tiers** ✅
    - Added `QualityTierConfig` class to `src/config.py`
    - Enhanced `QualitySettings` with configurable tiers, Atmos detection, premium formats
    - Updated `QualityAnalyzer.from_config()` factory method for config-based initialization
    - Configurable tier definitions in `config.yaml`
 
-8. **Plugin architecture for output formats** ✅
+2. **Plugin architecture for output formats** ✅
    - Created `src/output/` module with formatter plugin system
    - Base `OutputFormatter` abstract class with `format_items()` and `output()` methods
    - `TableFormatter` - Rich console tables with column styling
@@ -580,7 +620,7 @@ def _get_catalog_product(self, asin: str) -> dict:
    - Factory function `get_formatter(format)` for easy instantiation
    - 34 new tests in `tests/test_output_formatters.py`
 
-9. **Async CLI support for better UX** ✅
+3. **Async CLI support for better UX** ✅
    - Created `src/cli/async_utils.py` with async helpers
    - `run_async()` - Run coroutines from sync code
    - `@async_command` - Decorator for async Typer commands with spinner
@@ -601,6 +641,7 @@ The application has a solid foundation with clear module separation, well-define
 3. **Maintainability** - Split large files, reduce duplication
 
 **All priority recommendations have been implemented.** The codebase now features:
+
 - Modular CLI structure (`src/cli/`)
 - Service layer for business operations (`UpgradeFinderService`)
 - Type-safe ABS response models with `*_parsed()` methods

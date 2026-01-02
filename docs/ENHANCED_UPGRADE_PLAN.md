@@ -11,7 +11,7 @@ Our discovery with golden samples (Providence USAC, Harry Potter Atmos) revealed
 ### What We Learned from Golden Samples
 
 | Sample | Standard API Shows | Actual Format (Widevine) | Issue |
-|--------|-------------------|--------------------------|-------|
+| --- | --- | --- | --- |
 | **Providence** | 64 kbps AAC | 128 kbps xHE-AAC | 2x better than reported! |
 | **Harry Potter** | 128 kbps AAC stereo | 768 kbps E-AC-3 5.1 Atmos | 6x better than reported! |
 
@@ -36,7 +36,7 @@ Our discovery with golden samples (Providence USAC, Harry Potter Atmos) revealed
 ## Codec Reference Table
 
 | Codec ID | Name | Efficiency | Typical Bitrate | Notes |
-|----------|------|------------|-----------------|-------|
+| --- | --- | --- | --- | --- |
 | `mp4a.40.42` | xHE-AAC/USAC | ~2x LC-AAC | 64-128 kbps | Modern efficient codec |
 | `ec+3` | E-AC-3/DD+ | N/A | 768 kbps | Dolby Atmos carrier |
 | `LC_128_44100_stereo` | AAC-LC | Baseline | 128 kbps | Standard quality |
@@ -45,7 +45,7 @@ Our discovery with golden samples (Providence USAC, Harry Potter Atmos) revealed
 
 ### Quality Equivalencies
 
-```
+```text
 128 kbps xHE-AAC ≈ 200-256 kbps AAC-LC (equivalent perceptual quality)
 768 kbps E-AC-3 = Premium spatial audio (incomparable - different use case)
 64 kbps AAC-LC ≈ 45 kbps xHE-AAC (if converted)
@@ -193,11 +193,7 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
 
 ## Implementation Plan
 
-<<<<<<< HEAD
 ### Phase 1: Enhance Local Analysis ✅ (Complete)
-=======
-### Phase 1: Enhance Local Analysis ✅ (Mostly Done)
->>>>>>> d107b4b (feat: Remove obsolete scraper output and enhance upgrade card functionality)
 
 **Status:** Implemented in `scanner/mediainfo.py`
 
@@ -205,15 +201,8 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
 - [x] Detect USAC/xHE-AAC codec  
 - [x] Parse bitrate accurately
 - [x] Detect channel count for surround
-<<<<<<< HEAD
 - [x] Add `codec_tier` field to Book model
 - [x] Add `effective_quality` calculation for USAC (1.75x multiplier)
-=======
-
-**Enhancements Needed:**
-- [ ] Add `codec_tier` field to MediaInfo model
-- [ ] Add `effective_quality` calculation for USAC
->>>>>>> d107b4b (feat: Remove obsolete scraper output and enhance upgrade card functionality)
 
 ### Phase 2: Improve API Integration ⚠️ (Partial)
 
@@ -223,59 +212,32 @@ def should_upgrade(local: LocalQuality, api: UpgradeOptions) -> UpgradeDecision:
 - [x] `is_plus_catalog` detection
 - [x] Parse `available_codecs`
 
-<<<<<<< HEAD
 **Future Enhancements:**
-=======
-**Enhancements Needed:**
->>>>>>> d107b4b (feat: Remove obsolete scraper output and enhance upgrade card functionality)
+
 - [ ] Add `api_quality_reliable` flag (false for Atmos/USAC titles)
 - [ ] Track `asset_details` for spatial info
 - [ ] Consider Widevine integration for true quality detection
 
-<<<<<<< HEAD
 ### Phase 3: Smart Upgrade Logic ✅ (Complete)
-=======
-### Phase 3: Smart Upgrade Logic ✅ (Recently Done)
->>>>>>> d107b4b (feat: Remove obsolete scraper output and enhance upgrade card functionality)
 
-**Status:** Implemented in `analysis/quality.py`
+**Status:** Implemented in `src/quality/analyzer.py`
 
 - [x] 5% threshold tolerance (121.6 kbps acceptable)
-<<<<<<< HEAD
-- [x] 10% deficit threshold for guaranteed flagging
 - [x] Minimum 16 kbps upgrade delta
 - [x] Priority levels: plus, high, medium, low, met
 - [x] Phase 8 re-evaluation after enrichment
-- [x] Special handling for USAC-encoded local files (NOT flagged)
+- [x] Special handling for USAC-encoded local files
 - [x] Don't suggest upgrades for USAC files unless Atmos available
-- [x] Add `effective_bitrate_kbps` to upgrade calculations
+- [x] Add `effective_quality` to upgrade calculations
 
 ### Phase 4: Report Enhancements ✅ (Complete)
 
-**Status:** Implemented in templates
+**Status:** Implemented in CLI output
 
-- [x] Show codec tier badge (ATMOS, USAC, AAC, MP3) - `codec_tier_badge` macro
-- [x] Show effective quality vs raw bitrate for USAC - `effective_bitrate` macro
-- [x] Add tooltip explaining why book isn't upgrade candidate - `upgrade_reason_badge` macro
-- [x] Filter upgrade list by priority/codec type - Filter tabs in upgrades section
-=======
-- [x] Minimum 16 kbps upgrade delta
-- [x] Priority levels: plus, high, medium, low, met
-- [x] Phase 8 re-evaluation after enrichment
-
-**Enhancements Needed:**
-- [ ] Special handling for USAC-encoded local files
-- [ ] Don't suggest upgrades for USAC files unless Atmos available
-- [ ] Add `effective_quality` to upgrade calculations
-
-### Phase 4: Report Enhancements 🔲 (Todo)
-
-**Changes Needed:**
-- [ ] Show codec tier badge (ATMOS, USAC, AAC, MP3)
-- [ ] Show effective quality vs raw bitrate for USAC
-- [ ] Add tooltip explaining why book isn't upgrade candidate
-- [ ] Filter upgrade list by codec type
->>>>>>> d107b4b (feat: Remove obsolete scraper output and enhance upgrade card functionality)
+- [x] Show codec tier badge (ATMOS, USAC, AAC, MP3)
+- [x] Show effective quality vs raw bitrate for USAC
+- [x] Add tooltip explaining why book isn't upgrade candidate
+- [x] Filter upgrade list by codec type
 
 ---
 
