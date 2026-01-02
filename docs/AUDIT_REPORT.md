@@ -146,7 +146,7 @@ These f-strings have no `{}` placeholders and should be regular strings:
 
 ### 3. mypy Type Errors (49 total)
 
-#### High Priority Fixes
+#### High-Priority Fixes
 
 **A. Collection model type mismatch (src/abs/models.py:353)**
 
@@ -173,7 +173,7 @@ error: Unexpected keyword argument "total_duration" for "ABSSeriesInfo"; did you
 error: "WishlistItem" has no attribute "list_price"
 ```
 
-- Need to check the actual attribute name in the model
+- Verify the actual attribute name in the model
 
 **D. AudibleRating type conversion (cli.py:1238, 1418)**
 
@@ -190,7 +190,7 @@ error: "Collection" has no attribute "get"
 error: "CollectionExpanded" has no attribute "get"
 ```
 
-- Code is treating Pydantic models as dicts - need to use attribute access instead
+- Code treats Pydantic models as dicts; use attribute access instead 
 
 **F. Return type mismatches in clients**
 Multiple functions returning `Any` when typed to return specific types:
