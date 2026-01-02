@@ -23,6 +23,8 @@ This audit evaluates the architecture, design patterns, business logic, and over
 
 ## 🏗️ Architecture Analysis
 
+**Timeline Note:** This audit identifies issues from the initial design review. Many issues have been resolved through subsequent refactoring—see the **Recommended Improvements** section (line 579+) for completion status. Where an issue is marked as ✅ COMPLETED, it refers to improvements implemented after this analysis.
+
 ### Module Structure (Good ✅)
 
 ```text
@@ -573,6 +575,8 @@ def _get_catalog_product(self, asin: str) -> dict:
 ---
 
 ## 🛠️ Recommended Improvements
+
+**Note on Status:** The following recommendations are organized by priority and impact. Items marked ✅ COMPLETED were implemented after the initial design analysis. Items without checkmarks remain for future consideration.
 
 ### Priority 1: High Impact, Low Effort ✅ COMPLETED
 
