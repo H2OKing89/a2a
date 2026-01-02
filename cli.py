@@ -188,6 +188,11 @@ def cache_command(
     stats: bool = typer.Option(True, "--stats/--no-stats", help="Show cache statistics"),
     clear: bool = typer.Option(False, "--clear", help="Clear all cached data"),
     cleanup: bool = typer.Option(False, "--cleanup", help="Remove expired entries"),
+    clear_pricing: bool = typer.Option(
+        False,
+        "--clear-pricing",
+        help="Clear pricing/deals caches (use after monthly deals change)",
+    ),
     namespace: str | None = typer.Option(None, "--namespace", "-n", help="Specific namespace to clear"),
 ):
     """Manage unified SQLite cache."""
@@ -203,7 +208,14 @@ def cache_command(
         raise typer.Exit(1)
 
     try:
-        if clear:
+        if clear_pricing:
+            with ui.spinner("Clearing pricing caches (monthly deals may have changed)..."):
+                cleared = cache.clear_pricing_caches()
+            total = sum(cleared.values())
+            ui.success(f"Cleared {total} pricing entries")
+            for ns, count in cleared.items():
+                console.print(f"  [dim]{ns}:[/dim] {count} entries")
+        elif clear:
             with ui.spinner("Clearing cache..."):
                 if namespace:
                     count = cache.clear_namespace(namespace)

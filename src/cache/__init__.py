@@ -6,11 +6,22 @@ Provides SQLite-based caching with:
 - Namespace support for different data sources
 - Full-text search on titles and authors
 - ASIN cross-referencing between ABS and Audible
+- Month-boundary-aware TTL for pricing data
 """
 
-from .sqlite_cache import SQLiteCache
+from .sqlite_cache import (
+    PRICING_NAMESPACES,
+    SQLiteCache,
+    calculate_pricing_ttl_seconds,
+    get_seconds_until_next_month,
+)
 
-__all__ = ["SQLiteCache"]
+__all__ = [
+    "SQLiteCache",
+    "calculate_pricing_ttl_seconds",
+    "get_seconds_until_next_month",
+    "PRICING_NAMESPACES",
+]
 
 
 def get_cache(

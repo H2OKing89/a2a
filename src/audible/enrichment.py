@@ -195,10 +195,13 @@ class AudibleEnrichmentService:
 
     Uses caching to avoid repeated API calls. Can be used by any feature
     that needs rich Audible metadata (quality analysis, series matching, etc.).
+
+    Note: Cache TTL is calculated to not extend past month boundaries since
+    Audible's monthly deals reset on the 1st of each month.
     """
 
     CACHE_NAMESPACE = "audible_enrichment"
-    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours (prices change)
+    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours base (actual TTL may be shorter near month end)
 
     def __init__(
         self,
@@ -381,10 +384,12 @@ class AudibleEnrichmentService:
             enrichment.api_quality_reliable = False
 
         # Cache result (ownership excluded since it's checked separately)
+        # Use month-boundary-aware TTL to avoid stale pricing across month resets
         if self._cache:
-            self._cache.set(
-                self.CACHE_NAMESPACE, cache_key, enrichment.model_dump(), ttl_seconds=self.CACHE_TTL_SECONDS
-            )
+            from ..cache.sqlite_cache import calculate_pricing_ttl_seconds
+
+            ttl = calculate_pricing_ttl_seconds(self.CACHE_TTL_SECONDS)
+            self._cache.set(self.CACHE_NAMESPACE, cache_key, enrichment.model_dump(), ttl_seconds=ttl)
 
         return enrichment
 
@@ -431,6 +436,9 @@ class AsyncAudibleEnrichmentService:
     The catalog API's available_codecs field only shows legacy AAX formats
     (max ~64 kbps), so license requests are required for accurate quality info.
 
+    Note: Cache TTL is calculated to not extend past month boundaries since
+    Audible's monthly deals reset on the 1st of each month.
+
     Example:
         async with AsyncAudibleClient.from_file("auth.json") as client:
             service = AsyncAudibleEnrichmentService(client, cache)
@@ -438,7 +446,7 @@ class AsyncAudibleEnrichmentService:
     """
 
     CACHE_NAMESPACE = "audible_enrichment_v2"  # New namespace for quality-enriched data
-    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours (prices change)
+    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours base (actual TTL may be shorter near month end)
 
     def __init__(
         self,
@@ -596,13 +604,16 @@ class AsyncAudibleEnrichmentService:
         if enrichment.has_atmos or (enrichment.actual_quality and enrichment.actual_quality.has_atmos):
             enrichment.api_quality_reliable = False
 
-        # Cache result
+        # Cache result with month-boundary-aware TTL
         if self._cache:
+            from ..cache.sqlite_cache import calculate_pricing_ttl_seconds
+
+            ttl = calculate_pricing_ttl_seconds(self.CACHE_TTL_SECONDS)
             self._cache.set(
                 self.CACHE_NAMESPACE,
                 cache_key,
                 enrichment.model_dump(),
-                ttl_seconds=self.CACHE_TTL_SECONDS,
+                ttl_seconds=ttl,
             )
 
         return enrichment
