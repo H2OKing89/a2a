@@ -2,7 +2,29 @@
 
 **Endpoint:** `GET /1.0/wishlist`
 
-Wishlist items with pricing and availability.
+Retrieve items from user's Audible wishlist with pricing and availability information.
+
+> ⚠️ **Note:** This endpoint is derived from community reverse-engineering of the Audible API. It is not officially documented by Amazon/Audible and may change without notice.
+
+## Authentication & Authorization
+
+- **Header:** `Authorization: Bearer {access_token}`
+- **Token Source:** Obtained via Audible OAuth login (see [Audible Authentication](../../../ABS/auth.md) for details)
+- **Required Scopes:** Full account access (wishlist data requires authenticated session)
+
+## Pagination & Rate Limiting
+
+- **Pagination Parameters:**
+  - `page` (optional): Page number (default: 0)
+  - `num_results` (optional): Items per page (default: 50, max: 1000)
+- **Rate Limiting:** Audible applies rate limiting to all API endpoints. Requests hitting rate limits receive HTTP 429 responses
+- **Recommended:** Implement exponential backoff for 429 responses; typical limits are ~100 requests per minute
+
+## Related Endpoints
+
+- **[Library API](/catalog/products)** - Retrieve all owned audiobooks with detailed metadata; use to track ownership vs wishlist status
+- **[Catalog Products](/search/products)** - Search and discover audiobooks; combined with wishlist for gap analysis (e.g., missing series books)
+- **[Deals API](/deals)** - Current promotional offers and monthly deals; cross-reference with wishlist items for purchase opportunities
 
 ## Schema (Key | Value)
 
@@ -91,7 +113,7 @@ Wishlist items with pricing and availability.
 | `pdf_url` | `None` |
 | `performance_summary` | `None` |
 | `periodical_info` | `None` |
-| `plans` | [array of 1 objects] |
+| `plans` | `[array of 1 objects]` |
 | `plans[0].customer_eligible` | `None` |
 | `plans[0].detail_plan_names` | `None` |
 | `plans[0].end_date` | `2099-12-31T00:00:00.00000Z` |
