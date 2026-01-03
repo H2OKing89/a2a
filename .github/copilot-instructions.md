@@ -116,7 +116,14 @@ cache.search_by_title("Project Hail Mary")  # Full-text search
 cache.clear_pricing_caches()  # Clear all pricing namespaces (no params)
 ```
 
-**Month-Boundary-Aware TTL**: Pricing/deal caches automatically expire before month end since Audible's monthly deals reset on the 1st. `clear_pricing_caches()` takes no parameters and clears all `PRICING_NAMESPACES` internally. Use `calculate_pricing_ttl_seconds()` for custom TTL calculations.
+**Month-Boundary-Aware TTL**: Pricing/deal caches in the Audible enrichment service automatically use month-aware TTL via `calculate_pricing_ttl_seconds()`, expiring before month end since Audible's monthly deals reset on the 1st. When month boundaries approach, TTL is capped to prevent stale deals carrying over to the next month. Developers building custom pricing caches can invoke `calculate_pricing_ttl_seconds()` directly:
+```python
+from src.cache import calculate_pricing_ttl_seconds
+
+ttl_sec = calculate_pricing_ttl_seconds(requested_ttl_seconds=3600)  # 1 hour → capped to month boundary
+cache.set("audible_deals", asin, deal_data, ttl_seconds=ttl_sec)
+```
+`clear_pricing_caches()` takes no parameters and clears all `PRICING_NAMESPACES` internally.
 
 ### Async Clients
 Both clients have async variants (`AsyncABSClient`, `AsyncAudibleClient`) for concurrent operations. Use `async with` context managers.
