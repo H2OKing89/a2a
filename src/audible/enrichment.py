@@ -26,10 +26,9 @@ from .models import ContentQualityInfo, PlusCatalogInfo, PricingInfo
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
     from .async_client import AsyncAudibleClient
-else:
-    # Import for exception handling at runtime
-    from .async_client import AsyncAudibleError
 
+# Import for exception handling at runtime (not just type checking)
+from .async_client import AsyncAudibleError
 
 logger = logging.getLogger(__name__)
 
@@ -588,15 +587,18 @@ class AsyncAudibleEnrichmentService:
                         if bitrate <= 320 and bitrate > (enrichment.best_bitrate or 0):
                             enrichment.best_bitrate = bitrate
 
-        # Discover actual quality via license requests
+        # Discover actual quality via fast metadata endpoint (~3x faster than license requests)
         if discover_quality:
             self._quality_discoveries += 1
             try:
-                quality_info = await self._client.discover_content_quality(asin, use_cache=use_cache)
-                enrichment.actual_quality = quality_info
-                enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
-                if quality_info.best_bitrate_kbps > 0:
-                    enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
+                # Use fast_quality_check (metadata endpoint) instead of discover_content_quality (license requests)
+                # This is ~3x faster and has less aggressive rate limiting
+                quality_info = await self._client.fast_quality_check(asin, use_cache=use_cache)
+                if quality_info:
+                    enrichment.actual_quality = quality_info
+                    enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
+                    if quality_info.best_bitrate_kbps > 0:
+                        enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
             except (AsyncAudibleError, ValidationError) as e:
                 logger.debug("Failed to discover quality for ASIN %s: %s", asin, str(e))
 
@@ -624,18 +626,20 @@ class AsyncAudibleEnrichmentService:
         use_cache: bool = True,
         discover_quality: bool = True,
         max_concurrent: int = 5,
+        use_fast_quality: bool = True,
     ) -> dict[str, AudibleEnrichment]:
         """
         Enrich multiple ASINs with Audible data including actual quality.
 
-        This method fetches catalog data and makes license requests concurrently
+        This method fetches catalog data and discovers quality concurrently
         for efficient batch processing. Progress is reported as each item completes.
 
         Args:
             asins: List of ASINs to enrich
             use_cache: Use cached data if available
-            discover_quality: Make license requests to discover actual quality
+            discover_quality: Discover actual audio quality
             max_concurrent: Max concurrent enrichment operations
+            use_fast_quality: Use fast metadata endpoint (default) vs slower license requests
 
         Returns:
             Dict mapping ASIN to enrichment data
