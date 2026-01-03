@@ -1214,6 +1214,7 @@ class AudibleClient:
         self,
         asin: str,
         quality: str = "High",
+        drm_type: str | None = None,
         use_cache: bool = True,
     ) -> ContentMetadata | None:
         """
@@ -1225,12 +1226,16 @@ class AudibleClient:
         Args:
             asin: ASIN of the book
             quality: Audio quality (High, Normal)
+            drm_type: DRM type to request ("Widevine" or "Adrm"). When specified,
+                     the API returns codec and content_size info for bitrate calculation.
+                     Widevine typically returns HE-AAC v2 (~114 kbps).
+                     Adrm typically returns AAC-LC (~128 kbps).
             use_cache: Whether to use cached results
 
         Returns:
             ContentMetadata or None on error
         """
-        cache_key = f"content_meta_{asin}_{quality}"
+        cache_key = f"content_meta_{asin}_{quality}_{drm_type or 'default'}"
 
         # Check cache
         if use_cache and self._cache:
@@ -1239,23 +1244,36 @@ class AudibleClient:
                 return ContentMetadata.model_validate(cached)
 
         try:
+            # Build request params
+            params: dict[str, str] = {
+                "response_groups": "chapter_info,content_reference",
+                "quality": quality,
+            }
+            if drm_type:
+                params["drm_type"] = drm_type
+
             response = self._request(
                 "GET",
                 f"1.0/content/{asin}/metadata",
-                response_groups="chapter_info,content_reference",
-                quality=quality,
+                **params,
             )
+
+            # Handle both response structures:
+            # - Old: {"chapter_info": {...}, "content_reference": {...}}
+            # - New with drm_type: {"content_metadata": {"chapter_info": {...}, "content_reference": {...}}}
+            data = response.get("content_metadata", response)
 
             # Build metadata model
             metadata = ContentMetadata(
                 asin=asin,
-                acr=response.get("content_reference", {}).get("acr"),
-                chapter_info=response.get("chapter_info"),
-                content_reference=response.get("content_reference"),
+                acr=data.get("content_reference", {}).get("acr"),
+                chapter_info=data.get("chapter_info"),
+                content_reference=data.get("content_reference"),
+                drm_type=drm_type,
             )
 
             # Extract available codecs from content_reference
-            content_ref = response.get("content_reference", {})
+            content_ref = data.get("content_reference", {})
             if "available_codec" in content_ref:
                 metadata.available_codecs = content_ref["available_codec"]
 

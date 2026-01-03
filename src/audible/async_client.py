@@ -686,37 +686,73 @@ class AsyncAudibleClient:
         self,
         asin: str,
         quality: str = "High",
+        drm_type: str | None = None,
         use_cache: bool = True,
     ) -> ContentMetadata | None:
-        """Get content metadata including chapter info and codecs."""
-        cache_key = f"content_meta_{asin}_{quality}"
+        """
+        Get content metadata including chapter info and codecs.
+
+        When drm_type is specified (Widevine or Adrm), the response includes
+        actual codec and content size for quality/bitrate discovery. This is
+        ~3x faster than license requests for quality checking.
+
+        Args:
+            asin: Audible ASIN
+            quality: Quality level ("High" or "Normal")
+            drm_type: Optional DRM type for quality discovery ("Widevine" or "Adrm")
+                      - Widevine: Returns modern formats (HE-AAC, Atmos)
+                      - Adrm: Returns legacy AAC-LC format
+            use_cache: Use cached results
+
+        Returns:
+            ContentMetadata with chapter info and quality data
+        """
+        cache_key = f"content_meta_{asin}_{quality}_{drm_type or 'none'}"
 
         if use_cache and self._cache:
-            cached = self._cache.get("catalog", cache_key)
+            cached = self._cache.get("content_metadata", cache_key)
             if cached:
                 return ContentMetadata.model_validate(cached)
 
         try:
+            # Build request params
+            params: dict[str, str] = {
+                "response_groups": "chapter_info,content_reference",
+                "quality": quality,
+            }
+            if drm_type:
+                params["drm_type"] = drm_type
+
             response = await self._request(
                 "GET",
                 f"content/{asin}/metadata",
-                response_groups="chapter_info,content_reference",
-                quality=quality,
+                **params,
             )
+
+            # Handle both response structures:
+            # - Old: {"chapter_info": {...}, "content_reference": {...}}
+            # - New with drm_type: {"content_metadata": {"chapter_info": {...}, "content_reference": {...}}}
+            data = response.get("content_metadata", response)
 
             metadata = ContentMetadata(
                 asin=asin,
-                acr=response.get("content_reference", {}).get("acr"),
-                chapter_info=response.get("chapter_info"),
-                content_reference=response.get("content_reference"),
+                acr=data.get("content_reference", {}).get("acr"),
+                chapter_info=data.get("chapter_info"),
+                content_reference=data.get("content_reference"),
+                drm_type=drm_type,
             )
 
-            content_ref = response.get("content_reference", {})
+            content_ref = data.get("content_reference", {})
             if "available_codec" in content_ref:
                 metadata.available_codecs = content_ref["available_codec"]
 
             if self._cache:
-                self._cache.set("catalog", cache_key, metadata.model_dump(), ttl_seconds=self._cache_ttl_seconds)
+                self._cache.set(
+                    "content_metadata",
+                    cache_key,
+                    metadata.model_dump(),
+                    ttl_seconds=self._cache_ttl_seconds,
+                )
 
             return metadata
 
@@ -729,7 +765,122 @@ class AsyncAudibleClient:
         return metadata.supports_atmos if metadata else False
 
     # -------------------------------------------------------------------------
-    # Content License / Quality Discovery
+    # Fast Quality Discovery (via Metadata Endpoint)
+    # -------------------------------------------------------------------------
+
+    async def fast_quality_check(
+        self,
+        asin: str,
+        use_cache: bool = True,
+    ) -> ContentQualityInfo | None:
+        """
+        Fast quality check using metadata endpoint (~3x faster than license requests).
+
+        This method uses the /content/{asin}/metadata endpoint with drm_type parameter
+        to discover the actual audio quality available. It's much faster than the
+        license request approach because:
+        - Single GET request vs multiple POST requests
+        - Less aggressive rate limiting
+        - Returns same codec/size data
+
+        Discovered via Libation PR #1527.
+
+        Args:
+            asin: Audible ASIN
+            use_cache: Use cached results
+
+        Returns:
+            ContentQualityInfo with best available format info, or None if failed
+        """
+        cache_key = f"fast_quality_{asin}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("content_quality", cache_key)
+            if cached:
+                return ContentQualityInfo.model_validate(cached)
+
+        formats: list[AudioFormat] = []
+
+        # Try Widevine first (modern formats: HE-AAC/USAC, Atmos)
+        widevine = await self.get_content_metadata(asin, drm_type="Widevine", use_cache=use_cache)
+        if widevine and widevine.parsed_content_ref:
+            ref = widevine.parsed_content_ref
+            if ref.bitrate_kbps > 0:
+                formats.append(
+                    AudioFormat(
+                        codec=ref.codec or "unknown",
+                        codec_name=ref.codec_name,
+                        drm_type="Widevine",
+                        bitrate_kbps=ref.bitrate_kbps,
+                        size_bytes=ref.content_size_bytes,
+                        runtime_ms=ref.runtime_ms,
+                        is_spatial=ref.is_atmos,
+                    )
+                )
+
+        # Also try Adrm for comparison (legacy AAC-LC format)
+        adrm = await self.get_content_metadata(asin, drm_type="Adrm", use_cache=use_cache)
+        if adrm and adrm.parsed_content_ref:
+            ref = adrm.parsed_content_ref
+            if ref.bitrate_kbps > 0:
+                formats.append(
+                    AudioFormat(
+                        codec=ref.codec or "unknown",
+                        codec_name=ref.codec_name,
+                        drm_type="Adrm",
+                        bitrate_kbps=ref.bitrate_kbps,
+                        size_bytes=ref.content_size_bytes,
+                        runtime_ms=ref.runtime_ms,
+                        is_spatial=ref.is_atmos,
+                    )
+                )
+
+        if formats:
+            quality_info = ContentQualityInfo.from_formats(asin, formats)
+
+            if self._cache:
+                self._cache.set(
+                    "content_quality",
+                    cache_key,
+                    quality_info.model_dump(),
+                    ttl_seconds=self._cache_ttl_seconds,
+                )
+
+            return quality_info
+
+        return None
+
+    async def fast_quality_check_multiple(
+        self,
+        asins: list[str],
+        use_cache: bool = True,
+        max_concurrent: int = 10,
+    ) -> dict[str, ContentQualityInfo]:
+        """
+        Fast quality check for multiple ASINs concurrently.
+
+        Args:
+            asins: List of Audible ASINs
+            use_cache: Use cached results
+            max_concurrent: Maximum concurrent requests
+
+        Returns:
+            Dict mapping ASIN to ContentQualityInfo
+        """
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def check_one(asin: str) -> tuple[str, ContentQualityInfo | None]:
+            async with semaphore:
+                result = await self.fast_quality_check(asin, use_cache=use_cache)
+                return asin, result
+
+        tasks = [check_one(asin) for asin in asins]
+        results = await asyncio.gather(*tasks)
+
+        return {asin: quality for asin, quality in results if quality is not None}
+
+    # -------------------------------------------------------------------------
+    # Content License / Quality Discovery (Full - Slower but More Detailed)
     # -------------------------------------------------------------------------
 
     async def request_content_license(

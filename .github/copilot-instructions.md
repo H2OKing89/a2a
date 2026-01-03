@@ -54,6 +54,7 @@ settings = get_settings()  # Singleton, loads config.yaml → .env → env vars
 settings.abs.host          # ABSSettings
 settings.audible.locale    # AudibleSettings  
 settings.cache.db_path     # CacheSettings
+settings.cache.pricing_ttl_hours  # TTL for pricing/deal data (default 6h, respects month boundaries)
 settings.quality.bitrate_threshold_kbps  # QualitySettings
 ```
 
@@ -112,7 +113,18 @@ Uses rapidfuzz for fuzzy string matching between ABS and Audible series names. H
 ```python
 cache.set("audible_library", asin, data, ttl_hours=240)  # Namespace + TTL
 cache.search_by_title("Project Hail Mary")  # Full-text search
+cache.clear_pricing_caches()  # Clear all pricing namespaces (no params)
 ```
+
+**Month-Boundary-Aware TTL**: Pricing/deal caches in the Audible enrichment service automatically use month-aware TTL via `calculate_pricing_ttl_seconds()`, expiring before month end since Audible's monthly deals reset on the 1st. When month boundaries approach, TTL is capped to prevent stale deals carrying over to the next month. Developers building custom pricing caches can invoke `calculate_pricing_ttl_seconds()` directly:
+```python
+from src.cache import calculate_pricing_ttl_seconds
+
+ttl_sec = calculate_pricing_ttl_seconds(requested_ttl_seconds=3600)  # 1 hour → capped to month boundary
+cache.set("audible_deals", asin, deal_data, ttl_seconds=ttl_sec)
+
+```python
+`clear_pricing_caches()` takes no parameters and clears all `PRICING_NAMESPACES` internally.
 
 ### Async Clients
 Both clients have async variants (`AsyncABSClient`, `AsyncAudibleClient`) for concurrent operations. Use `async with` context managers.

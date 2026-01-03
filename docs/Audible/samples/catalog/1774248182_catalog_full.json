@@ -1,0 +1,669 @@
+{
+  "product": {
+    "asin": "1774248182",
+    "asset_details": [],
+    "authors": [
+      {
+        "asin": "B08VWFRTMS",
+        "name": "Shirtaloon"
+      },
+      {
+        "name": "Travis Deverell"
+      }
+    ],
+    "available_codecs": [
+      {
+        "enhanced_codec": "LC_32_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_32"
+      },
+      {
+        "enhanced_codec": "LC_64_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_64"
+      },
+      {
+        "enhanced_codec": "format4",
+        "format": "Format4",
+        "is_kindle_enhanced": false,
+        "name": "format4"
+      },
+      {
+        "enhanced_codec": "mp42232",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_22_32"
+      },
+      {
+        "enhanced_codec": "mp42264",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_22_64"
+      },
+      {
+        "enhanced_codec": "aax",
+        "format": "Enhanced",
+        "is_kindle_enhanced": false,
+        "name": "aax"
+      }
+    ],
+    "category_ladders": [
+      {
+        "ladder": [
+          {
+            "id": "18580606011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18580607011",
+            "name": "Fantasy"
+          },
+          {
+            "id": "18580608011",
+            "name": "Action & Adventure"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18580606011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18580607011",
+            "name": "Fantasy"
+          },
+          {
+            "id": "18580615011",
+            "name": "Epic"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18580606011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18580607011",
+            "name": "Fantasy"
+          },
+          {
+            "id": "18580622011",
+            "name": "Paranormal & Urban"
+          },
+          {
+            "id": "18580625011",
+            "name": "Urban"
+          }
+        ],
+        "root": "Genres"
+      }
+    ],
+    "content_delivery_type": "MultiPartBook",
+    "content_type": "Product",
+    "copyright": "\u00a92021 Shirtaloon (P)2021 Podium Audio",
+    "customer_reviews": [
+      {
+        "asin": "1774248182",
+        "author_id": "amzn1.account.AEJW47Y4FNFNOODEMTIOC2MVFUAA",
+        "author_name": "William Schiff",
+        "body": "I don't know if it was intented or not by the author (given the Nietzsche quote) but the main character is incredibly unlikable. He is sanctimonious and so full of himself that I find myself rolling my eyes (as some of the other characters do). While he appears to be self aware of his flaws, it just seems like he can't help himself or more likely doesn't care. Overall, the story was enjoyable, but I can see people getting annoyed at the MC and his political ideas and losing interest (or even rage quitting). This series is definitely not for those who may be sensitive to this type of thing. Ironically, the MC would probably not care about those offended and would tell them to not let the door hit them on the way out. I admit that I am curious where the author is going with the MC's growth/arc. I wonder if the MC's personality flaws are intentional (i.e., irony) and his idealistic philosophy (and all-or-nothing thinking) will work out or come crashing down around him resulting in personal growth/change. Or is the author trying to preach to the reader, through his character, very specific political ideas (typical allegory stuff). ",
+        "format": "Freeform",
+        "id": "df8b7e950ace40b4998922c68e4c3f57",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 90,
+          "num_helpful_votes": 8,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2021-06-12T14:07:01Z",
+        "title": "sanctimonious main character"
+      },
+      {
+        "asin": "1774248182",
+        "author_id": "amzn1.account.AE2MVJ7G6CYQXC37GFDVHXAPF6QA",
+        "author_name": "DAVID",
+        "body": "I probably should have paid more attention to the low star reviews because I pretty much agreed with them.  I feel that the author made an interesting world, cool ability system, fun supporting characters and the narrator is great.  I enjoyed the first 1/3 of the book and then boom\u2026the main character started spouting out nonstop holier than though class differentiation poly science nonsense.  On and on.  It was so annoying that I was going to give up on the book but I like to see things thru so slogged thru\u2026.and then for the last 1/3 of the book it\u2019s like the author was tired and needed a break after his nonstop rant, maybe he got an ice tea, took a walk, relaxed a little in the Sun and stepped down from the grand stand he was on to got back to writing a good ending.  The author still put jabs in all over the place about the incompetence of the nobility, wealthy and self entitlement, etc etc\u2026but the main character slowed down on spewing eco/class/wealth poly science crud land got back to business.  The story became enjoyable and the ending fight was great.  I actually enjoyed it enough to say that it salvaged the book for me and I\u2019m going to get book 2.<br /><br />Anyway, if you can stomach the preaching it\u2019s pretty good.",
+        "format": "Freeform",
+        "id": "40e79e41852d414f9787234b6803a97c",
+        "location": "",
+        "ratings": {
+          "overall_rating": 4,
+          "performance_rating": 5,
+          "story_rating": 3
+        },
+        "review_content_scores": {
+          "content_quality": 89,
+          "num_helpful_votes": 7,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2023-02-04T18:16:34Z",
+        "title": "Mixed Bag"
+      },
+      {
+        "asin": "1774248182",
+        "author_id": "amzn1.account.AFFHVEN3WYHSDSEHVZGX5OXPAKIA",
+        "author_name": "Michael Rhen Bruner",
+        "body": "The writers use of the word \"said\" in the beginning nearly made me give up on this book. That said, I loved this series. The main character is a snarky *** that is reminiscent of Deadpool, but Australian which makes it even better. For me at least, and yes it's because of the Ryan Reynolds/Hugh Jackman \"feud\". I've truly enjoyed the series and can't wait for book three, already pre-ordered.",
+        "format": "Freeform",
+        "id": "55779213d28540f3bbaf3e5920e867f7",
+        "location": "",
+        "ratings": {
+          "overall_rating": 4,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 88,
+          "num_helpful_votes": 6,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2021-06-18T17:34:19Z",
+        "title": "Why do I have to add this?"
+      }
+    ],
+    "customer_rights": {
+      "is_book_qa_eligible": false,
+      "is_consumable": true,
+      "is_consumable_indefinitely": false,
+      "is_consumable_offline": true,
+      "is_consumable_until": "2099-12-31T12:00:00Z"
+    },
+    "date_first_available": "2021-03-09",
+    "distribution_rights_region": [
+      "PR",
+      "PS",
+      "PT",
+      "PW",
+      "PY",
+      "QA",
+      "AD",
+      "AE",
+      "AF",
+      "AG",
+      "AI",
+      "AL",
+      "AM",
+      "AO",
+      "AQ",
+      "AR",
+      "AS",
+      "AT",
+      "RE",
+      "AU",
+      "AW",
+      "AX",
+      "AZ",
+      "RO",
+      "BA",
+      "BB",
+      "RS",
+      "BD",
+      "BE",
+      "RU",
+      "BF",
+      "BG",
+      "RW",
+      "BH",
+      "BI",
+      "BJ",
+      "BL",
+      "BM",
+      "BN",
+      "BO",
+      "SA",
+      "BQ",
+      "SB",
+      "BR",
+      "SC",
+      "BS",
+      "SD",
+      "BT",
+      "SE",
+      "BV",
+      "SG",
+      "BW",
+      "SH",
+      "SI",
+      "BY",
+      "SJ",
+      "BZ",
+      "SK",
+      "SL",
+      "SM",
+      "SN",
+      "SO",
+      "CA",
+      "SR",
+      "CC",
+      "SS",
+      "CD",
+      "ST",
+      "CF",
+      "SV",
+      "CG",
+      "CH",
+      "SX",
+      "CI",
+      "SZ",
+      "CK",
+      "CL",
+      "CM",
+      "CN",
+      "CO",
+      "CR",
+      "TC",
+      "TD",
+      "TF",
+      "CV",
+      "TG",
+      "CW",
+      "TH",
+      "CX",
+      "CY",
+      "TJ",
+      "CZ",
+      "TK",
+      "TL",
+      "TM",
+      "TN",
+      "TO",
+      "TR",
+      "TT",
+      "DE",
+      "TV",
+      "TW",
+      "DJ",
+      "TZ",
+      "DK",
+      "DM",
+      "DO",
+      "UA",
+      "UG",
+      "DZ",
+      "UM",
+      "EC",
+      "US",
+      "EE",
+      "EG",
+      "EH",
+      "UY",
+      "UZ",
+      "VA",
+      "ER",
+      "VC",
+      "ES",
+      "ET",
+      "VE",
+      "VG",
+      "VI",
+      "VN",
+      "VU",
+      "FI",
+      "FJ",
+      "FK",
+      "FM",
+      "FO",
+      "FR",
+      "WF",
+      "GA",
+      "GB",
+      "WS",
+      "GD",
+      "GE",
+      "GF",
+      "GG",
+      "GH",
+      "GI",
+      "GL",
+      "GM",
+      "GN",
+      "GP",
+      "GQ",
+      "GR",
+      "GS",
+      "GT",
+      "GU",
+      "GW",
+      "GY",
+      "HK",
+      "HM",
+      "HN",
+      "HR",
+      "HT",
+      "YE",
+      "HU",
+      "ID",
+      "YT",
+      "IE",
+      "IL",
+      "IM",
+      "IN",
+      "IO",
+      "ZA",
+      "IQ",
+      "IS",
+      "IT",
+      "ZM",
+      "JE",
+      "ZW",
+      "JM",
+      "JO",
+      "JP",
+      "KE",
+      "KG",
+      "KH",
+      "KI",
+      "KM",
+      "KN",
+      "KR",
+      "KW",
+      "KY",
+      "KZ",
+      "LA",
+      "LB",
+      "LC",
+      "LI",
+      "LK",
+      "LR",
+      "LS",
+      "LT",
+      "LU",
+      "LV",
+      "LY",
+      "MA",
+      "MC",
+      "MD",
+      "ME",
+      "MF",
+      "MG",
+      "MH",
+      "MK",
+      "ML",
+      "MM",
+      "MN",
+      "MO",
+      "MP",
+      "MQ",
+      "MR",
+      "MS",
+      "MT",
+      "MU",
+      "MV",
+      "MW",
+      "MX",
+      "MY",
+      "MZ",
+      "NC",
+      "NE",
+      "NF",
+      "NG",
+      "NI",
+      "NL",
+      "NO",
+      "NP",
+      "NR",
+      "NU",
+      "NZ",
+      "OM",
+      "PA",
+      "PE",
+      "PF",
+      "PG",
+      "PH",
+      "PK",
+      "PL",
+      "PM",
+      "PN"
+    ],
+    "extended_product_description": "<p> </p> <p>It\u2019s not easy making the career jump from office-supplies-store middle manager to heroic interdimensional adventurer. At least, Jason<i> tries </i>to be heroic, but it's hard to be good when all your powers are evil. He\u2019ll face off against cannibals, cultists, wizards, monsters...and that\u2019s just on the first day. He\u2019s going to need courage, he\u2019s going to need wit, and he\u2019s going to need some magic powers of his own. But first, he\u2019s going to need pants.</p>",
+    "format_type": "unabridged",
+    "has_children": true,
+    "is_adult_product": false,
+    "is_buyable": true,
+    "is_in_wishlist": false,
+    "is_listenable": true,
+    "is_pdf_url_available": false,
+    "is_preorderable": false,
+    "is_purchasability_suppressed": false,
+    "is_vvab": false,
+    "is_world_rights": false,
+    "isbn": "9781774248188",
+    "issue_date": "2021-03-09",
+    "language": "english",
+    "listening_status": {
+      "is_finished": false,
+      "percent_complete": 0.0,
+      "time_remaining_seconds": 104160
+    },
+    "merchandising_description": "",
+    "merchandising_summary": "Jason, a former office-supplies-store manager, battles monsters in a magical realm, wielding powers in search of courage...and pants.",
+    "narrators": [
+      {
+        "name": "Heath Miller"
+      }
+    ],
+    "plans": [
+      {
+        "end_date": "2099-12-31T00:00:00.00000Z",
+        "plan_name": "AccessViaMusic",
+        "start_date": "1970-01-01T00:00:00.00000Z"
+      },
+      {
+        "end_date": "2099-12-31T12:00:00.00000Z",
+        "plan_name": "US Minerva",
+        "start_date": "2025-02-01T08:00:00.00000Z"
+      }
+    ],
+    "platinum_keywords": [
+      "Science_Fiction_Fantasy",
+      "Science_Fiction_Fantasy/Fantasy",
+      "Science_Fiction_Fantasy/Fantasy/Epic",
+      "Science_Fiction_Fantasy/Fantasy/Paranormal",
+      "Sci-Fi_Fantasy/Paranormal_Urban_Fantasy/Urban_Fantasy",
+      "Classics"
+    ],
+    "preorder_release_date": "2021-03-09T08:00:00Z",
+    "price": {
+      "credit_price": 1.0,
+      "list_price": {
+        "base": 59.9900016784668,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "list"
+      },
+      "lowest_price": {
+        "base": 41.9900016784668,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "member"
+      },
+      "ws4v_upsell_price": {
+        "base": 4.929999828338623,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "ws4v_upsell"
+      }
+    },
+    "product_images": {
+      "500": "https://m.media-amazon.com/images/I/51KQ+4F1OVL._SL500_.jpg"
+    },
+    "product_site_launch_date": "2021-01-26T19:09:00Z",
+    "product_state": "AVAILABLE",
+    "publication_datetime": "2021-03-09T08:00:00Z",
+    "publication_name": "He Who Fights with Monsters",
+    "publisher_name": "Podium Audio",
+    "publisher_summary": "<p><b><i>Selected as one of Audible's best audiobooks of 2021</i></b> </p> <p><b>Jason wakes up in a mysterious world of magic and monsters. </b></p> <p>It\u2019s not easy making the career jump from office-supplies-store middle manager to heroic interdimensional adventurer. At least, Jason<i> tries </i>to be heroic, but it's hard to be good when all your powers are evil.</p> <p>He\u2019ll face off against cannibals, cultists, wizards, monsters...and that\u2019s just on the first day. He\u2019s going to need courage, he\u2019s going to need wit, and he\u2019s going to need some magic powers of his own. But first, he\u2019s going to need pants.</p> <p><b>After cementing itself as one of the best-rated serial novels on Royal Road with an astonishing 13 million views,</b><b><i> He Who Fights with Monsters</i></b><b> is now brought to you in professionally formatted audio. </b></p>",
+    "rating": {
+      "num_reviews": 7139,
+      "overall_distribution": {
+        "average_rating": 4.759119109429313,
+        "display_average_rating": "4.8",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 38452,
+        "num_four_star_ratings": 4776,
+        "num_one_star_ratings": 573,
+        "num_ratings": 45454,
+        "num_three_star_ratings": 1078,
+        "num_two_star_ratings": 575
+      },
+      "performance_distribution": {
+        "average_rating": 4.814423360534854,
+        "display_average_rating": "4.8",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 35277,
+        "num_four_star_ratings": 4045,
+        "num_one_star_ratings": 274,
+        "num_ratings": 40684,
+        "num_three_star_ratings": 855,
+        "num_two_star_ratings": 233
+      },
+      "story_distribution": {
+        "average_rating": 4.734618984286488,
+        "display_average_rating": "4.7",
+        "display_stars": 4.5,
+        "num_five_star_ratings": 33745,
+        "num_four_star_ratings": 4661,
+        "num_one_star_ratings": 589,
+        "num_ratings": 40602,
+        "num_three_star_ratings": 1063,
+        "num_two_star_ratings": 544
+      }
+    },
+    "read_along_support": "true",
+    "reasons_for_reporting_review": [
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_guideline_violation",
+        "reported_reason_value": "guideline_violation"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_csam",
+        "reported_reason_value": "csam"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_inappropriate_content",
+        "reported_reason_value": "inappropriate_content"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_other_concerning_content",
+        "reported_reason_value": "other_concerning_content"
+      }
+    ],
+    "relationships": [
+      {
+        "asin": "B08Y91RX55",
+        "relationship_to_product": "child",
+        "relationship_type": "component",
+        "sort": "3"
+      },
+      {
+        "asin": "B08WJ59784",
+        "content_delivery_type": "BookSeries",
+        "relationship_to_product": "parent",
+        "relationship_type": "series",
+        "sequence": "1",
+        "sku": "SE_RIES_052667",
+        "sku_lite": "SE_RIES_052667",
+        "sort": "1",
+        "title": "He Who Fights with Monsters",
+        "url": "/pd/He-Who-Fights-with-Monsters-Audiobook/B08WJ59784"
+      },
+      {
+        "asin": "B08Y92S4N7",
+        "relationship_to_product": "child",
+        "relationship_type": "component",
+        "sort": "2"
+      },
+      {
+        "asin": "B08Y91PP66",
+        "relationship_to_product": "child",
+        "relationship_type": "component",
+        "sort": "1"
+      }
+    ],
+    "release_date": "2021-03-09",
+    "runtime_length_min": 1736,
+    "sample_url": "https://samples.audible.com/bk/podm/002396/bk_podm_002396_sample.mp3",
+    "selected_sort_option_for_reviews": "MostRelevant",
+    "series": [
+      {
+        "asin": "B08WJ59784",
+        "sequence": "1",
+        "title": "He Who Fights with Monsters",
+        "url": "/pd/He-Who-Fights-with-Monsters-Audiobook/B08WJ59784"
+      }
+    ],
+    "sku": "BK_PODM_002396",
+    "sku_lite": "BK_PODM_002396",
+    "social_media_images": {
+      "facebook": "https://m.media-amazon.com/images/I/51KQ+4F1OVL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51KQ+4F1OVL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+      "ig_bg": "https://m.media-amazon.com/images/I/51KQ+4F1OVL._SL200_BL80_UR1080,2160.jpg",
+      "ig_static_with_bg": "https://m.media-amazon.com/images/I/51KQ+4F1OVL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51KQ+4F1OVL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHe%20Who%20Fights%20with%20Mons...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBShirtaloon%252C%20Travis%20Deverell,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+      "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51KQ+4F1OVL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHe%20Who%20Fights%20w...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20Shirtaloon%252C%20Travis...,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+      "twitter": "https://m.media-amazon.com/images/I/51KQ+4F1OVL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51KQ+4F1OVL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+    },
+    "sort_options_for_reviews": [
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRelevant",
+        "reviews_sort_order_value": "MostRelevant"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostHelpful",
+        "reviews_sort_order_value": "MostHelpful"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRecent",
+        "reviews_sort_order_value": "MostRecent"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostPositive",
+        "reviews_sort_order_value": "MostPositive"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostCritical",
+        "reviews_sort_order_value": "MostCritical"
+      }
+    ],
+    "subtitle": "He Who Fights with Monsters, Book 1",
+    "thesaurus_subject_keywords": [
+      "literature-and-fiction"
+    ],
+    "title": "He Who Fights with Monsters: A LitRPG Adventure"
+  },
+  "response_groups": [
+    "customer_rights",
+    "claim_code_url",
+    "rating",
+    "media",
+    "product_attrs",
+    "sample",
+    "relationships",
+    "product_desc",
+    "always-returned",
+    "product_extended_attrs",
+    "contributors",
+    "listening_status",
+    "reviews",
+    "provided_review",
+    "product_plans",
+    "price",
+    "series",
+    "in_wishlist",
+    "category_ladders",
+    "sku",
+    "product_details",
+    "product_plan_details"
+  ]
+}

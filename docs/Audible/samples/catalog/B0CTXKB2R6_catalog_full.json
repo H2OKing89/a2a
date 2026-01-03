@@ -1,0 +1,573 @@
+{
+  "product": {
+    "asin": "B0CTXKB2R6",
+    "asset_details": [],
+    "authors": [
+      {
+        "name": "Sage Guarino"
+      }
+    ],
+    "available_codecs": [
+      {
+        "enhanced_codec": "LC_64_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_64"
+      },
+      {
+        "enhanced_codec": "LC_32_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_32"
+      },
+      {
+        "enhanced_codec": "LC_64_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_64"
+      },
+      {
+        "enhanced_codec": "LC_128_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_128"
+      },
+      {
+        "enhanced_codec": "aax",
+        "format": "Enhanced",
+        "is_kindle_enhanced": false,
+        "name": "aax"
+      }
+    ],
+    "category_ladders": [
+      {
+        "ladder": [
+          {
+            "id": "18580518011",
+            "name": "Romance"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "24427740011",
+            "name": "Comedy & Humor"
+          },
+          {
+            "id": "18574496011",
+            "name": "Literature & Fiction"
+          }
+        ],
+        "root": "Genres"
+      }
+    ],
+    "content_delivery_type": "SinglePartBook",
+    "content_type": "Product",
+    "copyright": "",
+    "customer_reviews": [
+      {
+        "asin": "B0CTXKB2R6",
+        "author_id": "amzn1.account.AELIFZBVFDSPB2CNLHVVKNZK5FIA",
+        "author_name": "Aaron",
+        "body": "This was a good story and well worth the listen, I wished the second audible volume was out. I wrote a summary below to give an alternate synapses of what happens. The narrator is a virtual AI. It does a good job but it messes up the nervous or embarrassed stuttering you would expect in this genre (Stuttering example: for \"b-but\", it would literaly say the letter \"B\" follwed by but). As the audio editing goes it has parts that are, disrupted, is the best way to put it. This occurred rarely and didn't detract from the telling. All and all I would reccomend this audible version.<br /><br />Summary:<br />The beginning has our MC, Cid, confessing his love to his crush only to be shot down. When those present laugh at him he flees in embarrassment. As he ran across the street he encounters truck-kun and blacks out.<br /><br />Cid ends up in a coma and has surgery that transforms him into to the hottest man in the world. traumatized by these events he now has made all woman his enemy and swears to return the favor by making them fall in love with him so he can reject them as he was rejected. A task made easier due to his rise to fame as an actor and model. <br /><br />One day when going to class he bumps in to the girl that started it all and he jumps at the opportunity to get some pay back in the way he now knows best, by making her fall head over heels for him. <br /><br />Still, he fell in love with her in the first place for a reason- can he succeed in his revenge or will he fall once again?<br /><br />",
+        "format": "Freeform",
+        "id": "0eb652fa33ce467c8d037f5bb17ef487",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 4,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 50,
+          "num_helpful_votes": 0,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2024-10-16T18:13:00Z",
+        "title": "Short and Sweet"
+      },
+      {
+        "asin": "B0CTXKB2R6",
+        "author_id": "amzn1.account.AGUE3IEYHGM3UPAFLEAA2YC2G4RQ",
+        "author_name": "EM buyer",
+        "body": "I loved the motivation of the story and how it played out. The ending was one of the best parts.",
+        "format": "Freeform",
+        "id": "3a509ff5a2a143719048d36c25f2e819",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 50,
+          "num_helpful_votes": 0,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2025-05-31T09:24:18Z",
+        "title": "amazing"
+      },
+      {
+        "asin": "B0CTXKB2R6",
+        "author_id": "amzn1.account.AHLU5CZVF5ZD7PA4BUQ4FFIJW7CA",
+        "author_name": "Gabriel Morton",
+        "body": "I'm not the kind of person to dislike something and arbitrarily give 1 star. I think that some people might like it and it only has a few reviews, and I dont want to kill its potential future audience, so I gave a middle of the road score with the understanding that my review is actually more like 1 star (for me). <br /><br />Story: Kinda just mid the whole time. Even though it is so short I still couldn't finish it. It did get me to chuckle a few times, but the weird (not sure how else to put this) sexuslised interaction is not my thing. To be clear as far as I made it nothing \"spicy\" happened, just weird and uncomfortable. Felt kind of like the ultra fast version of a cringe high-school romane anime.<br /><br />Narration: I greatly dislike this narration. full of errors and kind of just monologue, no feeling and easily identifiable as artificial. Just pay some random guy to read it & he would do a better job plus then you are paying an actual person. I've even interacted with some AI's that read very well, So it's just a low effort AI reader too.<br /><br />Overall, not my thing. I could see how somebody might like it.... But it's definitely not for me.",
+        "format": "Freeform",
+        "id": "779d31d5112342f1a2006066d73a1c38",
+        "location": "",
+        "ratings": {
+          "overall_rating": 3,
+          "performance_rating": 2,
+          "story_rating": 3
+        },
+        "review_content_scores": {
+          "content_quality": 50,
+          "num_helpful_votes": 0,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2025-11-21T17:08:29Z",
+        "title": "Not for me"
+      }
+    ],
+    "customer_rights": {
+      "is_book_qa_eligible": false,
+      "is_consumable": true,
+      "is_consumable_indefinitely": false,
+      "is_consumable_offline": true,
+      "is_consumable_until": "9999-12-31T23:59:59Z"
+    },
+    "distribution_rights_region": [
+      "PR",
+      "PS",
+      "PT",
+      "PW",
+      "PY",
+      "QA",
+      "AD",
+      "AE",
+      "AF",
+      "AG",
+      "AI",
+      "AL",
+      "AM",
+      "AO",
+      "AQ",
+      "AR",
+      "AS",
+      "AT",
+      "RE",
+      "AU",
+      "AW",
+      "AX",
+      "AZ",
+      "RO",
+      "BA",
+      "BB",
+      "RS",
+      "BD",
+      "BE",
+      "RU",
+      "BF",
+      "BG",
+      "RW",
+      "BH",
+      "BI",
+      "BJ",
+      "BL",
+      "BM",
+      "BN",
+      "BO",
+      "SA",
+      "BQ",
+      "SB",
+      "BR",
+      "SC",
+      "BS",
+      "SD",
+      "BT",
+      "SE",
+      "BV",
+      "SG",
+      "BW",
+      "SH",
+      "SI",
+      "BY",
+      "SJ",
+      "BZ",
+      "SK",
+      "SL",
+      "SM",
+      "SN",
+      "SO",
+      "CA",
+      "SR",
+      "CC",
+      "SS",
+      "CD",
+      "ST",
+      "CF",
+      "SV",
+      "CG",
+      "CH",
+      "SX",
+      "CI",
+      "SZ",
+      "CK",
+      "CL",
+      "CM",
+      "CN",
+      "CO",
+      "CR",
+      "TC",
+      "TD",
+      "TF",
+      "CV",
+      "TG",
+      "CW",
+      "TH",
+      "CX",
+      "CY",
+      "TJ",
+      "CZ",
+      "TK",
+      "TL",
+      "TM",
+      "TN",
+      "TO",
+      "TR",
+      "TT",
+      "DE",
+      "TV",
+      "TW",
+      "DJ",
+      "TZ",
+      "DK",
+      "DM",
+      "DO",
+      "UA",
+      "UG",
+      "DZ",
+      "UM",
+      "EC",
+      "US",
+      "EE",
+      "EG",
+      "EH",
+      "UY",
+      "UZ",
+      "VA",
+      "ER",
+      "VC",
+      "ES",
+      "ET",
+      "VE",
+      "VG",
+      "VI",
+      "VN",
+      "VU",
+      "FI",
+      "FJ",
+      "FK",
+      "FM",
+      "FO",
+      "FR",
+      "WF",
+      "GA",
+      "GB",
+      "WS",
+      "GD",
+      "GE",
+      "GF",
+      "GG",
+      "GH",
+      "GI",
+      "GL",
+      "GM",
+      "GN",
+      "GP",
+      "GQ",
+      "GR",
+      "GS",
+      "GT",
+      "GU",
+      "GW",
+      "GY",
+      "HK",
+      "HM",
+      "HN",
+      "HR",
+      "HT",
+      "YE",
+      "HU",
+      "ID",
+      "YT",
+      "IE",
+      "IL",
+      "IM",
+      "IN",
+      "IO",
+      "ZA",
+      "IQ",
+      "IS",
+      "IT",
+      "ZM",
+      "JE",
+      "ZW",
+      "JM",
+      "JO",
+      "JP",
+      "KE",
+      "KG",
+      "KH",
+      "KI",
+      "KM",
+      "KN",
+      "KR",
+      "KW",
+      "KY",
+      "KZ",
+      "LA",
+      "LB",
+      "LC",
+      "LI",
+      "LK",
+      "LR",
+      "LS",
+      "LT",
+      "LU",
+      "LV",
+      "LY",
+      "MA",
+      "MC",
+      "MD",
+      "ME",
+      "MF",
+      "MG",
+      "MH",
+      "MK",
+      "ML",
+      "MM",
+      "MN",
+      "MO",
+      "MP",
+      "MQ",
+      "MR",
+      "MS",
+      "MT",
+      "MU",
+      "MV",
+      "MW",
+      "MX",
+      "MY",
+      "MZ",
+      "NC",
+      "NE",
+      "NF",
+      "NG",
+      "NI",
+      "NL",
+      "NO",
+      "NP",
+      "NR",
+      "NU",
+      "NZ",
+      "OM",
+      "PA",
+      "PE",
+      "PF",
+      "PG",
+      "PH",
+      "PK",
+      "PL",
+      "PM",
+      "PN"
+    ],
+    "extended_product_description": "Cid Yamamoto, also known as \"The World's Hottest Man,\" spends his days filming movies, modeling for agencies, and breaking the hearts of every maiden who crosses his path. \"What could be better than this?\" However, everything changes when Cid decides to go back to school. On the first day of classes, he encounters the last person he had ever hoped to see: Ayumi Tahanka\u2014the only girl who had ever broken his heart. Realizing the opportunity presented to him, Cid channels his anger and sets out to make Ayumi fall in love with him, all in the name of revenge. \"Oh Ayumi, just you wait. I'm ...",
+    "format_type": "unabridged",
+    "has_children": false,
+    "is_adult_product": false,
+    "is_buyable": true,
+    "is_in_wishlist": false,
+    "is_listenable": true,
+    "is_pdf_url_available": false,
+    "is_preorderable": false,
+    "is_purchasability_suppressed": false,
+    "is_vvab": true,
+    "is_world_rights": false,
+    "issue_date": "2024-06-21",
+    "language": "english",
+    "listening_status": {
+      "is_finished": false,
+      "percent_complete": 0.0,
+      "time_remaining_seconds": 9240
+    },
+    "merchandising_description": "",
+    "merchandising_summary": "Cid Yamamoto, also known as \"The World's Hottest Man,\" spends his days filming movies, modeling for agencies, and breaking the hearts of every ...",
+    "narrators": [
+      {
+        "name": "Virtual Voice"
+      }
+    ],
+    "plans": [
+      {
+        "end_date": "2099-12-31T00:00:00.00000Z",
+        "plan_name": "AccessViaMusic",
+        "start_date": "1970-01-01T00:00:00.00000Z"
+      },
+      {
+        "end_date": "9999-12-31T23:59:59.00059Z",
+        "plan_name": "US Minerva",
+        "start_date": "2024-09-26T20:07:07.00007Z"
+      }
+    ],
+    "price": {
+      "credit_price": 1.0,
+      "list_price": {
+        "base": 4.989999771118164,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "list"
+      },
+      "lowest_price": {
+        "base": 3.490000009536743,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "member"
+      },
+      "ws4v_upsell_price": {
+        "base": 1.9900000095367432,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "ws4v_upsell"
+      }
+    },
+    "product_images": {
+      "500": "https://m.media-amazon.com/images/I/51YE7vf2vzL._SL500_.jpg"
+    },
+    "product_site_launch_date": "2024-06-21T00:48:00Z",
+    "product_state": "AVAILABLE",
+    "publication_datetime": "2024-06-21T00:48:00Z",
+    "publisher_name": "Independently Published",
+    "publisher_summary": "<p>Cid Yamamoto, also known as \"The World's Hottest Man,\" spends his days filming movies, modeling for agencies, and breaking the hearts of every maiden who crosses his path. \"What could be better than this?\"</p><p>However, everything changes when Cid decides to go back to school. On the first day of classes, he encounters the last person he had ever hoped to see: Ayumi Tahanka\u2014the only girl who had ever broken his heart.</p><p>Realizing the opportunity presented to him, Cid channels his anger and sets out to make Ayumi fall in love with him, all in the name of revenge. \"Oh Ayumi, just you wait. I'm going to enjoy breaking your heart.\"</p>",
+    "rating": {
+      "num_reviews": 3,
+      "overall_distribution": {
+        "average_rating": 4.4,
+        "display_average_rating": "4.4",
+        "display_stars": 4.5,
+        "num_five_star_ratings": 3,
+        "num_four_star_ratings": 1,
+        "num_one_star_ratings": 0,
+        "num_ratings": 5,
+        "num_three_star_ratings": 1,
+        "num_two_star_ratings": 0
+      },
+      "performance_distribution": {
+        "average_rating": 3.4,
+        "display_average_rating": "3.4",
+        "display_stars": 3.5,
+        "num_five_star_ratings": 1,
+        "num_four_star_ratings": 2,
+        "num_one_star_ratings": 0,
+        "num_ratings": 5,
+        "num_three_star_ratings": 0,
+        "num_two_star_ratings": 2
+      },
+      "story_distribution": {
+        "average_rating": 4.2,
+        "display_average_rating": "4.2",
+        "display_stars": 4.0,
+        "num_five_star_ratings": 3,
+        "num_four_star_ratings": 0,
+        "num_one_star_ratings": 0,
+        "num_ratings": 5,
+        "num_three_star_ratings": 2,
+        "num_two_star_ratings": 0
+      }
+    },
+    "read_along_support": "true",
+    "reasons_for_reporting_review": [
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_guideline_violation",
+        "reported_reason_value": "guideline_violation"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_csam",
+        "reported_reason_value": "csam"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_inappropriate_content",
+        "reported_reason_value": "inappropriate_content"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_other_concerning_content",
+        "reported_reason_value": "other_concerning_content"
+      }
+    ],
+    "release_date": "2024-06-21",
+    "runtime_length_min": 154,
+    "sample_url": "https://samples.audible.com/vv/8001/025365/vv_8001_025365_sample.mp3",
+    "selected_sort_option_for_reviews": "MostRelevant",
+    "sku": "VV_8001_025365",
+    "sku_lite": "VV_8001_025365",
+    "social_media_images": {
+      "facebook": "https://m.media-amazon.com/images/I/51YE7vf2vzL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51YE7vf2vzL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+      "ig_bg": "https://m.media-amazon.com/images/I/51YE7vf2vzL._SL200_BL80_UR1080,2160.jpg",
+      "ig_static_with_bg": "https://m.media-amazon.com/images/I/51YE7vf2vzL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51YE7vf2vzL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBThe%20World%27s%20Hottest%20Man...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBSage%20Guarino,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+      "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51YE7vf2vzL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAThe%20World%27s%20Hot...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20Sage%20Guarino,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+      "twitter": "https://m.media-amazon.com/images/I/51YE7vf2vzL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51YE7vf2vzL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+    },
+    "sort_options_for_reviews": [
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRelevant",
+        "reviews_sort_order_value": "MostRelevant"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostHelpful",
+        "reviews_sort_order_value": "MostHelpful"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRecent",
+        "reviews_sort_order_value": "MostRecent"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostPositive",
+        "reviews_sort_order_value": "MostPositive"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostCritical",
+        "reviews_sort_order_value": "MostCritical"
+      }
+    ],
+    "subtitle": "(Light Novel Volume 1)",
+    "text_to_speech": "TANDEM",
+    "thesaurus_subject_keywords": [
+      "tandem"
+    ],
+    "title": "The World's Hottest Man Has No Luck With Girls"
+  },
+  "response_groups": [
+    "customer_rights",
+    "rating",
+    "media",
+    "product_attrs",
+    "sample",
+    "relationships",
+    "product_desc",
+    "always-returned",
+    "product_extended_attrs",
+    "contributors",
+    "listening_status",
+    "reviews",
+    "product_plans",
+    "price",
+    "series",
+    "in_wishlist",
+    "category_ladders",
+    "sku",
+    "product_details",
+    "product_plan_details"
+  ]
+}

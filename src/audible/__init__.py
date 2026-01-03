@@ -56,6 +56,7 @@ from .models import (  # Core models; Wishlist models; Content/quality models; P
     ContentMetadata,
     ContentQuality,
     ContentQualityInfo,
+    ContentReference,
     DrmType,
     LibrarySortBy,
     LibraryStatus,
@@ -113,6 +114,7 @@ __all__ = [
     # Content/quality models
     "ChapterInfo",
     "ContentMetadata",
+    "ContentReference",
     "AudioFormat",
     "ContentQualityInfo",
     "LICENSE_TEST_CONFIGS",

@@ -1,8 +1,11 @@
 # Audit Planning Document
 
 **Created:** December 27, 2025  
+**Last Updated:** January 2, 2026  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)  
-**Status:** Planning
+**Status:** 🟡 In Progress (2/7 audits complete)
+
+> **Note:** This is an active planning document. Completed audit reports are archived in [../archive/audits/](../archive/audits/).
 
 ---
 
@@ -10,15 +13,15 @@
 
 This document outlines future audits to improve the quality, security, and maintainability of the codebase. Each audit includes scope, key questions, and actionable items.
 
-| Audit | Priority | Effort | Status |
-| --- | --- | --- | --- |
-| [Security Audit](#1-security-audit) | 🔴 High | Medium | ✅ Complete |
-| [Dependency Audit](#2-dependency-audit) | 🔴 High | Low | ✅ Complete |
-| [Documentation Audit](#3-documentation-audit) | 🟡 Medium | Medium | ⬜ Not Started |
-| [Performance Audit](#4-performance-audit) | 🟡 Medium | High | ⬜ Not Started |
-| [Observability Audit](#5-observability-audit) | 🟡 Medium | Medium | ⬜ Not Started |
-| [CLI UX Audit](#6-cli-ux-audit) | 🟢 Low | Medium | ⬜ Not Started |
-| [Integration Test Audit](#7-integration-test-audit) | 🟡 Medium | High | ⬜ Not Started |
+| Audit | Priority | Effort | Status | Report |
+| --- | --- | --- | --- | --- |
+| [Security Audit](#1-security-audit) | 🔴 High | Medium | ✅ Complete | [SECURITY_AUDIT.md](../archive/audits/SECURITY_AUDIT.md) |
+| [Dependency Audit](#2-dependency-audit) | 🔴 High | Low | ✅ Complete | [DEPENDENCY_AUDIT.md](../archive/audits/DEPENDENCY_AUDIT.md) |
+| [Documentation Audit](#3-documentation-audit) | 🟡 Medium | Medium | ⬜ Not Started | - |
+| [Performance Audit](#4-performance-audit) | 🟡 Medium | High | ⬜ Not Started | - |
+| [Observability Audit](#5-observability-audit) | 🟡 Medium | Medium | ⬜ Not Started | - |
+| [CLI UX Audit](#6-cli-ux-audit) | 🟢 Low | Medium | ⬜ Not Started | - |
+| [Integration Test Audit](#7-integration-test-audit) | 🟡 Medium | High | ⬜ Not Started | - |
 
 ---
 
@@ -26,47 +29,16 @@ This document outlines future audits to improve the quality, security, and maint
 
 **Priority:** 🔴 High  
 **Effort:** Medium  
-**Status:** ✅ Complete  
-**Report:** [SECURITY_AUDIT.md](SECURITY_AUDIT.md)
+**Status:** ✅ Complete (December 28, 2025)  
+**Report:** [SECURITY_AUDIT.md](../archive/audits/SECURITY_AUDIT.md)  
+**Commit:** 669c2b5 "feat(security): Add AES encryption for Audible credentials"
 
-### Security Audit Scope
+**Outcome Summary:**
 
-Review credential handling, API key management, input validation, and potential security vulnerabilities.
-
-### Security Audit - Key Questions
-
-- [x] How are Audible credentials stored in `data/audible_auth.json`?
-- [x] Are credentials encrypted at rest?
-- [x] Could API keys or tokens leak into logs?
-- [x] Is there input validation on CLI arguments to prevent injection?
-- [x] Are there any hardcoded secrets in the codebase?
-- [x] Is the SQLite cache database protected?
-- [x] Are HTTP requests using secure connections (HTTPS)?
-
-### Security Audit - Files to Review
-
-- `data/audible_auth.json` - Credential storage
-- `src/config.py` - Settings and environment variable handling
-- `src/audible/client.py` - API authentication
-- `src/abs/client.py` - ABS authentication
-- `src/cache/sqlite_cache.py` - Cache storage
-- All logging calls for potential credential exposure
-
-### Security Audit - Actionable Items
-
-- [x] Audit credential storage mechanism
-- [x] Check for secrets in git history
-- [x] Review logging for sensitive data exposure
-- [x] Validate all external inputs (CLI args, API responses)
-- [x] Ensure HTTPS enforcement
-- [x] Consider adding `.gitignore` patterns for sensitive files
-- [x] Evaluate encryption for stored credentials (implemented AES encryption support)
-
-### Tools
-
-- `git log -p` - Check git history for secrets
-- `bandit` - Python security linter (already in dev dependencies)
-- `trufflehog` - Secret scanner for git repos
+- ✅ AES encryption implemented for credential storage
+- ✅ File permissions hardened (chmod 600)
+- ✅ No credential leaks in logs or git history
+- ✅ All bandit security warnings resolved
 
 ---
 
@@ -74,54 +46,15 @@ Review credential handling, API key management, input validation, and potential 
 
 **Priority:** 🔴 High  
 **Effort:** Low  
-**Status:** ✅ Complete  
-**Report:** [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)
+**Status:** ✅ Complete (December 27, 2025)  
+**Report:** [DEPENDENCY_AUDIT.md](../archive/audits/DEPENDENCY_AUDIT.md)
 
-### Dependency Audit Scope
+**Outcome Summary:**
 
-Review dependencies for vulnerabilities, outdated packages, and license compliance.
-
-### Dependency Audit - Key Questions
-
-- [x] Are there any known vulnerabilities in dependencies?
-- [x] Which packages are outdated?
-- [x] Are all licenses compatible with project goals?
-- [ ] Are there unused dependencies that can be removed?
-- [x] Are dependency versions pinned appropriately?
-
-### Dependency Audit - Files to Review
-
-- `requirements.txt` - Production dependencies
-- `requirements-dev.txt` - Development dependencies
-- `pyproject.toml` - Project configuration
-
-### Dependency Audit - Actionable Items
-
-- [x] Run `pip list --outdated` to find old packages
-- [x] Run `pip-audit` or `safety check` for vulnerabilities
-- [x] Review licenses with `pip-licenses`
-- [ ] Remove unused dependencies
-- [ ] Consider using `dependabot` for automated updates
-- [x] Pin versions in requirements files
-
-### Dependency Audit Tools
-
-```bash
-# Check outdated packages
-pip list --outdated
-
-# Security vulnerability scan
-pip install pip-audit
-pip-audit
-
-# Alternative security scan
-pip install safety
-safety check
-
-# License audit
-pip install pip-licenses
-pip-licenses --format=markdown
-```
+- ✅ Zero security vulnerabilities found (pip-audit)
+- ✅ All licenses reviewed (1 AGPL dependency noted)
+- ⚠️ 3 minor package updates available (dev dependencies)
+- 📝 Recommendation: Pin production dependency versions
 
 ---
 
@@ -138,30 +71,32 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 ### Documentation Audit - Key Questions
 
 - [ ] Is there a comprehensive README with setup instructions?
-- [ ] Are all CLI commands documented with `--help`?
-- [ ] Are there usage examples for common workflows?
+- [ ] Are all public APIs documented?
+- [ ] Is there a CONTRIBUTING guide?
 - [ ] Are docstrings complete and accurate?
-- [ ] Is there API documentation for developers?
-- [ ] Are configuration options documented?
-- [ ] Is the architecture documented for contributors?
+- [ ] Is the CLI help text clear and accurate?
+- [ ] Are there examples for common use cases?
 
 ### Documentation Audit - Files to Review
 
-- `README.md` - Main documentation
-- `docs/` - Documentation folder
-- All `--help` outputs from CLI commands
-- Docstrings in all Python modules
-- `config.yaml` - Configuration reference
+- `README.md` - Main project documentation
+- `CONTRIBUTING.md` - Contribution guidelines
+- `docs/` - All documentation files
+- Module docstrings
+- CLI help text (via `--help`)
 
 ### Documentation Audit - Actionable Items
 
-- [ ] Create/update comprehensive README
+- [ ] Review README for completeness
+- [ ] Check all docstrings with `pydocstyle`
+- [ ] Verify CLI help text accuracy
+- [ ] Create examples/tutorials if missing
+- [ ] Update architecture diagrams if needed
 - [ ] Document all CLI commands with examples
 - [ ] Add quick-start guide
 - [ ] Document configuration options
 - [ ] Add architecture diagram
 - [ ] Generate API docs (sphinx/mkdocs)
-- [ ] Add CONTRIBUTING.md for contributors
 - [ ] Create CHANGELOG.md
 
 ### Documentation Structure

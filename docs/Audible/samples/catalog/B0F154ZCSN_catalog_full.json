@@ -1,0 +1,446 @@
+{
+  "product": {
+    "asin": "B0F154ZCSN",
+    "asset_details": [
+      {
+        "is_spatial": true,
+        "name": "Dolby"
+      }
+    ],
+    "authors": [
+      {
+        "asin": "B000AP9A6K",
+        "name": "J.K. Rowling"
+      }
+    ],
+    "available_codecs": [
+      {
+        "enhanced_codec": "LC_128_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_128"
+      },
+      {
+        "enhanced_codec": "LC_64_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_64"
+      },
+      {
+        "enhanced_codec": "aax",
+        "format": "Enhanced",
+        "is_kindle_enhanced": false,
+        "name": "aax"
+      }
+    ],
+    "category_ladders": [
+      {
+        "ladder": [
+          {
+            "id": "18572091011",
+            "name": "Children's Audiobooks"
+          },
+          {
+            "id": "18572323011",
+            "name": "Growing Up & Facts of Life"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18572091011",
+            "name": "Children's Audiobooks"
+          },
+          {
+            "id": "18572323011",
+            "name": "Growing Up & Facts of Life"
+          },
+          {
+            "id": "18572393011",
+            "name": "Social & Life Skills"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18572091011",
+            "name": "Children's Audiobooks"
+          },
+          {
+            "id": "18572491011",
+            "name": "Literature & Fiction"
+          },
+          {
+            "id": "18572505011",
+            "name": "Family Life"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18572091011",
+            "name": "Children's Audiobooks"
+          },
+          {
+            "id": "18572586011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18572587011",
+            "name": "Fantasy & Magic"
+          }
+        ],
+        "root": "Genres"
+      }
+    ],
+    "content_delivery_type": "SinglePartBook",
+    "content_type": "Product",
+    "copyright": "\u00a91997 J.K. Rowling (P)2025 Pottermore Limited",
+    "customer_reviews": [
+      {
+        "asin": "B0F154ZCSN",
+        "author_id": "amzn1.account.AFKDPVOQGHMTYGARG6MDIACQ4ZLA",
+        "author_name": "Nadine",
+        "body": "I was so excited for the full cast edition! The first book's sound was so badly mixed that it was repellent.  Thank you for fixing it in the edition!!! So much better and allows us to fall into the wonder again!",
+        "format": "Freeform",
+        "id": "0b77e2514f8a4c0c9085cbb3ec5912bf",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 80,
+          "num_helpful_votes": 3,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2025-12-16T22:58:01Z",
+        "title": "Thank you for fixing the sound!"
+      },
+      {
+        "asin": "B0F154ZCSN",
+        "author_id": "amzn1.account.AEDH2DF5QHN54WSH5KS7P6F7NVUQ",
+        "author_name": "James",
+        "body": "The sound mixing is much better in this book compared to the last one. The dialogue is much more clear and easier to understand. Hopefully they keep up the good work with the rest of the books and maybe clean up the first one a bit.",
+        "format": "Freeform",
+        "id": "cca71bd1fcb64e32a8ad831fe29f1084",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 75,
+          "num_helpful_votes": 2,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2025-12-18T18:18:45Z",
+        "title": "Clarity "
+      },
+      {
+        "asin": "B0F154ZCSN",
+        "author_id": "amzn1.account.AEUATVUM4RDVUVRIWYBQPU4VBU5A",
+        "author_name": "Miah",
+        "body": "I already dearly love the Harry Potter series but the full cast brought it too life in a whole new way. it's so magical 100/10 recommend! ",
+        "format": "Freeform",
+        "id": "0fc3898d8c8f4255ba9679dc413393d3",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 67,
+          "num_helpful_votes": 1,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2025-12-18T19:27:30Z",
+        "title": "best audiobook EVER."
+      }
+    ],
+    "customer_rights": {
+      "is_book_qa_eligible": false,
+      "is_consumable": false,
+      "is_consumable_indefinitely": false,
+      "is_consumable_offline": false
+    },
+    "date_first_available": "2025-12-16",
+    "distribution_rights_region": [
+      "AS",
+      "PR",
+      "MP",
+      "VI",
+      "PW",
+      "UM",
+      "PH",
+      "MH",
+      "GU",
+      "US"
+    ],
+    "extended_product_description": "<p>Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p>",
+    "format_type": "unabridged",
+    "has_children": false,
+    "is_adult_product": false,
+    "is_buyable": true,
+    "is_in_wishlist": false,
+    "is_listenable": true,
+    "is_pdf_url_available": false,
+    "is_preorderable": false,
+    "is_purchasability_suppressed": false,
+    "is_vvab": false,
+    "is_world_rights": false,
+    "issue_date": "2025-12-16",
+    "language": "english",
+    "listening_status": {
+      "is_finished": false,
+      "percent_complete": 0.0,
+      "time_remaining_seconds": 34620
+    },
+    "merchandising_description": "",
+    "merchandising_summary": "<i>'There is a plot, Harry Potter. A plot to make most terrible things happen at Hogwarts School of Witchcraft and Wizardry this year.'</i>",
+    "narrators": [
+      {
+        "name": "Hugh Laurie"
+      },
+      {
+        "name": "Matthew Macfadyen"
+      },
+      {
+        "name": "Kit Harington"
+      },
+      {
+        "name": "Riz Ahmed"
+      },
+      {
+        "name": "Michelle Gomez"
+      },
+      {
+        "name": "Daniel Mays"
+      },
+      {
+        "name": "Mark Addy"
+      },
+      {
+        "name": "Simon Pegg"
+      },
+      {
+        "name": "Cush Jumbo"
+      },
+      {
+        "name": "Alex Hassell"
+      },
+      {
+        "name": "Gemma Whelan"
+      },
+      {
+        "name": "Indira Varma"
+      },
+      {
+        "name": "Frankie Treadaway"
+      },
+      {
+        "name": "Max Lester"
+      },
+      {
+        "name": "Arabella Stanton"
+      }
+    ],
+    "plans": [
+      {
+        "end_date": "2099-12-31T00:00:00.00000Z",
+        "plan_name": "AccessViaMusic",
+        "start_date": "1970-01-01T00:00:00.00000Z"
+      }
+    ],
+    "platinum_keywords": [
+      "Childrens_Audiobooks/Science_Fiction_Fantasy",
+      "Childrens_Audiobooks",
+      "Childrens_Audiobooks/Science_Fiction_Fantasy/Fantasy_Magic",
+      "Childrens_Audiobooks/Science_Fiction_Fantasy/Fantasy_Magic/Coming_of_Age",
+      "Classics"
+    ],
+    "preorder_release_date": "2025-12-16T08:00:00Z",
+    "price": {
+      "credit_price": 1.0,
+      "list_price": {
+        "base": 29.989999771118164,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "list"
+      },
+      "lowest_price": {
+        "base": 20.989999771118164,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "member"
+      },
+      "ws4v_upsell_price": {
+        "base": 29.989999771118164,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "ws4v_upsell"
+      }
+    },
+    "product_images": {
+      "500": "https://m.media-amazon.com/images/I/61p0qiVzZLL._SL500_.jpg"
+    },
+    "product_site_launch_date": "2025-07-22T08:00:00Z",
+    "product_state": "AVAILABLE",
+    "publication_datetime": "2025-12-16T08:00:00Z",
+    "publication_name": "Harry Potter (Full-Cast Editions)",
+    "publisher_name": "Pottermore Publishing and Audible Studios",
+    "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>'There is a plot, Harry Potter. A plot to make most terrible things happen at Hogwarts School of Witchcraft and Wizardry this year.'</i></p> <p>Harry Potter's summer has included the worst birthday ever, doomy warnings from a house-elf called Dobby, and rescue from the Dursleys by his friend Ron Weasley in a magical flying car! Back at Hogwarts School of Witchcraft and Wizardry for his second year, Harry hears strange whispers echo through empty corridors\u2014and then the attacks start. Students are found as though turned to stone... Dobby's sinister predictions seem to be coming true.</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Frankie Treadaway as Harry Potter, Max Lester as Ron Weasley, Arabella Stanton as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, Kit Harington as Gilderoy Lockhart, Simon Pegg as Arthur Weasley, Alex Hassell as Lucius Malfoy, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+    "rating": {
+      "num_reviews": 435,
+      "overall_distribution": {
+        "average_rating": 4.894683544303797,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 1834,
+        "num_four_star_ratings": 103,
+        "num_one_star_ratings": 9,
+        "num_ratings": 1975,
+        "num_three_star_ratings": 18,
+        "num_two_star_ratings": 11
+      },
+      "performance_distribution": {
+        "average_rating": 4.880145909327775,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 1776,
+        "num_four_star_ratings": 99,
+        "num_one_star_ratings": 17,
+        "num_ratings": 1919,
+        "num_three_star_ratings": 18,
+        "num_two_star_ratings": 9
+      },
+      "story_distribution": {
+        "average_rating": 4.904637832204273,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 1791,
+        "num_four_star_ratings": 99,
+        "num_one_star_ratings": 11,
+        "num_ratings": 1919,
+        "num_three_star_ratings": 14,
+        "num_two_star_ratings": 4
+      }
+    },
+    "read_along_support": "false",
+    "reasons_for_reporting_review": [
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_guideline_violation",
+        "reported_reason_value": "guideline_violation"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_csam",
+        "reported_reason_value": "csam"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_inappropriate_content",
+        "reported_reason_value": "inappropriate_content"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_other_concerning_content",
+        "reported_reason_value": "other_concerning_content"
+      }
+    ],
+    "relationships": [
+      {
+        "asin": "B0FJMLG5DN",
+        "content_delivery_type": "BookSeries",
+        "relationship_to_product": "parent",
+        "relationship_type": "series",
+        "sequence": "2",
+        "sku": "SE_RIES_105047",
+        "sku_lite": "SE_RIES_105047",
+        "sort": "2",
+        "title": "Harry Potter (Full-Cast Editions)",
+        "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+      }
+    ],
+    "release_date": "2025-12-16",
+    "runtime_length_min": 577,
+    "sample_url": "https://samples.audible.com/bk/potr/000574/bk_potr_000574_sample.mp3",
+    "selected_sort_option_for_reviews": "MostRelevant",
+    "series": [
+      {
+        "asin": "B0FJMLG5DN",
+        "sequence": "2",
+        "title": "Harry Potter (Full-Cast Editions)",
+        "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+      }
+    ],
+    "short_description": "Hugh Laurie as Dumbledore, Riz Ahmed as Snape, and more continue their magic in \u2018Harry Potter and the Chamber of Secrets'.",
+    "sku": "BK_POTR_000574",
+    "sku_lite": "BK_POTR_000574",
+    "social_media_images": {
+      "facebook": "https://m.media-amazon.com/images/I/61p0qiVzZLL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C61p0qiVzZLL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+      "ig_bg": "https://m.media-amazon.com/images/I/61p0qiVzZLL._SL200_BL80_UR1080,2160.jpg",
+      "ig_static_with_bg": "https://m.media-amazon.com/images/I/61p0qiVzZLL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C61p0qiVzZLL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20Ch...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+      "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C61p0qiVzZLL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+      "twitter": "https://m.media-amazon.com/images/I/61p0qiVzZLL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C61p0qiVzZLL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+    },
+    "sort_options_for_reviews": [
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRelevant",
+        "reviews_sort_order_value": "MostRelevant"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostHelpful",
+        "reviews_sort_order_value": "MostHelpful"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRecent",
+        "reviews_sort_order_value": "MostRecent"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostPositive",
+        "reviews_sort_order_value": "MostPositive"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostCritical",
+        "reviews_sort_order_value": "MostCritical"
+      }
+    ],
+    "thesaurus_subject_keywords": [
+      "coming_of_age",
+      "literature-and-fiction"
+    ],
+    "title": "Harry Potter and the Chamber of Secrets (Full-Cast Edition)",
+    "video_url": "https://m.media-amazon.com/images/G/01/Audible/en_US/Reels/HP_Book2.mp4"
+  },
+  "response_groups": [
+    "customer_rights",
+    "claim_code_url",
+    "rating",
+    "media",
+    "product_attrs",
+    "sample",
+    "relationships",
+    "product_desc",
+    "always-returned",
+    "product_extended_attrs",
+    "contributors",
+    "listening_status",
+    "reviews",
+    "provided_review",
+    "product_plans",
+    "price",
+    "series",
+    "in_wishlist",
+    "category_ladders",
+    "sku",
+    "product_details",
+    "product_plan_details"
+  ]
+}

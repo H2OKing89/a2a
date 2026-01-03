@@ -1,5 +1,22 @@
 # CLI Restructuring Plan
 
+```bash
+  ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗
+ ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝
+ ██║     ██║   ██║██╔████╔██║██████╔╝██║     █████╗     ██║   █████╗  
+ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  
+ ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗
+  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝
+```
+
+> **📦 ARCHIVED:** This restructuring was completed on December 26, 2025.  
+> **Commit:** 3798f4e "feat: restructure CLI with uniform command hierarchy and fix Audible model validation"  
+> **Archived Date:** January 2, 2026  
+> **Reason:** Implementation complete - CLI now has symmetric abs/audible sub-apps  
+> **Breaking Changes:** Command paths changed (e.g., `status` → `abs status`, `libraries` → `abs libraries`)
+
+---
+
 ## Overview
 
 Restructure the CLI to provide a uniform, consistent command hierarchy where both ABS and Audible commands are organized under their respective sub-apps, with truly global commands at the root level.

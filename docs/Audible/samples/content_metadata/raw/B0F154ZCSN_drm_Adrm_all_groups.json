@@ -1,0 +1,151 @@
+{
+  "content_metadata": {
+    "chapter_info": {
+      "brandIntroDurationMs": 1532,
+      "brandOutroDurationMs": 3204,
+      "chapters": [
+        {
+          "length_ms": 64115,
+          "start_offset_ms": 0,
+          "start_offset_sec": 0,
+          "title": "Opening Credits"
+        },
+        {
+          "length_ms": 1046458,
+          "start_offset_ms": 64115,
+          "start_offset_sec": 64,
+          "title": "Chapter One -\u00a0The Worst Birthday"
+        },
+        {
+          "length_ms": 1234334,
+          "start_offset_ms": 1110573,
+          "start_offset_sec": 1110,
+          "title": "Chapter Two -\u00a0Dobby's Warning"
+        },
+        {
+          "length_ms": 1653458,
+          "start_offset_ms": 2344907,
+          "start_offset_sec": 2344,
+          "title": "Chapter Three - The Burrow"
+        },
+        {
+          "length_ms": 2231594,
+          "start_offset_ms": 3998365,
+          "start_offset_sec": 3998,
+          "title": "Chapter Four - At Flourish and Blotts"
+        },
+        {
+          "length_ms": 2128916,
+          "start_offset_ms": 6229959,
+          "start_offset_sec": 6229,
+          "title": "Chapter Five -\u00a0The Whomping Willow"
+        },
+        {
+          "length_ms": 1817042,
+          "start_offset_ms": 8358875,
+          "start_offset_sec": 8358,
+          "title": "Chapter Six -\u00a0Gilderoy Lockhart"
+        },
+        {
+          "length_ms": 1726630,
+          "start_offset_ms": 10175917,
+          "start_offset_sec": 10175,
+          "title": "Chapter Seven -\u00a0Mudbloods and Murmurs"
+        },
+        {
+          "length_ms": 1831500,
+          "start_offset_ms": 11902547,
+          "start_offset_sec": 11902,
+          "title": "Chapter Eight -\u00a0The Deathday Party"
+        },
+        {
+          "length_ms": 2009166,
+          "start_offset_ms": 13734047,
+          "start_offset_sec": 13734,
+          "title": "Chapter Nine -\u00a0The Writing on the Wall"
+        },
+        {
+          "length_ms": 2056389,
+          "start_offset_ms": 15743213,
+          "start_offset_sec": 15743,
+          "title": "Chapter Ten -\u00a0The Rogue Bludger"
+        },
+        {
+          "length_ms": 2279875,
+          "start_offset_ms": 17799602,
+          "start_offset_sec": 17799,
+          "title": "Chapter Eleven -\u00a0The Dueling Club"
+        },
+        {
+          "length_ms": 2078458,
+          "start_offset_ms": 20079477,
+          "start_offset_sec": 20079,
+          "title": "Chapter Twelve -\u00a0The Polyjuice Potion"
+        },
+        {
+          "length_ms": 2162944,
+          "start_offset_ms": 22157935,
+          "start_offset_sec": 22157,
+          "title": "Chapter Thirteen -\u00a0The Very Secret Diary"
+        },
+        {
+          "length_ms": 1508583,
+          "start_offset_ms": 24320879,
+          "start_offset_sec": 24320,
+          "title": "Chapter Fourteen -\u00a0Cornelius Fudge"
+        },
+        {
+          "length_ms": 1888473,
+          "start_offset_ms": 25829462,
+          "start_offset_sec": 25829,
+          "title": "Chapter Fifteen -\u00a0Aragog"
+        },
+        {
+          "length_ms": 2292041,
+          "start_offset_ms": 27717935,
+          "start_offset_sec": 27717,
+          "title": "Chapter Sixteen -\u00a0The Chamber of Secrets"
+        },
+        {
+          "length_ms": 2267250,
+          "start_offset_ms": 30009976,
+          "start_offset_sec": 30009,
+          "title": "Chapter Seventeen -\u00a0The Heir of Slytherin"
+        },
+        {
+          "length_ms": 1507417,
+          "start_offset_ms": 32277226,
+          "start_offset_sec": 32277,
+          "title": "Chapter Eighteen -\u00a0Dobby's Reward"
+        },
+        {
+          "length_ms": 843294,
+          "start_offset_ms": 33784643,
+          "start_offset_sec": 33784,
+          "title": "End Credits"
+        }
+      ],
+      "is_accurate": true,
+      "runtime_length_ms": 34627937,
+      "runtime_length_sec": 34627
+    },
+    "content_reference": {
+      "acr": "CR!A5XSASSTVH31Z8Y0V3C0C8D1BWPG",
+      "asin": "B0F154ZCSN",
+      "codec": "mp4a.40.2",
+      "content_format": "AAX_44_128",
+      "content_size_in_bytes": 557807179,
+      "file_version": "2",
+      "marketplace": "AF2M0KC94RCEA",
+      "sku": "BK_POTR_000574",
+      "tempo": "1.0",
+      "version": "104382371"
+    }
+  },
+  "response_groups": [
+    "always-returned",
+    "content_url",
+    "chapter_info",
+    "content_reference"
+  ]
+}

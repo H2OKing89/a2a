@@ -1,5 +1,13 @@
 # Dependency Audit Report
 
+> **📦 ARCHIVED:** Dependency audit completed December 27, 2025.  
+> **Archived Date:** January 2, 2026  
+> **Status:** ✅ No vulnerabilities found  
+> **Reason:** Point-in-time snapshot - dependencies change frequently  
+> **Note:** Run `pip-audit` and `pip list --outdated` for current status
+
+---
+
 **Date:** December 27, 2025  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)  
 **Status:** ✅ Complete
