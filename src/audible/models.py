@@ -6,11 +6,14 @@ Based on the Audible API response structures with response_groups:
 - rating, sample, series, categories, etc.
 """
 
+import logging
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # API Enums - Centralized API constants for type safety and discoverability
@@ -848,8 +851,10 @@ class ContentMetadata(BaseModel):
         if self.content_reference and not self.parsed_content_ref:
             try:
                 self.parsed_content_ref = ContentReference.model_validate(self.content_reference)
-            except Exception:
-                pass  # Keep as None if parsing fails
+            except Exception as e:
+                # Gracefully handle malformed content_reference from API
+                # Keep parsed_content_ref as None and fall back to raw dict access
+                logger.debug("Failed to parse content_reference for validation: %s", e)
 
     @property
     def supports_atmos(self) -> bool:
