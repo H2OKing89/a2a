@@ -36,8 +36,6 @@ def get_seconds_until_next_month() -> float:
         Seconds until midnight UTC on the 1st of next month
     """
     now = datetime.now(timezone.utc)
-    # Get days in current month
-    _, days_in_month = calendar.monthrange(now.year, now.month)
     # Calculate next month's 1st at midnight UTC
     if now.month == 12:
         next_month_start = datetime(now.year + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)

@@ -17,10 +17,10 @@ from .sqlite_cache import (
 )
 
 __all__ = [
+    "PRICING_NAMESPACES",
     "SQLiteCache",
     "calculate_pricing_ttl_seconds",
     "get_seconds_until_next_month",
-    "PRICING_NAMESPACES",
 ]
 
 
