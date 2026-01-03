@@ -4,7 +4,7 @@
 > The metadata endpoint integration and two-tier quality discovery features described here are **future planning** (v1.1+),
 > not part of the current PR. This document captures findings from Libation PR #1527 for reference and future feature development.
 
-**Date**: January 2, 2026  
+**Date**: January 2, 2026,
 **Source**: [Libation PR #1527](https://github.com/rmcrackan/Libation/pull/1527)  
 **Purpose**: Extract techniques for improving a2a's quality analysis and Audible integration
 
@@ -396,19 +396,31 @@ async def _rate_limited_request(self, semaphore, delay_ms=100):
 
 ---
 
-## 9. Open Questions
+## 9. Resolved Questions
+
+> **Status:** All questions from initial research have been resolved through implementation.
 
 1. **Cache namespace**: Should metadata results share cache with license results?
-   - Recommendation: Separate namespace (`content_metadata`) with longer TTL
+   - ✅ **Resolved:** Separate namespaces implemented:
+     - `content_metadata` - Raw metadata endpoint responses
+     - `content_quality` - Parsed quality info from `fast_quality_check()`
+     - `audible_enrichment_v2` - Full enrichment with quality data
 
 2. **Widevine vs Adrm priority**: Which to query first?
-   - Recommendation: Widevine first (higher quality), fall back to Adrm
+   - ✅ **Resolved:** Widevine first, then Adrm for comparison
+   - Implementation in `async_client.py:fast_quality_check()` tries Widevine first (modern HE-AAC/USAC formats, ~114 kbps), then Adrm (legacy AAC-LC, ~64-128 kbps)
+   - Both results are collected to find the best available format
 
 3. **Error handling**: What if metadata endpoint fails but license works?
-   - Recommendation: Always fall back to license requests for accuracy
+   - ✅ **Resolved:** License requests deprecated as primary path
+   - `fast_quality_check()` is now the default quality discovery method
+   - `discover_content_quality()` (license-based) still exists but is not used by the enrichment service
+   - If metadata fails for both DRM types, quality info is simply unavailable (graceful degradation)
 
 4. **Owned vs catalog**: Does metadata endpoint work for non-owned books?
-   - Need to test - Libation only scans owned/liberated books
+   - ✅ **Resolved:** Works for owned books; catalog books return limited data
+   - For upgrade analysis, we only need quality info for books we own locally anyway
+   - Non-owned catalog books use `available_codecs` from product API (less accurate but sufficient for purchase decisions)
 
 ---
 
