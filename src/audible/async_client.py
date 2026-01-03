@@ -765,7 +765,122 @@ class AsyncAudibleClient:
         return metadata.supports_atmos if metadata else False
 
     # -------------------------------------------------------------------------
-    # Content License / Quality Discovery
+    # Fast Quality Discovery (via Metadata Endpoint)
+    # -------------------------------------------------------------------------
+
+    async def fast_quality_check(
+        self,
+        asin: str,
+        use_cache: bool = True,
+    ) -> ContentQualityInfo | None:
+        """
+        Fast quality check using metadata endpoint (~3x faster than license requests).
+
+        This method uses the /content/{asin}/metadata endpoint with drm_type parameter
+        to discover the actual audio quality available. It's much faster than the
+        license request approach because:
+        - Single GET request vs multiple POST requests
+        - Less aggressive rate limiting
+        - Returns same codec/size data
+
+        Discovered via Libation PR #1527.
+
+        Args:
+            asin: Audible ASIN
+            use_cache: Use cached results
+
+        Returns:
+            ContentQualityInfo with best available format info, or None if failed
+        """
+        cache_key = f"fast_quality_{asin}"
+
+        if use_cache and self._cache:
+            cached = self._cache.get("content_quality", cache_key)
+            if cached:
+                return ContentQualityInfo.model_validate(cached)
+
+        formats: list[AudioFormat] = []
+
+        # Try Widevine first (modern formats: HE-AAC/USAC, Atmos)
+        widevine = await self.get_content_metadata(asin, drm_type="Widevine", use_cache=use_cache)
+        if widevine and widevine.parsed_content_ref:
+            ref = widevine.parsed_content_ref
+            if ref.bitrate_kbps > 0:
+                formats.append(
+                    AudioFormat(
+                        codec=ref.codec or "unknown",
+                        codec_name=ref.codec_name,
+                        drm_type="Widevine",
+                        bitrate_kbps=ref.bitrate_kbps,
+                        size_bytes=ref.content_size_bytes,
+                        runtime_ms=ref.runtime_ms,
+                        is_spatial=ref.is_atmos,
+                    )
+                )
+
+        # Also try Adrm for comparison (legacy AAC-LC format)
+        adrm = await self.get_content_metadata(asin, drm_type="Adrm", use_cache=use_cache)
+        if adrm and adrm.parsed_content_ref:
+            ref = adrm.parsed_content_ref
+            if ref.bitrate_kbps > 0:
+                formats.append(
+                    AudioFormat(
+                        codec=ref.codec or "unknown",
+                        codec_name=ref.codec_name,
+                        drm_type="Adrm",
+                        bitrate_kbps=ref.bitrate_kbps,
+                        size_bytes=ref.content_size_bytes,
+                        runtime_ms=ref.runtime_ms,
+                        is_spatial=ref.is_atmos,
+                    )
+                )
+
+        if formats:
+            quality_info = ContentQualityInfo.from_formats(asin, formats)
+
+            if self._cache:
+                self._cache.set(
+                    "content_quality",
+                    cache_key,
+                    quality_info.model_dump(),
+                    ttl_seconds=self._cache_ttl_seconds,
+                )
+
+            return quality_info
+
+        return None
+
+    async def fast_quality_check_multiple(
+        self,
+        asins: list[str],
+        use_cache: bool = True,
+        max_concurrent: int = 10,
+    ) -> dict[str, ContentQualityInfo]:
+        """
+        Fast quality check for multiple ASINs concurrently.
+
+        Args:
+            asins: List of Audible ASINs
+            use_cache: Use cached results
+            max_concurrent: Maximum concurrent requests
+
+        Returns:
+            Dict mapping ASIN to ContentQualityInfo
+        """
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def check_one(asin: str) -> tuple[str, ContentQualityInfo | None]:
+            async with semaphore:
+                result = await self.fast_quality_check(asin, use_cache=use_cache)
+                return asin, result
+
+        tasks = [check_one(asin) for asin in asins]
+        results = await asyncio.gather(*tasks)
+
+        return {asin: quality for asin, quality in results if quality is not None}
+
+    # -------------------------------------------------------------------------
+    # Content License / Quality Discovery (Full - Slower but More Detailed)
     # -------------------------------------------------------------------------
 
     async def request_content_license(
