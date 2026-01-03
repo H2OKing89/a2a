@@ -756,11 +756,71 @@ class WishlistResponse(BaseModel):
 # =============================================================================
 
 
+class ContentReference(BaseModel):
+    """
+    Content reference from /content/{asin}/metadata endpoint.
+
+    Contains codec, size, and runtime info for bitrate calculation.
+    This is the key data structure returned when using the drm_type parameter.
+
+    Discovered via Libation PR #1527 - this endpoint is ~3x faster than
+    license requests for quality discovery.
+    """
+
+    codec: str | None = Field(default=None, description="Codec ID: mp4a.40.2, mp4a.40.42, ec+3, ac-4")
+    content_format: str | None = Field(
+        default=None, alias="content_format", description="Format: M4A, M4A_XHE, M4A_EC3"
+    )
+    content_size_bytes: int = Field(
+        default=0, alias="content_size_in_bytes", description="Content size for bitrate calc"
+    )
+    runtime_ms: int = Field(default=0, alias="runtime_length_ms", description="Runtime in milliseconds")
+    acr: str | None = Field(default=None, description="Audio Content Reference")
+
+    model_config = {"extra": "ignore", "populate_by_name": True}
+
+    @property
+    def bitrate_kbps(self) -> float:
+        """Calculate bitrate from size and runtime."""
+        if self.runtime_ms > 0 and self.content_size_bytes > 0:
+            # bitrate = (bytes * 8 bits/byte) / (ms / 1000 ms/s) / 1000 bits/kbit
+            return (self.content_size_bytes * 8) / (self.runtime_ms / 1000) / 1000
+        return 0.0
+
+    @property
+    def is_atmos(self) -> bool:
+        """Check if this is Dolby Atmos/spatial audio."""
+        return self.codec in ("ec+3", "ac-4")
+
+    @property
+    def is_high_efficiency(self) -> bool:
+        """Check if this is HE-AAC v2 / xHE-AAC / USAC."""
+        return self.codec == "mp4a.40.42"
+
+    @property
+    def is_standard_aac(self) -> bool:
+        """Check if this is standard AAC-LC."""
+        return self.codec == "mp4a.40.2"
+
+    @property
+    def codec_name(self) -> str:
+        """Human-readable codec name."""
+        return {
+            "mp4a.40.2": "AAC-LC",
+            "mp4a.40.42": "HE-AAC v2",
+            "ec+3": "Dolby Digital Plus",
+            "ac-4": "Dolby AC-4 (Atmos)",
+        }.get(self.codec or "", "Unknown")
+
+
 class ContentMetadata(BaseModel):
     """
     Content metadata from /content/{asin}/metadata endpoint.
 
     Contains chapter info, available codecs, and quality info.
+
+    When called with drm_type parameter (Widevine or Adrm), the content_reference
+    field contains actual codec and size info for quality discovery.
     """
 
     asin: str | None = None
@@ -769,23 +829,89 @@ class ContentMetadata(BaseModel):
     # Chapter info
     chapter_info: dict[str, Any] | None = None
 
-    # Content reference (URLs, etc.)
+    # Content reference - raw dict (for backward compatibility)
     content_reference: dict[str, Any] | None = None
+
+    # Parsed content reference (new - for quality discovery)
+    parsed_content_ref: ContentReference | None = Field(default=None, exclude=True)
 
     # Available formats
     available_codecs: list[str] = Field(default_factory=list)
 
+    # DRM type used to fetch this metadata
+    drm_type: str | None = Field(default=None, description="DRM type: Widevine, Adrm")
+
     model_config = {"extra": "ignore", "populate_by_name": True}
+
+    def model_post_init(self, __context: Any) -> None:
+        """Parse content_reference into structured model after init."""
+        if self.content_reference and not self.parsed_content_ref:
+            try:
+                self.parsed_content_ref = ContentReference.model_validate(self.content_reference)
+            except Exception:
+                pass  # Keep as None if parsing fails
 
     @property
     def supports_atmos(self) -> bool:
         """Check if Dolby Atmos (AC-4) is available."""
-        return "ac-4" in self.available_codecs or "ec+3" in self.available_codecs
+        # Only use parsed_content_ref if it has a codec value
+        if self.parsed_content_ref and self.parsed_content_ref.codec:
+            return self.parsed_content_ref.is_atmos
+        # Check model-level available_codecs
+        if "ac-4" in self.available_codecs or "ec+3" in self.available_codecs:
+            return True
+        # Also check raw content_reference.available_codec (legacy format)
+        if self.content_reference:
+            raw_codecs = self.content_reference.get("available_codec", [])
+            return "ac-4" in raw_codecs or "ec+3" in raw_codecs
+        return False
 
     @property
     def supports_high_quality(self) -> bool:
         """Check if high quality AAC is available."""
+        if self.parsed_content_ref and self.parsed_content_ref.codec:
+            return self.parsed_content_ref.is_high_efficiency or self.parsed_content_ref.is_standard_aac
         return "mp4a.40.2" in self.available_codecs or "mp4a.40.42" in self.available_codecs
+
+    @property
+    def bitrate_kbps(self) -> float:
+        """
+        Calculate bitrate from content size and runtime.
+
+        Uses content_reference.content_size_in_bytes and chapter_info.runtime_length_ms
+        to calculate bitrate. Falls back to parsed_content_ref if it has runtime.
+        """
+        # Try to get content size
+        content_size = 0
+        if self.parsed_content_ref and self.parsed_content_ref.codec:
+            content_size = self.parsed_content_ref.content_size_bytes
+        elif self.content_reference:
+            content_size = self.content_reference.get("content_size_in_bytes", 0)
+
+        if content_size <= 0:
+            return 0.0
+
+        # Try to get runtime from chapter_info first (more reliable)
+        runtime_ms = 0
+        if self.chapter_info:
+            runtime_ms = self.chapter_info.get("runtime_length_ms", 0)
+
+        # Fall back to parsed_content_ref runtime if available
+        if runtime_ms <= 0 and self.parsed_content_ref:
+            runtime_ms = self.parsed_content_ref.runtime_ms
+
+        if runtime_ms <= 0:
+            return 0.0
+
+        # Calculate: (bytes * 8 bits/byte) / (ms / 1000 ms/s) / 1000 bits/kbit
+        return (content_size * 8) / (runtime_ms / 1000) / 1000
+
+    @property
+    def codec(self) -> str | None:
+        """Get codec from parsed content reference."""
+        if self.parsed_content_ref:
+            return self.parsed_content_ref.codec
+        return None
 
 
 class ChapterInfo(BaseModel):
