@@ -686,37 +686,73 @@ class AsyncAudibleClient:
         self,
         asin: str,
         quality: str = "High",
+        drm_type: str | None = None,
         use_cache: bool = True,
     ) -> ContentMetadata | None:
-        """Get content metadata including chapter info and codecs."""
-        cache_key = f"content_meta_{asin}_{quality}"
+        """
+        Get content metadata including chapter info and codecs.
+
+        When drm_type is specified (Widevine or Adrm), the response includes
+        actual codec and content size for quality/bitrate discovery. This is
+        ~3x faster than license requests for quality checking.
+
+        Args:
+            asin: Audible ASIN
+            quality: Quality level ("High" or "Normal")
+            drm_type: Optional DRM type for quality discovery ("Widevine" or "Adrm")
+                      - Widevine: Returns modern formats (HE-AAC, Atmos)
+                      - Adrm: Returns legacy AAC-LC format
+            use_cache: Use cached results
+
+        Returns:
+            ContentMetadata with chapter info and quality data
+        """
+        cache_key = f"content_meta_{asin}_{quality}_{drm_type or 'none'}"
 
         if use_cache and self._cache:
-            cached = self._cache.get("catalog", cache_key)
+            cached = self._cache.get("content_metadata", cache_key)
             if cached:
                 return ContentMetadata.model_validate(cached)
 
         try:
+            # Build request params
+            params: dict[str, str] = {
+                "response_groups": "chapter_info,content_reference",
+                "quality": quality,
+            }
+            if drm_type:
+                params["drm_type"] = drm_type
+
             response = await self._request(
                 "GET",
                 f"content/{asin}/metadata",
-                response_groups="chapter_info,content_reference",
-                quality=quality,
+                **params,
             )
+
+            # Handle both response structures:
+            # - Old: {"chapter_info": {...}, "content_reference": {...}}
+            # - New with drm_type: {"content_metadata": {"chapter_info": {...}, "content_reference": {...}}}
+            data = response.get("content_metadata", response)
 
             metadata = ContentMetadata(
                 asin=asin,
-                acr=response.get("content_reference", {}).get("acr"),
-                chapter_info=response.get("chapter_info"),
-                content_reference=response.get("content_reference"),
+                acr=data.get("content_reference", {}).get("acr"),
+                chapter_info=data.get("chapter_info"),
+                content_reference=data.get("content_reference"),
+                drm_type=drm_type,
             )
 
-            content_ref = response.get("content_reference", {})
+            content_ref = data.get("content_reference", {})
             if "available_codec" in content_ref:
                 metadata.available_codecs = content_ref["available_codec"]
 
             if self._cache:
-                self._cache.set("catalog", cache_key, metadata.model_dump(), ttl_seconds=self._cache_ttl_seconds)
+                self._cache.set(
+                    "content_metadata",
+                    cache_key,
+                    metadata.model_dump(),
+                    ttl_seconds=self._cache_ttl_seconds,
+                )
 
             return metadata
 
