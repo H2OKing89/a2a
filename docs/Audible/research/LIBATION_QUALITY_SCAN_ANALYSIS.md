@@ -1,5 +1,9 @@
 # Libation Quality Scan Analysis
 
+> **⚠️ Note:** This is exploratory research documentation that informed PR #25's month-aware cache TTL implementation.
+> The metadata endpoint integration and two-tier quality discovery features described here are **future planning** (v1.1+),
+> not part of the current PR. This document captures findings from Libation PR #1527 for reference and future feature development.
+
 **Date**: January 2, 2026  
 **Source**: [Libation PR #1527](https://github.com/rmcrackan/Libation/pull/1527)  
 **Purpose**: Extract techniques for improving a2a's quality analysis and Audible integration
@@ -17,6 +21,10 @@ Libation's "Scan for Higher Quality Books" feature reveals a simpler, faster app
 ## 1. Audible API Endpoint Discovery
 
 ### 1.1 Content Metadata Endpoint (NEW - Not Currently Used by a2a)
+
+> **⚠️ API Stability:** This endpoint is **not officially documented by Audible**. The specifications are community reverse-engineered
+> from Libation and other projects. Audible may change this endpoint's behavior or deprecate it without notice.
+> Use in production with caution and monitor for changes.
 
 ```bash
 GET /1.0/content/{asin}/metadata
@@ -90,22 +98,23 @@ class AudioCodec(str, Enum):
 var bitrate = (int)(totalSize / 1024d * 1000 / totalLengthMs * 8); // in kbps
 ```
 
-Simplified:
+### 2.2 Correct Formula Derivation
 
-```python
-bitrate_kbps = (content_size_bytes * 8) / (runtime_ms * 1000) * 1000
-             = (content_size_bytes * 8) / runtime_ms
-             = content_size_bytes / runtime_ms * 8 / 1000  # to kbps
-```
+**Units analysis:**
+- `size_bytes * 8` → bits
+- `runtime_ms / 1000` → seconds
+- `bits / seconds / 1000` → kilobits per second (kbps)
 
-**More accurate formula**:
+**Correct formula:**
 
 ```python
 bitrate_kbps = (content_size_bytes * 8) / (runtime_ms / 1000) / 1000
-             = content_size_bytes * 8 / runtime_ms
+             = (content_size_bytes * 8000) / runtime_ms
 ```
 
-### 2.2 Comparison with a2a's Current Approach
+Both forms are equivalent. Use the second for direct calculation without intermediate division.
+
+### 2.3 Comparison with a2a's Current Approach
 
 **a2a** uses license requests which return explicit bitrate in the response. The calculated approach is:
 
