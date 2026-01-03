@@ -10,7 +10,7 @@
 ## Executive Summary
 
 | Category | Status | Risk Level | Findings |
-|----------|--------|------------|----------|
+| --- | --- | --- | --- |
 | Credential Storage | ✅ Secured | 🟢 Low | AES encryption implemented |
 | Secret Management | ✅ Good | 🟢 Low | Proper .gitignore, no secrets in git history |
 | Logging Security | ✅ Good | 🟢 Low | No credential exposure in logs |
@@ -55,7 +55,7 @@ Implemented AES-CBC encryption using the upstream `audible` library's built-in e
 **Implementation Details:**
 
 | Component | Description |
-|-----------|-------------|
+| --- | --- |
 | `encryption.py` | `load_auth()`, `save_auth()`, `is_file_encrypted()`, `get_encryption_config()` |
 | `client.py` | Added `auth_password`, `auth_encryption`, `auth_kdf_iterations` params |
 | `cli/audible.py` | New `encrypt` command, updated `login` and `status` |
@@ -168,7 +168,7 @@ Implemented a "secure by default" configuration with user-friendly escape hatche
 **Implementation Details:**
 
 | Component | Description |
-|-----------|-------------|
+| --- | --- |
 | `config.py` | `allow_insecure_http`, `tls_ca_bundle`, `insecure_tls` in `ABSSettings` |
 | `abs/client.py` | Auto HTTP/2, URL normalization, localhost detection, TLS verification options |
 | `cli/abs.py` | Security status from client state (HTTPS, HTTP/2, CA bundle, etc.) |
@@ -322,7 +322,7 @@ All issues resolved:
 ## Files Reviewed
 
 | File | Status | Notes |
-|------|--------|-------|
+| --- | --- | --- |
 | `data/audible_auth.json` | ✅ | Now encrypted with AES-CBC, 600 permissions |
 | `.gitignore` | ✅ | Properly excludes sensitive files |
 | `src/config.py` | ✅ | Security settings: `allow_insecure_http`, `tls_ca_bundle`, `insecure_tls` |
@@ -338,8 +338,10 @@ All issues resolved:
 
 ---
 
-*Report updated: December 28, 2025*
+## Report updated: December 28, 2025
+
+**Update note:** Updated to reflect implementation of credential encryption (Finding 1.1), file permission enforcement (Finding 1.2), network security improvements (Finding 4.2), code security fixes (Findings 5.1–5.2), and expanded remediation checklist with completion status.
 
 ---
 
-*Report generated: December 27, 2025*
+## Report generated: December 27, 2025

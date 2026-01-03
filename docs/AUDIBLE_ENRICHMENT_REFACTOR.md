@@ -7,7 +7,7 @@ Centralized all Audible API functionality into `src/audible/` module for reuse a
 ## Implementation Status
 
 | Step | Status | Description |
-|------|--------|-------------|
+| --- | --- | --- |
 | 1. Move models | ✅ DONE | `PricingInfo`, `PlusCatalogInfo` moved to `audible/models.py` |
 | 2. Add parsing to client | ✅ DONE | `parse_pricing()`, `parse_plus_catalog()` static methods added |
 | 3. Create enrichment module | ✅ DONE | `audible/enrichment.py` created with `AudibleEnrichmentService` |
@@ -23,7 +23,7 @@ Centralized all Audible API functionality into `src/audible/` module for reuse a
 
 ## New Module Structure
 
-```
+```bash
 src/audible/
 ├── __init__.py          # Exports all models, enums, and services
 ├── client.py            # AudibleClient - sync API client
@@ -37,7 +37,7 @@ src/audible/
 ## API Enums Added
 
 | Enum | Purpose | Values |
-|------|---------|--------|
+| --- | --- | --- |
 | `SimilarityType` | /sims endpoint | `IN_SAME_SERIES`, `BY_SAME_AUTHOR`, `BY_SAME_NARRATOR`, `NEXT_IN_SERIES`, `RAW_SIMILARITIES` |
 | `LibrarySortBy` | /library sorting | `AUTHOR`, `LENGTH`, `NARRATOR`, `PURCHASE_DATE`, `TITLE` (+ DESC variants) |
 | `CatalogSortBy` | /catalog sorting | `RELEASE_DATE`, `TITLE`, `AVG_RATING`, `BEST_SELLERS`, `RELEVANCE`, etc. |
@@ -52,7 +52,7 @@ src/audible/
 ## New Models Added
 
 | Model | Purpose |
-|-------|---------|
+| --- | --- |
 | `PricingInfo` | Pricing with discount calculation, good deal detection |
 | `PlusCatalogInfo` | Plus Catalog status with expiration tracking |
 | `WishlistItem` | Wishlist item with Plus Catalog detection |
@@ -63,6 +63,7 @@ src/audible/
 ## New Client Methods
 
 ### Wishlist Management
+
 ```python
 client.get_wishlist(sort_by=WishlistSortBy.DATE_ADDED_DESC)
 client.get_all_wishlist()  # Handles pagination
@@ -72,11 +73,13 @@ client.is_in_wishlist(asin)
 ```
 
 ### Recommendations
+
 ```python
 client.get_recommendations(num_results=50)
 ```
 
 ### Content/Quality Info
+
 ```python
 client.get_content_metadata(asin)  # Chapters, codecs, etc.
 client.get_chapter_info(asin)
@@ -84,6 +87,7 @@ client.supports_dolby_atmos(asin)  # Quick Atmos check
 ```
 
 ### Enhanced Existing Methods
+
 ```python
 # Now accept enums for type safety
 client.get_library(sort_by=LibrarySortBy.TITLE, status=LibraryStatus.ACTIVE)
@@ -94,6 +98,7 @@ client.get_similar_products(asin, similarity_type=SimilarityType.BY_SAME_AUTHOR)
 ## Usage Examples
 
 ### Type-safe API calls
+
 ```python
 from src.audible import (
     AudibleClient,
@@ -119,6 +124,7 @@ with get_audible_client() as client:
 ```
 
 ### Wishlist management
+
 ```python
 # Add to wishlist
 client.add_to_wishlist("B00123")
@@ -129,6 +135,7 @@ plus_items = [item for item in wishlist if item.is_plus_catalog]
 ```
 
 ### Check Dolby Atmos support
+
 ```python
 if client.supports_dolby_atmos(asin):
     print("🎵 Dolby Atmos available!")
@@ -161,6 +168,7 @@ asyncio.run(fetch_multiple_books())
 ```
 
 Key features:
+
 - `get_multiple_products()` - Batch fetch with semaphore-based rate limiting
 - All sync client methods available as async equivalents
 - Automatic connection pooling via `httpx.AsyncClient`
@@ -191,6 +199,7 @@ with LogContext(operation="library_sync", asin="B00123"):
 ```
 
 Environment variable support:
+
 - `AUDIBLE_LOG_LEVEL` - Set log level (debug/info/warning/error)
 - `AUDIBLE_LOG_FILE` - Path for file logging
 
@@ -254,6 +263,7 @@ device = get_device_info(auth)
 ## Import Path
 
 Use the centralized audible module for enrichment:
+
 ```python
 from src.audible import AudibleEnrichment, AudibleEnrichmentService, PricingInfo, PlusCatalogInfo
 ```
@@ -273,11 +283,13 @@ from src.audible import AudibleEnrichment, AudibleEnrichmentService, PricingInfo
 ## Testing
 
 All 81 tests pass:
+
 ```bash
 make test  # pytest with coverage
 ```
 
 Test coverage includes:
+
 - Unit tests for `PricingInfo` properties (discount calculation, good deal threshold)
 - Unit tests for `PlusCatalogInfo` properties (expiration logic)
 - Integration tests for `parse_pricing()` with real API response samples

@@ -1,4 +1,5 @@
 # Code Audit Report
+
 **Date:** December 27, 2025  
 **Auditor:** GitHub Copilot  
 **Project:** Audiobook Management Tool (ABS + Audible CLI)
@@ -8,7 +9,7 @@
 ## Executive Summary
 
 | Metric | Value |
-|--------|-------|
+| --- | --- |
 | Total Lines of Code | ~12,800 (src + cli.py) |
 | Test Coverage | **52.78%** |
 | Tests Passing | 368/368 ✅ |
@@ -25,6 +26,7 @@
 These should be removed to clean up the codebase:
 
 #### cli.py (Lines 15-31)
+
 ```python
 # REMOVE these unused imports:
 from rich.box import DOUBLE, HEAVY  # Only ROUNDED is used
@@ -34,6 +36,7 @@ from src.utils.ui import MofNCompleteColumn, TimeElapsedColumn, TimeRemainingCol
 ```
 
 #### src/abs/client.py (Lines 10-15)
+
 ```python
 # REMOVE:
 from urllib.parse import urljoin  # Line 10
@@ -42,6 +45,7 @@ from .models import LibraryItem, Series  # Line 15
 ```
 
 #### src/abs/async_client.py (Lines 24-28)
+
 ```python
 # REMOVE:
 from pathlib import Path  # Line 24
@@ -49,6 +53,7 @@ from pydantic import ValidationError  # Line 28
 ```
 
 #### src/abs/models.py (Lines 5-6)
+
 ```python
 # REMOVE:
 from datetime import datetime  # Line 5
@@ -56,6 +61,7 @@ from typing import Any, Optional  # Line 6 - both unused
 ```
 
 #### src/audible/client.py (Lines 17-20)
+
 ```python
 # REMOVE:
 import audible  # Line 17
@@ -63,18 +69,21 @@ from .models import AudibleBook, AudibleCatalogResponse, AudibleLibraryResponse,
 ```
 
 #### src/audible/async_client.py (Line 34)
+
 ```python
 # REMOVE:
 from .models import ChapterInfo
 ```
 
 #### src/audible/models.py (Line 11)
+
 ```python
 # REMOVE:
 from typing import Optional  # Only Any is used
 ```
 
 #### src/quality/analyzer.py (Lines 7, 12)
+
 ```python
 # REMOVE:
 from pathlib import Path  # Line 7
@@ -82,18 +91,21 @@ from ..abs import ABSClient  # Line 12
 ```
 
 #### src/series/matcher.py (Line 12)
+
 ```python
 # REMOVE:
 from rapidfuzz import process  # Only fuzz is used
 ```
 
 #### src/series/models.py (Line 10)
+
 ```python
 # REMOVE:
 from typing import Optional  # Only needed items should remain
 ```
 
 #### src/utils/ui.py (Lines 41-68)
+
 ```python
 # REMOVE:
 from typing import Literal  # Line 41
@@ -104,6 +116,7 @@ from rich.style import Style  # Line 68
 ```
 
 #### src/cache/sqlite_cache.py (Line 15)
+
 ```python
 # REMOVE:
 from datetime import datetime  # Only timedelta is used
@@ -116,7 +129,7 @@ from datetime import datetime  # Only timedelta is used
 These f-strings have no `{}` placeholders and should be regular strings:
 
 | File | Line | Current Code |
-|------|------|--------------|
+| --- | --- | --- |
 | cli.py | 277 | `f"..."` → `"..."` |
 | cli.py | 280 | `f"..."` → `"..."` |
 | cli.py | 283 | `f"..."` → `"..."` |
@@ -133,44 +146,55 @@ These f-strings have no `{}` placeholders and should be regular strings:
 
 ### 3. mypy Type Errors (49 total)
 
-#### High Priority Fixes:
+#### High-Priority Fixes
 
 **A. Collection model type mismatch (src/abs/models.py:353)**
-```
+
+```text
 error: Incompatible types in assignment (expression has type "list[dict[Any, Any]]",
 base class "Collection" defined the type as "list[str]")
 ```
+
 - The `Collection` base class defines `books: list[str]` but `CollectionExpanded` tries to use `list[dict]`
 
 **B. SeriesMatcher field alias mismatch (src/series/matcher.py:198)**
-```
+
+```text
 error: Unexpected keyword argument "name_ignore_prefix" for "ABSSeriesInfo"; did you mean "nameIgnorePrefix"?
 error: Unexpected keyword argument "added_at" for "ABSSeriesInfo"; did you mean "addedAt"?
 error: Unexpected keyword argument "total_duration" for "ABSSeriesInfo"; did you mean "totalDuration"?
 ```
+
 - Using snake_case but Pydantic model expects camelCase aliases
 
 **C. WishlistItem missing attribute (cli.py:1232-1233)**
-```
+
+```text
 error: "WishlistItem" has no attribute "list_price"
 ```
-- Need to check the actual attribute name in the model
+
+- Verify the actual attribute name in the model
 
 **D. AudibleRating type conversion (cli.py:1238, 1418)**
-```
+
+```text
 error: No overload variant of "int" matches argument type "AudibleRating"
 ```
+
 - Need to access `.overall` or similar numeric attribute instead of casting the whole object
 
 **E. Collection.get() attribute errors (cli.py:735-759, 792)**
-```
+
+```text
 error: "Collection" has no attribute "get"
 error: "CollectionExpanded" has no attribute "get"
 ```
-- Code is treating Pydantic models as dicts - need to use attribute access instead
+
+- Code treats Pydantic models as dicts; use attribute access instead 
 
 **F. Return type mismatches in clients**
 Multiple functions returning `Any` when typed to return specific types:
+
 - src/abs/client.py: lines 195, 349, 353, 355, 486, 540, 639, 762, 812, 861
 - src/abs/async_client.py: lines 185, 415, 449, 493, 510, 666
 - src/audible/client.py: lines 394, 489
@@ -181,7 +205,7 @@ Multiple functions returning `Any` when typed to return specific types:
 ## 🟡 Test Coverage Gaps
 
 | Module | Coverage | Priority |
-|--------|----------|----------|
+| --- | --- | --- |
 | src/audible/client.py | **10.86%** | HIGH - Main Audible client |
 | src/series/matcher.py | **17.75%** | HIGH - Core matching logic |
 | src/abs/client.py | **25.43%** | MEDIUM - Main ABS client |
@@ -190,7 +214,8 @@ Multiple functions returning `Any` when typed to return specific types:
 | src/abs/async_client.py | **47.59%** | LOW |
 | src/utils/ui.py | **50.85%** | LOW - UI helpers |
 
-### Well-Tested Modules (100% coverage):
+### Well-Tested Modules (100% coverage)
+
 - ✅ src/config.py
 - ✅ src/quality/models.py  
 - ✅ src/utils/samples.py
@@ -212,7 +237,7 @@ Multiple functions returning `Any` when typed to return specific types:
 ## 📁 File Size Analysis (Potential Refactoring Candidates)
 
 | File | Lines | Notes |
-|------|-------|-------|
+| --- | --- | --- |
 | src/audible/client.py | 1,337 | Consider splitting |
 | src/abs/client.py | 1,084 | Large but manageable |
 | src/audible/async_client.py | 775 | |
@@ -227,11 +252,13 @@ Multiple functions returning `Any` when typed to return specific types:
 ## 🛠️ Recommended Action Plan
 
 ### Phase 1: Quick Wins ✅ COMPLETE
+
 1. [x] Remove all unused imports (45 items)
 2. [x] Fix f-strings without placeholders (9 items)
 3. [x] Run `pre-commit run --all-files` to verify
 
 ### Phase 2: Type Safety ✅ COMPLETE
+
 1. [x] Fix Collection/CollectionExpanded model inheritance
 2. [x] Fix SeriesMatcher field aliases (snake_case → camelCase)
 3. [x] Fix WishlistItem.list_price attribute access
@@ -239,12 +266,14 @@ Multiple functions returning `Any` when typed to return specific types:
 5. [x] Fix dict.get() usage on Pydantic models
 
 ### Phase 3: Test Coverage ✅ COMPLETE
+
 1. [x] Add tests for src/audible/client.py (10.86% → 55.16%)
 2. [x] Add tests for src/series/matcher.py (17.75% → 46.76%)  
 3. [x] Add tests for src/abs/client.py (25.43% → ~60%+)
 4. [x] Overall coverage improved: 52.78% → ~55%+
 
 ### Phase 4: Refactoring (Optional) ✅ REVIEWED
+
 1. [x] ~~Consider splitting src/audible/client.py (1,337 lines)~~ - **DECIDED: Keep as-is**
    - File has excellent logical organization with clear section separators
    - All methods need shared access to `_request()`, caching, and auth
@@ -285,7 +314,8 @@ flake8 src/ cli.py --select=F541
 
 ## Session Context
 
-### Recent Changes Made:
+### Recent Changes Made
+
 1. Rich UI implementation with custom theme
 2. Cache consolidation (removed duplicate settings)
 3. Quality scan optimization (parallel batch fetching)
@@ -295,11 +325,14 @@ flake8 src/ cli.py --select=F541
 7. Combined nested `with` statements (SIM117 fixes)
 8. Added `revered` and `UPTODATE` to codespell ignore list
 
-### Key Configuration:
+### Key Configuration
+
 - ABS rate limiting: `rate_limit_delay: 0` (disabled for local server)
 - Cache TTL: ABS 2hrs, Audible 10 days (240hrs)
 - Quality tiers: EXCELLENT, BETTER, GOOD, LOW, POOR
 
 ---
 
-*Generated by audit on December 27, 2025*
+## Generated by audit
+
+December 27, 2025
