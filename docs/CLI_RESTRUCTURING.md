@@ -7,6 +7,7 @@ Restructure the CLI to provide a uniform, consistent command hierarchy where bot
 ## Problem Statement
 
 The current CLI structure is inconsistent:
+
 - `cli.py status` shows only ABS status (misleading - feels global)
 - ABS commands are at root level (`libraries`, `items`, `search`, etc.)
 - Audible commands are under `audible` sub-app
@@ -15,18 +16,20 @@ The current CLI structure is inconsistent:
 ## Proposed Structure
 
 ### Root Level (Global Commands)
+
 Commands that affect the entire system or span multiple services:
 
 | Command | Description |
-|---------|-------------|
+| --- | --- |
 | `status` | **NEW** - Combined status: ABS + Audible + Cache |
 | `cache` | Manage unified SQLite cache (shared by both) |
 
 ### ABS Sub-App (`cli.py abs ...`)
+
 All Audiobookshelf-specific commands:
 
 | Command | Description | Current Location |
-|---------|-------------|------------------|
+| --- | --- | --- |
 | `status` | ABS connection status | `cli.py status` (root) |
 | `libraries` | List all libraries | `cli.py libraries` (root) |
 | `stats` | Library statistics | `cli.py stats` (root) |
@@ -37,10 +40,11 @@ All Audiobookshelf-specific commands:
 | `sample` | Collect golden samples | `cli.py sample-abs` (root) |
 
 ### Audible Sub-App (`cli.py audible ...`)
+
 All Audible-specific commands (already organized):
 
 | Command | Description | Status |
-|---------|-------------|--------|
+| --- | --- | --- |
 | `status` | Audible connection status | ✅ Already exists |
 | `login` | Login/authenticate | ✅ Already exists |
 | `library` | List library items | ✅ Already exists |
@@ -51,10 +55,11 @@ All Audible-specific commands (already organized):
 | `sample` | Collect golden samples | `cli.py sample-audible` → move |
 
 ### Quality Sub-App (`cli.py quality ...`)
+
 Cross-system quality analysis (no changes needed):
 
 | Command | Description |
-|---------|-------------|
+| --- | --- |
 | `scan` | Scan library for quality analysis |
 | `low` | Show low-quality items |
 | `item` | Single item quality check |
@@ -63,11 +68,14 @@ Cross-system quality analysis (no changes needed):
 ## Implementation Steps
 
 ### Phase 1: Create ABS Sub-App
+
 1. Create `abs_app = typer.Typer(help="Audiobookshelf API commands")`
 2. Register with `app.add_typer(abs_app, name="abs")`
 
 ### Phase 2: Move ABS Commands
+
 Move these commands from `@app.command()` to `@abs_app.command()`:
+
 - `status` → `abs status`
 - `libraries` → `abs libraries`
 - `stats` → `abs stats`
@@ -78,20 +86,24 @@ Move these commands from `@app.command()` to `@abs_app.command()`:
 - `sample-abs` → `abs sample`
 
 ### Phase 3: Create Global Status
+
 New `@app.command("status")` that shows:
+
 - ABS connection + library count
 - Audible connection + library count
 - Cache summary (entries, size)
 - Overall health indicator
 
 ### Phase 4: Move Sample Commands
+
 - `sample-abs` → `abs sample`
 - `sample-audible` → `audible sample`
 
 ## Before/After Comparison
 
 ### Before
-```
+
+```bash
 $ cli.py --help
 Commands:
   status           Check connection status to ABS server.  # CONFUSING!
@@ -109,7 +121,8 @@ Commands:
 ```
 
 ### After
-```
+
+```bash
 $ cli.py --help
 Commands:
   status    Show global status (ABS + Audible + Cache)

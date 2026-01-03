@@ -11,7 +11,7 @@
 This document outlines future audits to improve the quality, security, and maintainability of the codebase. Each audit includes scope, key questions, and actionable items.
 
 | Audit | Priority | Effort | Status |
-|-------|----------|--------|--------|
+| --- | --- | --- | --- |
 | [Security Audit](#1-security-audit) | 🔴 High | Medium | ✅ Complete |
 | [Dependency Audit](#2-dependency-audit) | 🔴 High | Low | ✅ Complete |
 | [Documentation Audit](#3-documentation-audit) | 🟡 Medium | Medium | ⬜ Not Started |
@@ -29,11 +29,11 @@ This document outlines future audits to improve the quality, security, and maint
 **Status:** ✅ Complete  
 **Report:** [SECURITY_AUDIT.md](SECURITY_AUDIT.md)
 
-### Scope
+### Security Audit Scope
 
 Review credential handling, API key management, input validation, and potential security vulnerabilities.
 
-### Key Questions
+### Security Audit - Key Questions
 
 - [x] How are Audible credentials stored in `data/audible_auth.json`?
 - [x] Are credentials encrypted at rest?
@@ -43,7 +43,7 @@ Review credential handling, API key management, input validation, and potential 
 - [x] Is the SQLite cache database protected?
 - [x] Are HTTP requests using secure connections (HTTPS)?
 
-### Files to Review
+### Security Audit - Files to Review
 
 - `data/audible_auth.json` - Credential storage
 - `src/config.py` - Settings and environment variable handling
@@ -52,7 +52,7 @@ Review credential handling, API key management, input validation, and potential 
 - `src/cache/sqlite_cache.py` - Cache storage
 - All logging calls for potential credential exposure
 
-### Actionable Items
+### Security Audit - Actionable Items
 
 - [x] Audit credential storage mechanism
 - [x] Check for secrets in git history
@@ -77,11 +77,11 @@ Review credential handling, API key management, input validation, and potential 
 **Status:** ✅ Complete  
 **Report:** [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)
 
-### Scope
+### Dependency Audit Scope
 
 Review dependencies for vulnerabilities, outdated packages, and license compliance.
 
-### Key Questions
+### Dependency Audit - Key Questions
 
 - [x] Are there any known vulnerabilities in dependencies?
 - [x] Which packages are outdated?
@@ -89,13 +89,13 @@ Review dependencies for vulnerabilities, outdated packages, and license complian
 - [ ] Are there unused dependencies that can be removed?
 - [x] Are dependency versions pinned appropriately?
 
-### Files to Review
+### Dependency Audit - Files to Review
 
 - `requirements.txt` - Production dependencies
 - `requirements-dev.txt` - Development dependencies
 - `pyproject.toml` - Project configuration
 
-### Actionable Items
+### Dependency Audit - Actionable Items
 
 - [x] Run `pip list --outdated` to find old packages
 - [x] Run `pip-audit` or `safety check` for vulnerabilities
@@ -104,7 +104,7 @@ Review dependencies for vulnerabilities, outdated packages, and license complian
 - [ ] Consider using `dependabot` for automated updates
 - [x] Pin versions in requirements files
 
-### Tools
+### Dependency Audit Tools
 
 ```bash
 # Check outdated packages
@@ -131,11 +131,11 @@ pip-licenses --format=markdown
 **Effort:** Medium  
 **Status:** ⬜ Not Started
 
-### Scope
+### Documentation Audit Scope
 
 Review documentation completeness, accuracy, and accessibility for users and developers.
 
-### Key Questions
+### Documentation Audit - Key Questions
 
 - [ ] Is there a comprehensive README with setup instructions?
 - [ ] Are all CLI commands documented with `--help`?
@@ -145,7 +145,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 - [ ] Are configuration options documented?
 - [ ] Is the architecture documented for contributors?
 
-### Files to Review
+### Documentation Audit - Files to Review
 
 - `README.md` - Main documentation
 - `docs/` - Documentation folder
@@ -153,7 +153,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 - Docstrings in all Python modules
 - `config.yaml` - Configuration reference
 
-### Actionable Items
+### Documentation Audit - Actionable Items
 
 - [ ] Create/update comprehensive README
 - [ ] Document all CLI commands with examples
@@ -166,7 +166,7 @@ Review documentation completeness, accuracy, and accessibility for users and dev
 
 ### Documentation Structure
 
-```
+```text
 docs/
 ├── README.md           # Quick start, overview
 ├── INSTALLATION.md     # Detailed setup
@@ -186,11 +186,11 @@ docs/
 **Effort:** High  
 **Status:** ⬜ Not Started
 
-### Scope
+### Performance Audit Scope
 
 Identify bottlenecks, memory issues, and optimization opportunities.
 
-### Key Questions
+### Performance Audit - Key Questions
 
 - [ ] How does the tool perform with large libraries (1000+ books)?
 - [ ] Are API calls batched efficiently?
@@ -207,7 +207,7 @@ Identify bottlenecks, memory issues, and optimization opportunities.
 - Cache read/write performance
 - Series matching algorithms
 
-### Actionable Items
+### Performance Audit - Actionable Items
 
 - [ ] Profile key operations with `cProfile`
 - [ ] Measure memory usage with `memory_profiler`
@@ -249,7 +249,7 @@ kernprof -l -v script.py
 **Effort:** Medium  
 **Status:** ⬜ Not Started
 
-### Scope
+### Observability Audit Scope
 
 Review logging, metrics, and debugging capabilities.
 
@@ -262,14 +262,14 @@ Review logging, metrics, and debugging capabilities.
 - [ ] Are API request/response logged for debugging?
 - [ ] Is there structured logging support?
 
-### Files to Review
+### Observability Audit - Files to Review
 
 - `src/abs/logging.py` - ABS logging config
 - `src/audible/logging.py` - Audible logging config
 - All `logger.xxx()` calls across codebase
 - CLI verbose/debug flags
 
-### Actionable Items
+### Observability Audit - Actionable Items
 
 - [ ] Standardize logging format across modules
 - [ ] Add request IDs for tracing
@@ -295,7 +295,7 @@ logger.error("API call failed", extra={"endpoint": url, "status": status}, exc_i
 **Effort:** Medium  
 **Status:** ⬜ Not Started
 
-### Scope
+### CLI UX Audit Scope
 
 Review command-line interface for consistency, usability, and user experience.
 
@@ -317,7 +317,7 @@ Review command-line interface for consistency, usability, and user experience.
 - All `series` subcommands
 - Global commands (`status`, `cache`)
 
-### Actionable Items
+### CLI UX Audit - Actionable Items
 
 - [ ] Audit all `--help` text for clarity
 - [ ] Standardize option naming conventions
@@ -330,7 +330,7 @@ Review command-line interface for consistency, usability, and user experience.
 
 ### UX Checklist
 
-```
+```text
 ✓ Consistent verb usage (list, show, get, create, delete)
 ✓ Short flags for common options (-l, -o, -v)
 ✓ Long flags are descriptive (--library, --output, --verbose)
@@ -349,11 +349,11 @@ Review command-line interface for consistency, usability, and user experience.
 **Effort:** High  
 **Status:** ⬜ Not Started
 
-### Scope
+### Integration Test Audit Scope
 
 Review end-to-end test coverage and real-world scenario testing.
 
-### Key Questions
+### Integration Test Audit - Key Questions
 
 - [ ] Are there integration tests for key workflows?
 - [ ] Is there a test environment with mock APIs?
@@ -370,7 +370,7 @@ Review end-to-end test coverage and real-world scenario testing.
 5. Error recovery (network failures, API errors)
 6. Configuration loading from various sources
 
-### Actionable Items
+### Integration Test Audit - Actionable Items
 
 - [ ] Create mock ABS server for testing
 - [ ] Create mock Audible responses
@@ -382,7 +382,7 @@ Review end-to-end test coverage and real-world scenario testing.
 
 ### Test Fixtures Needed
 
-```
+```text
 tests/
 ├── fixtures/
 │   ├── abs_responses/      # Mock ABS API responses
@@ -421,4 +421,6 @@ Recommended order based on priority and dependencies:
 
 ---
 
-*Last updated: December 27, 2025*
+## Last updated
+
+December 27, 2025
