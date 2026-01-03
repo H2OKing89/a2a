@@ -1,0 +1,120 @@
+{
+  "content_metadata": {
+    "chapter_info": {
+      "brandIntroDurationMs": 0,
+      "brandOutroDurationMs": 0,
+      "chapters": [
+        {
+          "length_ms": 14952,
+          "start_offset_ms": 0,
+          "start_offset_sec": 0,
+          "title": "Opening Credits"
+        },
+        {
+          "length_ms": 4632,
+          "start_offset_ms": 14952,
+          "start_offset_sec": 14,
+          "title": "Content Page"
+        },
+        {
+          "length_ms": 646320,
+          "start_offset_ms": 19584,
+          "start_offset_sec": 19,
+          "title": "Prolouge"
+        },
+        {
+          "length_ms": 506424,
+          "start_offset_ms": 665904,
+          "start_offset_sec": 665,
+          "title": "Chapter 1"
+        },
+        {
+          "length_ms": 897168,
+          "start_offset_ms": 1172328,
+          "start_offset_sec": 1172,
+          "title": "Chapter 2"
+        },
+        {
+          "length_ms": 744168,
+          "start_offset_ms": 2069496,
+          "start_offset_sec": 2069,
+          "title": "Chapter 3"
+        },
+        {
+          "length_ms": 797640,
+          "start_offset_ms": 2813664,
+          "start_offset_sec": 2813,
+          "title": "Chapter 4"
+        },
+        {
+          "length_ms": 687408,
+          "start_offset_ms": 3611304,
+          "start_offset_sec": 3611,
+          "title": "Chapter 5"
+        },
+        {
+          "length_ms": 1021368,
+          "start_offset_ms": 4298712,
+          "start_offset_sec": 4298,
+          "title": "Chapter 6"
+        },
+        {
+          "length_ms": 1099992,
+          "start_offset_ms": 5320080,
+          "start_offset_sec": 5320,
+          "title": "Chapter 7"
+        },
+        {
+          "length_ms": 724152,
+          "start_offset_ms": 6420072,
+          "start_offset_sec": 6420,
+          "title": "Chapter 8"
+        },
+        {
+          "length_ms": 774600,
+          "start_offset_ms": 7144224,
+          "start_offset_sec": 7144,
+          "title": "Chapter 9"
+        },
+        {
+          "length_ms": 459336,
+          "start_offset_ms": 7918824,
+          "start_offset_sec": 7918,
+          "title": "Chapter 10"
+        },
+        {
+          "length_ms": 865728,
+          "start_offset_ms": 8378160,
+          "start_offset_sec": 8378,
+          "title": "Chapter 11"
+        },
+        {
+          "length_ms": 6168,
+          "start_offset_ms": 9243888,
+          "start_offset_sec": 9243,
+          "title": "End Credits"
+        }
+      ],
+      "is_accurate": true,
+      "runtime_length_ms": 9250056,
+      "runtime_length_sec": 9250
+    },
+    "content_reference": {
+      "acr": "CR!EN15B0R9KN15N73EH7GYV2NH1QP3",
+      "asin": "B0CTXKB2R6",
+      "codec": "mp4a.40.42",
+      "content_format": "M4A_XHE",
+      "content_size_in_bytes": 121486917,
+      "file_version": "1",
+      "marketplace": "AF2M0KC94RCEA",
+      "sku": "VV_8001_025365",
+      "tempo": "1.0",
+      "version": "77636871"
+    }
+  },
+  "response_groups": [
+    "always-returned",
+    "chapter_info",
+    "content_reference"
+  ]
+}

@@ -1,0 +1,721 @@
+{
+  "content_metadata": {
+    "chapter_info": {
+      "brandIntroDurationMs": 3924,
+      "brandOutroDurationMs": 4945,
+      "chapters": [
+        {
+          "length_ms": 19765,
+          "start_offset_ms": 0,
+          "start_offset_sec": 0,
+          "title": "Opening Credits"
+        },
+        {
+          "length_ms": 994488,
+          "start_offset_ms": 19765,
+          "start_offset_sec": 19,
+          "title": "1. Strange Business"
+        },
+        {
+          "length_ms": 706098,
+          "start_offset_ms": 1014253,
+          "start_offset_sec": 1014,
+          "title": "2. Of Course Magic Is a Thing"
+        },
+        {
+          "length_ms": 639140,
+          "start_offset_ms": 1720351,
+          "start_offset_sec": 1720,
+          "title": "3. Local Cuisine"
+        },
+        {
+          "length_ms": 650739,
+          "start_offset_ms": 2359491,
+          "start_offset_sec": 2359,
+          "title": "4. Cannibals and Spelunking"
+        },
+        {
+          "length_ms": 677960,
+          "start_offset_ms": 3010230,
+          "start_offset_sec": 3010,
+          "title": "5. Wizard"
+        },
+        {
+          "length_ms": 665076,
+          "start_offset_ms": 3688190,
+          "start_offset_sec": 3688,
+          "title": "6. Potent Potable"
+        },
+        {
+          "length_ms": 840966,
+          "start_offset_ms": 4353266,
+          "start_offset_sec": 4353,
+          "title": "7. Spoils"
+        },
+        {
+          "length_ms": 912596,
+          "start_offset_ms": 5194232,
+          "start_offset_sec": 5194,
+          "title": "8. Dark Magic"
+        },
+        {
+          "length_ms": 914245,
+          "start_offset_ms": 6106828,
+          "start_offset_sec": 6106,
+          "title": "9. Escape"
+        },
+        {
+          "length_ms": 703161,
+          "start_offset_ms": 7021073,
+          "start_offset_sec": 7021,
+          "title": "10. The Evil Pit of Evil"
+        },
+        {
+          "length_ms": 795355,
+          "start_offset_ms": 7724234,
+          "start_offset_sec": 7724,
+          "title": "11. Dashing Heroics"
+        },
+        {
+          "length_ms": 696767,
+          "start_offset_ms": 8519589,
+          "start_offset_sec": 8519,
+          "title": "12. Sanguine Horror"
+        },
+        {
+          "length_ms": 979572,
+          "start_offset_ms": 9216356,
+          "start_offset_sec": 9216,
+          "title": "13. This Is the Part Where We Step Back"
+        },
+        {
+          "length_ms": 824992,
+          "start_offset_ms": 10195928,
+          "start_offset_sec": 10195,
+          "title": "14. Worlds Apart"
+        },
+        {
+          "length_ms": 960784,
+          "start_offset_ms": 11020920,
+          "start_offset_sec": 11020,
+          "title": "15. Outworlder"
+        },
+        {
+          "length_ms": 908998,
+          "start_offset_ms": 11981704,
+          "start_offset_sec": 11981,
+          "title": "16. Rescue Party"
+        },
+        {
+          "length_ms": 859562,
+          "start_offset_ms": 12890702,
+          "start_offset_sec": 12890,
+          "title": "17. A Conservative Pillage"
+        },
+        {
+          "length_ms": 812814,
+          "start_offset_ms": 13750264,
+          "start_offset_sec": 13750,
+          "title": "18. One of Us"
+        },
+        {
+          "length_ms": 709061,
+          "start_offset_ms": 14563078,
+          "start_offset_sec": 14563,
+          "title": "19. I Want a Lava Cannon"
+        },
+        {
+          "length_ms": 1214365,
+          "start_offset_ms": 15272139,
+          "start_offset_sec": 15272,
+          "title": "20. By the Power of Grayskull"
+        },
+        {
+          "length_ms": 787906,
+          "start_offset_ms": 16486504,
+          "start_offset_sec": 16486,
+          "title": "21. I Have the Power"
+        },
+        {
+          "length_ms": 1122335,
+          "start_offset_ms": 17274410,
+          "start_offset_sec": 17274,
+          "title": "22. Apocalypse Stone"
+        },
+        {
+          "length_ms": 994096,
+          "start_offset_ms": 18396745,
+          "start_offset_sec": 18396,
+          "title": "23. I May Have Made a Huge Mistake"
+        },
+        {
+          "length_ms": 700961,
+          "start_offset_ms": 19390841,
+          "start_offset_sec": 19390,
+          "title": "24. Astral Space"
+        },
+        {
+          "length_ms": 726360,
+          "start_offset_ms": 20091802,
+          "start_offset_sec": 20091,
+          "title": "25. Blasphemy Is Kind of My Thing"
+        },
+        {
+          "length_ms": 720706,
+          "start_offset_ms": 20818162,
+          "start_offset_sec": 20818,
+          "title": "26. Waterfall"
+        },
+        {
+          "length_ms": 842449,
+          "start_offset_ms": 21538868,
+          "start_offset_sec": 21538,
+          "title": "27. Water, Fall"
+        },
+        {
+          "length_ms": 787523,
+          "start_offset_ms": 22381317,
+          "start_offset_sec": 22381,
+          "title": "28. How Did You All Fit in There?"
+        },
+        {
+          "length_ms": 816806,
+          "start_offset_ms": 23168840,
+          "start_offset_sec": 23168,
+          "title": "29. That\u2019s What Adventurers Do"
+        },
+        {
+          "length_ms": 722433,
+          "start_offset_ms": 23985646,
+          "start_offset_sec": 23985,
+          "title": "30. Closing the Door Too Hard"
+        },
+        {
+          "length_ms": 1177585,
+          "start_offset_ms": 24708079,
+          "start_offset_sec": 24708,
+          "title": "31. Taming the Beast"
+        },
+        {
+          "length_ms": 1003526,
+          "start_offset_ms": 25885664,
+          "start_offset_sec": 25885,
+          "title": "32. Monster Hunting for Beginners"
+        },
+        {
+          "length_ms": 816944,
+          "start_offset_ms": 26889190,
+          "start_offset_sec": 26889,
+          "title": "33. Mistrun River"
+        },
+        {
+          "length_ms": 648964,
+          "start_offset_ms": 27706134,
+          "start_offset_sec": 27706,
+          "title": "34. Waving the Flag for Secular Morality"
+        },
+        {
+          "length_ms": 882529,
+          "start_offset_ms": 28355098,
+          "start_offset_sec": 28355,
+          "title": "35. Greenstone"
+        },
+        {
+          "length_ms": 892422,
+          "start_offset_ms": 29237627,
+          "start_offset_sec": 29237,
+          "title": "36. The Island"
+        },
+        {
+          "length_ms": 1168714,
+          "start_offset_ms": 30130049,
+          "start_offset_sec": 30130,
+          "title": "37. A Good Adventurer and a Great One"
+        },
+        {
+          "length_ms": 1346584,
+          "start_offset_ms": 31298763,
+          "start_offset_sec": 31298,
+          "title": "38. Just Another Adventurer"
+        },
+        {
+          "length_ms": 1119409,
+          "start_offset_ms": 32645347,
+          "start_offset_sec": 32645,
+          "title": "39. Training"
+        },
+        {
+          "length_ms": 1042734,
+          "start_offset_ms": 33764756,
+          "start_offset_sec": 33764,
+          "title": "40. Eyebeams and the Ethics of Adventuring"
+        },
+        {
+          "length_ms": 1009226,
+          "start_offset_ms": 34807490,
+          "start_offset_sec": 34807,
+          "title": "41. Vulnerable and Exposed"
+        },
+        {
+          "length_ms": 766728,
+          "start_offset_ms": 35816716,
+          "start_offset_sec": 35816,
+          "title": "42. This Is the Pits"
+        },
+        {
+          "length_ms": 747507,
+          "start_offset_ms": 36583444,
+          "start_offset_sec": 36583,
+          "title": "43. Nightingale"
+        },
+        {
+          "length_ms": 838397,
+          "start_offset_ms": 37330951,
+          "start_offset_sec": 37330,
+          "title": "44. Complimentary Ointment"
+        },
+        {
+          "length_ms": 799829,
+          "start_offset_ms": 38169348,
+          "start_offset_sec": 38169,
+          "title": "45. So Much for Atheism"
+        },
+        {
+          "length_ms": 1243368,
+          "start_offset_ms": 38969177,
+          "start_offset_sec": 38969,
+          "title": "46. Blatant Manipulation"
+        },
+        {
+          "length_ms": 931848,
+          "start_offset_ms": 40212545,
+          "start_offset_sec": 40212,
+          "title": "47. Mirage Chamber"
+        },
+        {
+          "length_ms": 1100980,
+          "start_offset_ms": 41144393,
+          "start_offset_sec": 41144,
+          "title": "48. An Endless, Inescapable Nightmare"
+        },
+        {
+          "length_ms": 935841,
+          "start_offset_ms": 42245373,
+          "start_offset_sec": 42245,
+          "title": "49. A Voice from Home"
+        },
+        {
+          "length_ms": 901778,
+          "start_offset_ms": 43181214,
+          "start_offset_sec": 43181,
+          "title": "50. The Full Keanu"
+        },
+        {
+          "length_ms": 706172,
+          "start_offset_ms": 44082992,
+          "start_offset_sec": 44082,
+          "title": "51. Song of the Nightingale"
+        },
+        {
+          "length_ms": 814554,
+          "start_offset_ms": 44789164,
+          "start_offset_sec": 44789,
+          "title": "52. Pain"
+        },
+        {
+          "length_ms": 1141110,
+          "start_offset_ms": 45603718,
+          "start_offset_sec": 45603,
+          "title": "53. Nightlife"
+        },
+        {
+          "length_ms": 977361,
+          "start_offset_ms": 46744828,
+          "start_offset_sec": 46744,
+          "title": "54. Field Assessment"
+        },
+        {
+          "length_ms": 806554,
+          "start_offset_ms": 47722189,
+          "start_offset_sec": 47722,
+          "title": "55. Rune Tortoise"
+        },
+        {
+          "length_ms": 740642,
+          "start_offset_ms": 48528743,
+          "start_offset_sec": 48528,
+          "title": "56. Gary\u2019s Gift"
+        },
+        {
+          "length_ms": 860642,
+          "start_offset_ms": 49269385,
+          "start_offset_sec": 49269,
+          "title": "57. Rainbow Smoke"
+        },
+        {
+          "length_ms": 1082779,
+          "start_offset_ms": 50130027,
+          "start_offset_sec": 50130,
+          "title": "58. A Man of Malevolent Intellect"
+        },
+        {
+          "length_ms": 748574,
+          "start_offset_ms": 51212806,
+          "start_offset_sec": 51212,
+          "title": "59. Falling Short"
+        },
+        {
+          "length_ms": 748920,
+          "start_offset_ms": 51961380,
+          "start_offset_sec": 51961,
+          "title": "60. Making Music"
+        },
+        {
+          "length_ms": 1161703,
+          "start_offset_ms": 52710300,
+          "start_offset_sec": 52710,
+          "title": "61. Trade Hall"
+        },
+        {
+          "length_ms": 851266,
+          "start_offset_ms": 53872003,
+          "start_offset_sec": 53872,
+          "title": "62. Have Some Damn Adventures"
+        },
+        {
+          "length_ms": 1012795,
+          "start_offset_ms": 54723269,
+          "start_offset_sec": 54723,
+          "title": "63. Sunk-Cost Fallacy"
+        },
+        {
+          "length_ms": 692243,
+          "start_offset_ms": 55736064,
+          "start_offset_sec": 55736,
+          "title": "64. Take My Wife, Please"
+        },
+        {
+          "length_ms": 1117656,
+          "start_offset_ms": 56428307,
+          "start_offset_sec": 56428,
+          "title": "65. Curious Urges"
+        },
+        {
+          "length_ms": 821630,
+          "start_offset_ms": 57545963,
+          "start_offset_sec": 57545,
+          "title": "66. A Stronger Weapon Than the One in Your Hand"
+        },
+        {
+          "length_ms": 1473662,
+          "start_offset_ms": 58367593,
+          "start_offset_sec": 58367,
+          "title": "67. This Is What It Means to Fight Me"
+        },
+        {
+          "length_ms": 901415,
+          "start_offset_ms": 59841255,
+          "start_offset_sec": 59841,
+          "title": "68. Good News for Clive"
+        },
+        {
+          "length_ms": 965736,
+          "start_offset_ms": 60742670,
+          "start_offset_sec": 60742,
+          "title": "69. Dumpling Soup"
+        },
+        {
+          "length_ms": 951800,
+          "start_offset_ms": 61708406,
+          "start_offset_sec": 61708,
+          "title": "70. Rewards"
+        },
+        {
+          "length_ms": 897388,
+          "start_offset_ms": 62660206,
+          "start_offset_sec": 62660,
+          "title": "71. A Bit of Poo"
+        },
+        {
+          "length_ms": 660003,
+          "start_offset_ms": 63557594,
+          "start_offset_sec": 63557,
+          "title": "72. Rat Race"
+        },
+        {
+          "length_ms": 630887,
+          "start_offset_ms": 64217597,
+          "start_offset_sec": 64217,
+          "title": "73. A Grim Sword to Live By"
+        },
+        {
+          "length_ms": 795235,
+          "start_offset_ms": 64848484,
+          "start_offset_sec": 64848,
+          "title": "74. Doing Better"
+        },
+        {
+          "length_ms": 868380,
+          "start_offset_ms": 65643719,
+          "start_offset_sec": 65643,
+          "title": "75. Progress"
+        },
+        {
+          "length_ms": 831372,
+          "start_offset_ms": 66512099,
+          "start_offset_sec": 66512,
+          "title": "76. Preparations"
+        },
+        {
+          "length_ms": 838076,
+          "start_offset_ms": 67343471,
+          "start_offset_sec": 67343,
+          "title": "77. Group Cohesion"
+        },
+        {
+          "length_ms": 787692,
+          "start_offset_ms": 68181547,
+          "start_offset_sec": 68181,
+          "title": "78. Jason Has the Good Biscuits"
+        },
+        {
+          "length_ms": 784766,
+          "start_offset_ms": 68969239,
+          "start_offset_sec": 68969,
+          "title": "79. Sand Everywhere"
+        },
+        {
+          "length_ms": 944820,
+          "start_offset_ms": 69754005,
+          "start_offset_sec": 69754,
+          "title": "80. It\u2019s Not Work If You Love What You Do"
+        },
+        {
+          "length_ms": 637786,
+          "start_offset_ms": 70698825,
+          "start_offset_sec": 70698,
+          "title": "81. Crazy Desperation Move"
+        },
+        {
+          "length_ms": 918489,
+          "start_offset_ms": 71336611,
+          "start_offset_sec": 71336,
+          "title": "82. Choices"
+        },
+        {
+          "length_ms": 799472,
+          "start_offset_ms": 72255100,
+          "start_offset_sec": 72255,
+          "title": "83. It Makes No Difference to the Ant"
+        },
+        {
+          "length_ms": 901295,
+          "start_offset_ms": 73054572,
+          "start_offset_sec": 73054,
+          "title": "84. Injury and Death"
+        },
+        {
+          "length_ms": 783048,
+          "start_offset_ms": 73955867,
+          "start_offset_sec": 73955,
+          "title": "85. Because I\u2019m an Adventurer"
+        },
+        {
+          "length_ms": 1173120,
+          "start_offset_ms": 74738915,
+          "start_offset_sec": 74738,
+          "title": "86. Some Kind of Secret"
+        },
+        {
+          "length_ms": 1494094,
+          "start_offset_ms": 75912035,
+          "start_offset_sec": 75912,
+          "title": "87. Can\u2019t Lose"
+        },
+        {
+          "length_ms": 1055150,
+          "start_offset_ms": 77406129,
+          "start_offset_sec": 77406,
+          "title": "88. The Nature of Absolution"
+        },
+        {
+          "length_ms": 860304,
+          "start_offset_ms": 78461279,
+          "start_offset_sec": 78461,
+          "title": "89. Anti-Pirate Operations"
+        },
+        {
+          "length_ms": 861744,
+          "start_offset_ms": 79321583,
+          "start_offset_sec": 79321,
+          "title": "90. The Path to Bronze"
+        },
+        {
+          "length_ms": 673557,
+          "start_offset_ms": 80183327,
+          "start_offset_sec": 80183,
+          "title": "91. Life and Death"
+        },
+        {
+          "length_ms": 1078941,
+          "start_offset_ms": 80856884,
+          "start_offset_sec": 80856,
+          "title": "92. Unusual Contract"
+        },
+        {
+          "length_ms": 1062549,
+          "start_offset_ms": 81935825,
+          "start_offset_sec": 81935,
+          "title": "93. Truth"
+        },
+        {
+          "length_ms": 884888,
+          "start_offset_ms": 82998374,
+          "start_offset_sec": 82998,
+          "title": "94. Consequences"
+        },
+        {
+          "length_ms": 1579208,
+          "start_offset_ms": 83883262,
+          "start_offset_sec": 83883,
+          "title": "95. Punishment"
+        },
+        {
+          "length_ms": 793934,
+          "start_offset_ms": 85462470,
+          "start_offset_sec": 85462,
+          "title": "96. You Don\u2019t Get a Third"
+        },
+        {
+          "length_ms": 1357542,
+          "start_offset_ms": 86256404,
+          "start_offset_sec": 86256,
+          "title": "97. Integrity Is Sexy"
+        },
+        {
+          "length_ms": 868096,
+          "start_offset_ms": 87613946,
+          "start_offset_sec": 87613,
+          "title": "98. The Point of Money and Power"
+        },
+        {
+          "length_ms": 1349214,
+          "start_offset_ms": 88482042,
+          "start_offset_sec": 88482,
+          "title": "99. Someone Else\u2019s Game"
+        },
+        {
+          "length_ms": 863602,
+          "start_offset_ms": 89831256,
+          "start_offset_sec": 89831,
+          "title": "100. Legwork"
+        },
+        {
+          "length_ms": 974897,
+          "start_offset_ms": 90694858,
+          "start_offset_sec": 90694,
+          "title": "101. Fantasy World Goodness"
+        },
+        {
+          "length_ms": 974670,
+          "start_offset_ms": 91669755,
+          "start_offset_sec": 91669,
+          "title": "102. You Fight Like Me"
+        },
+        {
+          "length_ms": 1409772,
+          "start_offset_ms": 92644425,
+          "start_offset_sec": 92644,
+          "title": "103. Silver Hair"
+        },
+        {
+          "length_ms": 1077028,
+          "start_offset_ms": 94054197,
+          "start_offset_sec": 94054,
+          "title": "104. An Outcome That Satisfies"
+        },
+        {
+          "length_ms": 796413,
+          "start_offset_ms": 95131225,
+          "start_offset_sec": 95131,
+          "title": "105. You Aren\u2019t in Control of What Happens Next"
+        },
+        {
+          "length_ms": 1016523,
+          "start_offset_ms": 95927638,
+          "start_offset_sec": 95927,
+          "title": "106. Something Shady"
+        },
+        {
+          "length_ms": 1105329,
+          "start_offset_ms": 96944161,
+          "start_offset_sec": 96944,
+          "title": "107. All the Good People We Can Get"
+        },
+        {
+          "length_ms": 1145064,
+          "start_offset_ms": 98049490,
+          "start_offset_sec": 98049,
+          "title": "108. You Don\u2019t Have the Strength"
+        },
+        {
+          "length_ms": 859505,
+          "start_offset_ms": 99194554,
+          "start_offset_sec": 99194,
+          "title": "109. The Tyranny of Rank"
+        },
+        {
+          "length_ms": 913749,
+          "start_offset_ms": 100054059,
+          "start_offset_sec": 100054,
+          "title": "110. Help Arrives"
+        },
+        {
+          "length_ms": 1033798,
+          "start_offset_ms": 100967808,
+          "start_offset_sec": 100967,
+          "title": "111. Strange Star"
+        },
+        {
+          "length_ms": 1124338,
+          "start_offset_ms": 102001606,
+          "start_offset_sec": 102001,
+          "title": "112. The Accumulation of a Life"
+        },
+        {
+          "length_ms": 998359,
+          "start_offset_ms": 103125944,
+          "start_offset_sec": 103125,
+          "title": "113. You Need to Work on Making Enemies"
+        },
+        {
+          "length_ms": 59343,
+          "start_offset_ms": 104124303,
+          "start_offset_sec": 104124,
+          "title": "End Credits"
+        }
+      ],
+      "is_accurate": true,
+      "runtime_length_ms": 104183646,
+      "runtime_length_sec": 104183
+    },
+    "content_reference": {
+      "acr": "CR!4V1WDVJD1N2ZH0C2Q3TMPBAK77S8",
+      "asin": "1774248182",
+      "codec": "mp4a.40.42",
+      "content_format": "M4A_XHE",
+      "content_size_in_bytes": 374080865,
+      "file_version": "1",
+      "marketplace": "AF2M0KC94RCEA",
+      "sku": "BK_PODM_002396",
+      "tempo": "1.0",
+      "version": "26660071"
+    }
+  },
+  "response_groups": [
+    "always-returned",
+    "content_url",
+    "chapter_info",
+    "content_reference"
+  ]
+}

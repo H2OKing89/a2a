@@ -1,0 +1,656 @@
+{
+  "product": {
+    "asin": "1774249162",
+    "asset_details": [],
+    "authors": [
+      {
+        "asin": "B08VWFRTMS",
+        "name": "Shirtaloon"
+      },
+      {
+        "name": "Travis Deverell"
+      }
+    ],
+    "available_codecs": [
+      {
+        "enhanced_codec": "LC_128_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_128"
+      },
+      {
+        "enhanced_codec": "LC_32_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_32"
+      },
+      {
+        "enhanced_codec": "format4",
+        "format": "Format4",
+        "is_kindle_enhanced": false,
+        "name": "format4"
+      },
+      {
+        "enhanced_codec": "LC_64_44100_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_44_64"
+      },
+      {
+        "enhanced_codec": "LC_64_22050_stereo",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "aax_22_64"
+      },
+      {
+        "enhanced_codec": "mp44464",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_44_64"
+      },
+      {
+        "enhanced_codec": "mp42264",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_22_64"
+      },
+      {
+        "enhanced_codec": "mp42232",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_22_32"
+      },
+      {
+        "enhanced_codec": "mp444128",
+        "format": "Enhanced",
+        "is_kindle_enhanced": true,
+        "name": "mp4_44_128"
+      },
+      {
+        "enhanced_codec": "aax",
+        "format": "Enhanced",
+        "is_kindle_enhanced": false,
+        "name": "aax"
+      }
+    ],
+    "category_ladders": [
+      {
+        "ladder": [
+          {
+            "id": "18580606011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18580607011",
+            "name": "Fantasy"
+          },
+          {
+            "id": "18580608011",
+            "name": "Action & Adventure"
+          }
+        ],
+        "root": "Genres"
+      },
+      {
+        "ladder": [
+          {
+            "id": "18580606011",
+            "name": "Science Fiction & Fantasy"
+          },
+          {
+            "id": "18580607011",
+            "name": "Fantasy"
+          },
+          {
+            "id": "18580615011",
+            "name": "Epic"
+          }
+        ],
+        "root": "Genres"
+      }
+    ],
+    "content_delivery_type": "MultiPartBook",
+    "content_type": "Product",
+    "copyright": "\u00a92021 Shirtaloon (P)2021 Podium Audio",
+    "customer_reviews": [
+      {
+        "asin": "1774249162",
+        "author_id": "amzn1.account.AGHGPCG2FQWOWCPLC5WSPTB5XXUA",
+        "author_name": "Jeffrey",
+        "body": "I\u2019ve recently read book 1 and I have to admit the author has improved on character development but there were some story elements that could have been better. This book felt shorter than the first and the ending did leave me a bit confused. <br />*Spoilers*<br />I believe the author has really improved Jason\u2019s character. We are getting to know him more and he longer goes on a religious rant about the gods. I do feel like book one characters became pointless and I\u2019m mostly referring to Rufus and Garry. I really loved those characters and I wished Jason would have formed a team with them. I love Clyde and Hempfrey but I reallyyy don\u2019t care for Sophie or Belinda tbh they are very boring characters, I rather focus on Jason developing and getting stronger. Overall it\u2019s better than book one but the battle was at times confusing. I hope someone enjoys this honest review and book 3 here I come. ",
+        "format": "Freeform",
+        "id": "102742f9e00947ecb1230ec5f90c8a07",
+        "location": "",
+        "ratings": {
+          "overall_rating": 4,
+          "performance_rating": 3,
+          "story_rating": 4
+        },
+        "review_content_scores": {
+          "content_quality": 83,
+          "num_helpful_votes": 4,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2021-11-22T04:20:22Z",
+        "title": "Not perfect but overall better"
+      },
+      {
+        "asin": "1774249162",
+        "author_id": "amzn1.account.AEDHPQEEDE47OZGJPX2LDZ45PP5A",
+        "author_name": "Ernest James",
+        "body": "What can I say writing was amazing. Author really delivered in this book filled in the gaps from the last book left on the cliffhanger of already purchased the 3rd book",
+        "format": "Freeform",
+        "id": "efc66504cc9f4abfafd8541e704a60b7",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 80,
+          "num_helpful_votes": 3,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2021-05-26T04:22:24Z",
+        "title": "Could Stop Listening!!!"
+      },
+      {
+        "asin": "1774249162",
+        "author_id": "amzn1.account.AGR2ZDOOLZE4LYWKZP7L223FPIBQ",
+        "author_name": "RyanLBS",
+        "body": "Jason is so funny and this story is amazing I am hooked! Would highly recommend to anyone. ",
+        "format": "Freeform",
+        "id": "b17c126e85f44034a99abf5c47ae40b5",
+        "location": "",
+        "ratings": {
+          "overall_rating": 5,
+          "performance_rating": 5,
+          "story_rating": 5
+        },
+        "review_content_scores": {
+          "content_quality": 75,
+          "num_helpful_votes": 2,
+          "num_unhelpful_votes": 0
+        },
+        "submission_date": "2021-11-22T17:51:42Z",
+        "title": "Just amazing and funny"
+      }
+    ],
+    "customer_rights": {
+      "is_book_qa_eligible": false,
+      "is_consumable": false,
+      "is_consumable_indefinitely": false,
+      "is_consumable_offline": false
+    },
+    "date_first_available": "2021-05-18",
+    "distribution_rights_region": [
+      "PR",
+      "PS",
+      "PT",
+      "PW",
+      "PY",
+      "QA",
+      "AD",
+      "AE",
+      "AF",
+      "AG",
+      "AI",
+      "AL",
+      "AM",
+      "AO",
+      "AQ",
+      "AR",
+      "AS",
+      "AT",
+      "RE",
+      "AU",
+      "AW",
+      "AX",
+      "AZ",
+      "RO",
+      "BA",
+      "BB",
+      "RS",
+      "BD",
+      "BE",
+      "RU",
+      "BF",
+      "BG",
+      "RW",
+      "BH",
+      "BI",
+      "BJ",
+      "BL",
+      "BM",
+      "BN",
+      "BO",
+      "SA",
+      "BQ",
+      "SB",
+      "BR",
+      "SC",
+      "BS",
+      "SD",
+      "BT",
+      "SE",
+      "BV",
+      "SG",
+      "BW",
+      "SH",
+      "SI",
+      "BY",
+      "SJ",
+      "BZ",
+      "SK",
+      "SL",
+      "SM",
+      "SN",
+      "SO",
+      "CA",
+      "SR",
+      "CC",
+      "SS",
+      "CD",
+      "ST",
+      "CF",
+      "SV",
+      "CG",
+      "CH",
+      "SX",
+      "CI",
+      "SZ",
+      "CK",
+      "CL",
+      "CM",
+      "CN",
+      "CO",
+      "CR",
+      "TC",
+      "TD",
+      "TF",
+      "CV",
+      "TG",
+      "CW",
+      "TH",
+      "CX",
+      "CY",
+      "TJ",
+      "CZ",
+      "TK",
+      "TL",
+      "TM",
+      "TN",
+      "TO",
+      "TR",
+      "TT",
+      "DE",
+      "TV",
+      "TW",
+      "DJ",
+      "TZ",
+      "DK",
+      "DM",
+      "DO",
+      "UA",
+      "UG",
+      "DZ",
+      "UM",
+      "EC",
+      "US",
+      "EE",
+      "EG",
+      "EH",
+      "UY",
+      "UZ",
+      "VA",
+      "ER",
+      "VC",
+      "ES",
+      "ET",
+      "VE",
+      "VG",
+      "VI",
+      "VN",
+      "VU",
+      "FI",
+      "FJ",
+      "FK",
+      "FM",
+      "FO",
+      "FR",
+      "WF",
+      "GA",
+      "GB",
+      "WS",
+      "GD",
+      "GE",
+      "GF",
+      "GG",
+      "GH",
+      "GI",
+      "GL",
+      "GM",
+      "GN",
+      "GP",
+      "GQ",
+      "GR",
+      "GS",
+      "GT",
+      "GU",
+      "GW",
+      "GY",
+      "HK",
+      "HM",
+      "HN",
+      "HR",
+      "HT",
+      "YE",
+      "HU",
+      "ID",
+      "YT",
+      "IE",
+      "IL",
+      "IM",
+      "IN",
+      "IO",
+      "ZA",
+      "IQ",
+      "IS",
+      "IT",
+      "ZM",
+      "JE",
+      "ZW",
+      "JM",
+      "JO",
+      "JP",
+      "KE",
+      "KG",
+      "KH",
+      "KI",
+      "KM",
+      "KN",
+      "KR",
+      "KW",
+      "KY",
+      "KZ",
+      "LA",
+      "LB",
+      "LC",
+      "LI",
+      "LK",
+      "LR",
+      "LS",
+      "LT",
+      "LU",
+      "LV",
+      "LY",
+      "MA",
+      "MC",
+      "MD",
+      "ME",
+      "MF",
+      "MG",
+      "MH",
+      "MK",
+      "ML",
+      "MM",
+      "MN",
+      "MO",
+      "MP",
+      "MQ",
+      "MR",
+      "MS",
+      "MT",
+      "MU",
+      "MV",
+      "MW",
+      "MX",
+      "MY",
+      "MZ",
+      "NC",
+      "NE",
+      "NF",
+      "NG",
+      "NI",
+      "NL",
+      "NO",
+      "NP",
+      "NR",
+      "NU",
+      "NZ",
+      "OM",
+      "PA",
+      "PE",
+      "PF",
+      "PG",
+      "PH",
+      "PK",
+      "PL",
+      "PM",
+      "PN"
+    ],
+    "extended_product_description": "<p>But Jason Asano is settling into his new life. Now, a contest draws young elites to the city of Greenstone to compete for a grand prize. Jason must gather a band of companions if he is to stand a chance against the best the world has to offer. While the young adventurers are caught up in competition, the city leaders deal with revelations of betrayal as a vast and terrible enemy is revealed. Although Jason seems uninvolved, he has unknowingly crossed the enemy\u2019s path before. </p>",
+    "format_type": "unabridged",
+    "has_children": true,
+    "is_adult_product": false,
+    "is_buyable": true,
+    "is_in_wishlist": false,
+    "is_listenable": true,
+    "is_pdf_url_available": false,
+    "is_preorderable": false,
+    "is_purchasability_suppressed": false,
+    "is_vvab": false,
+    "is_world_rights": false,
+    "isbn": "9781774249161",
+    "issue_date": "2021-05-18",
+    "language": "english",
+    "listening_status": {
+      "is_finished": false,
+      "percent_complete": 0.0,
+      "time_remaining_seconds": 79260
+    },
+    "merchandising_description": "",
+    "merchandising_summary": "From retail to wizard, Jason Asano competes in Greenstone, gathering allies to face formidable foes, betrayals, and an impending conflict.",
+    "narrators": [
+      {
+        "name": "Heath Miller"
+      }
+    ],
+    "plans": [
+      {
+        "end_date": "2099-12-31T00:00:00.00000Z",
+        "plan_name": "AccessViaMusic",
+        "start_date": "1970-01-01T00:00:00.00000Z"
+      }
+    ],
+    "platinum_keywords": [
+      "Science_Fiction_Fantasy",
+      "Science_Fiction_Fantasy/Fantasy",
+      "Science_Fiction_Fantasy/Fantasy/Epic",
+      "Classics"
+    ],
+    "preorder_release_date": "2021-05-18T07:00:00Z",
+    "price": {
+      "credit_price": 1.0,
+      "list_price": {
+        "base": 59.9900016784668,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "list"
+      },
+      "lowest_price": {
+        "base": 7.989999771118164,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "sale"
+      },
+      "ws4v_upsell_price": {
+        "base": 5.050000190734863,
+        "currency_code": "USD",
+        "merchant_id": "A2ZO8JX97D5MN9",
+        "type": "ws4v_upsell"
+      }
+    },
+    "product_images": {
+      "500": "https://m.media-amazon.com/images/I/51GSxj-rhzL._SL500_.jpg"
+    },
+    "product_site_launch_date": "2021-03-10T05:07:00Z",
+    "product_state": "AVAILABLE",
+    "publication_datetime": "2021-05-18T07:00:00Z",
+    "publication_name": "He Who Fights with Monsters",
+    "publisher_name": "Podium Audio",
+    "publisher_summary": "<p><b>The path from retail middle management to inter-dimensional wizard adventurer wasn\u2019t easy. </b></p> <p>But Jason Asano is settling into his new life. Now, a contest draws young elites to the city of Greenstone to compete for a grand prize. Jason must gather a band of companions if he is to stand a chance against the best the world has to offer. </p> <p>While the young adventurers are caught up in competition, the city leaders deal with revelations of betrayal as a vast and terrible enemy is revealed. Although Jason seems uninvolved, he has unknowingly crossed the enemy\u2019s path before. Friends and foes made along the way will lead him to cross it again. Inevitable conflict looms....</p>",
+    "rating": {
+      "num_reviews": 2158,
+      "overall_distribution": {
+        "average_rating": 4.873001115656378,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 28959,
+        "num_four_star_ratings": 2753,
+        "num_one_star_ratings": 61,
+        "num_ratings": 32268,
+        "num_three_star_ratings": 384,
+        "num_two_star_ratings": 111
+      },
+      "performance_distribution": {
+        "average_rating": 4.906909992912828,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 25992,
+        "num_four_star_ratings": 1918,
+        "num_one_star_ratings": 29,
+        "num_ratings": 28220,
+        "num_three_star_ratings": 250,
+        "num_two_star_ratings": 31
+      },
+      "story_distribution": {
+        "average_rating": 4.856879105272501,
+        "display_average_rating": "4.9",
+        "display_stars": 5.0,
+        "num_five_star_ratings": 24942,
+        "num_four_star_ratings": 2645,
+        "num_one_star_ratings": 67,
+        "num_ratings": 28165,
+        "num_three_star_ratings": 415,
+        "num_two_star_ratings": 96
+      }
+    },
+    "read_along_support": "true",
+    "reasons_for_reporting_review": [
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_guideline_violation",
+        "reported_reason_value": "guideline_violation"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_csam",
+        "reported_reason_value": "csam"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_inappropriate_content",
+        "reported_reason_value": "inappropriate_content"
+      },
+      {
+        "reported_reason_string_id": "adbl_review_reported_reason_other_concerning_content",
+        "reported_reason_value": "other_concerning_content"
+      }
+    ],
+    "relationships": [
+      {
+        "asin": "B08WJ59784",
+        "content_delivery_type": "BookSeries",
+        "relationship_to_product": "parent",
+        "relationship_type": "series",
+        "sequence": "2",
+        "sku": "SE_RIES_052667",
+        "sku_lite": "SE_RIES_052667",
+        "sort": "2",
+        "title": "He Who Fights with Monsters",
+        "url": "/pd/He-Who-Fights-with-Monsters-Audiobook/B08WJ59784"
+      },
+      {
+        "asin": "B0955L9SWT",
+        "relationship_to_product": "child",
+        "relationship_type": "component",
+        "sort": "2"
+      },
+      {
+        "asin": "B0955CMPTR",
+        "relationship_to_product": "child",
+        "relationship_type": "component",
+        "sort": "1"
+      }
+    ],
+    "release_date": "2021-05-18",
+    "runtime_length_min": 1321,
+    "sample_url": "https://samples.audible.com/bk/podm/002523/bk_podm_002523_sample.mp3",
+    "selected_sort_option_for_reviews": "MostRelevant",
+    "series": [
+      {
+        "asin": "B08WJ59784",
+        "sequence": "2",
+        "title": "He Who Fights with Monsters",
+        "url": "/pd/He-Who-Fights-with-Monsters-Audiobook/B08WJ59784"
+      }
+    ],
+    "sku": "BK_PODM_002523",
+    "sku_lite": "BK_PODM_002523",
+    "social_media_images": {
+      "facebook": "https://m.media-amazon.com/images/I/51GSxj-rhzL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51GSxj-rhzL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+      "ig_bg": "https://m.media-amazon.com/images/I/51GSxj-rhzL._SL200_BL80_UR1080,2160.jpg",
+      "ig_static_with_bg": "https://m.media-amazon.com/images/I/51GSxj-rhzL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51GSxj-rhzL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHe%20Who%20Fights%20with%20Mons...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBShirtaloon%252C%20Travis%20Deverell,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+      "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51GSxj-rhzL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHe%20Who%20Fights%20w...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20Shirtaloon%252C%20Travis...,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+      "twitter": "https://m.media-amazon.com/images/I/51GSxj-rhzL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51GSxj-rhzL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+    },
+    "sort_options_for_reviews": [
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRelevant",
+        "reviews_sort_order_value": "MostRelevant"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostHelpful",
+        "reviews_sort_order_value": "MostHelpful"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostRecent",
+        "reviews_sort_order_value": "MostRecent"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostPositive",
+        "reviews_sort_order_value": "MostPositive"
+      },
+      {
+        "reviews_sort_order_string_id": "adbl_productdetail_reviews_sort_MostCritical",
+        "reviews_sort_order_value": "MostCritical"
+      }
+    ],
+    "subtitle": "A LitRPG Adventure (He Who Fights with Monsters, Book 2)",
+    "thesaurus_subject_keywords": [
+      "literature-and-fiction"
+    ],
+    "title": "He Who Fights with Monsters 2"
+  },
+  "response_groups": [
+    "customer_rights",
+    "rating",
+    "media",
+    "product_attrs",
+    "sample",
+    "relationships",
+    "product_desc",
+    "always-returned",
+    "product_extended_attrs",
+    "contributors",
+    "listening_status",
+    "reviews",
+    "product_plans",
+    "price",
+    "series",
+    "in_wishlist",
+    "category_ladders",
+    "sku",
+    "product_details",
+    "product_plan_details"
+  ]
+}

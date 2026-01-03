@@ -1,0 +1,1522 @@
+{
+  "bin_fields": null,
+  "products": [
+    {
+      "accolades": null,
+      "added_timestamp": "2025-10-09T02:12:30Z",
+      "amazon_asin": null,
+      "asin": "B0F14PK33J",
+      "asin_trends": null,
+      "asset_badges": null,
+      "asset_details": [],
+      "audible_editors_summary": null,
+      "author_pages": null,
+      "authors": [
+        {
+          "asin": "B000AP9A6K",
+          "name": "J.K. Rowling"
+        }
+      ],
+      "availability": null,
+      "available_codecs": null,
+      "badges": null,
+      "book_tags": null,
+      "buying_options": null,
+      "category_ladders": null,
+      "chart_ranks": null,
+      "claim_code_url": null,
+      "content_delivery_type": "SinglePartBook",
+      "content_level": null,
+      "content_rating": null,
+      "content_type": "Product",
+      "continuity": null,
+      "copyright": null,
+      "credits_required": null,
+      "customer_reviews": null,
+      "customer_rights": {
+        "is_book_qa_eligible": false,
+        "is_consumable": false,
+        "is_consumable_indefinitely": false,
+        "is_consumable_offline": false,
+        "is_consumable_until": null
+      },
+      "date_first_available": null,
+      "destination_asin": null,
+      "distribution_rights_region": [
+        "AS",
+        "PR",
+        "MP",
+        "VI",
+        "PW",
+        "UM",
+        "PH",
+        "MH",
+        "GU",
+        "US"
+      ],
+      "editorial_reviews": null,
+      "episode_count": null,
+      "episode_number": null,
+      "episode_type": null,
+      "extended_product_description": null,
+      "format_type": "unabridged",
+      "generic_keyword": null,
+      "goodreads_ratings": null,
+      "has_children": false,
+      "image_url": null,
+      "invites_remaining": null,
+      "is_adult_product": false,
+      "is_buyable": true,
+      "is_getting_latest_episodes": null,
+      "is_in_wishlist": null,
+      "is_listenable": true,
+      "is_pdf_url_available": null,
+      "is_preorderable": true,
+      "is_prereleased": null,
+      "is_purchasability_suppressed": false,
+      "is_released": null,
+      "is_searchable": null,
+      "is_shared": null,
+      "is_vvab": false,
+      "is_world_rights": false,
+      "is_ws4v_companion_asin_owned": null,
+      "is_ws4v_enabled": null,
+      "isbn": null,
+      "issue_date": "2026-01-13",
+      "language": "english",
+      "library_status": null,
+      "library_status_badges": null,
+      "listening_status": null,
+      "long_tail_topic_tags": null,
+      "member_giving_status": null,
+      "merchandising_description": null,
+      "merchandising_summary": "<i>'Welcome to the Knight Bus, emergency transport for the stranded witch or wizard. Just stick out your wand hand, step on board and we can take you anywhere you want to go.'</i>",
+      "music_id": null,
+      "narration_accent": null,
+      "narrators": [
+        {
+          "asin": null,
+          "name": "Hugh Laurie"
+        },
+        {
+          "asin": null,
+          "name": "Matthew Macfadyen"
+        },
+        {
+          "asin": null,
+          "name": "Riz Ahmed"
+        },
+        {
+          "asin": null,
+          "name": "Michelle Gomez"
+        },
+        {
+          "asin": null,
+          "name": "S\u0323o\u0323pe\u0323\u0301 Di\u0300ri\u0301su\u0300"
+        },
+        {
+          "asin": null,
+          "name": "Simon Pegg"
+        },
+        {
+          "asin": null,
+          "name": "Cush Jumbo"
+        },
+        {
+          "asin": null,
+          "name": "Iwan Rheon"
+        },
+        {
+          "asin": null,
+          "name": "Frankie Treadaway"
+        },
+        {
+          "asin": null,
+          "name": "Max Lester"
+        },
+        {
+          "asin": null,
+          "name": "Arabella Stanton"
+        },
+        {
+          "asin": null,
+          "name": "Mark Addy"
+        },
+        {
+          "asin": null,
+          "name": "Matt Berry"
+        },
+        {
+          "asin": null,
+          "name": "David Holmes"
+        },
+        {
+          "asin": null,
+          "name": "Saoirse-Monica Jackson"
+        }
+      ],
+      "new_episode_added_date": null,
+      "participation_plans": null,
+      "pdf_url": null,
+      "performance_summary": null,
+      "periodical_info": null,
+      "plans": [
+        {
+          "customer_eligible": null,
+          "detail_plan_names": null,
+          "end_date": "2099-12-31T00:00:00.00000Z",
+          "plan_name": "AccessViaMusic",
+          "start_date": "1970-01-01T00:00:00.00000Z"
+        }
+      ],
+      "platinum_keywords": null,
+      "preorder_release_date": "2026-01-13T08:00:00Z",
+      "preorder_status": null,
+      "price": {
+        "credit_price": 1.0,
+        "is_buy_for_free_eligible": null,
+        "is_credit_price_eligible": null,
+        "is_free_eligible": null,
+        "is_ws4v_upsell_eligible": null,
+        "list_price": {
+          "base": 29.989999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "list"
+        },
+        "lowest_price": {
+          "base": 20.989999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "member"
+        },
+        "ws4v_upsell_price": {
+          "base": 29.989999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "ws4v_upsell"
+        }
+      },
+      "product_images": {
+        "500": "https://m.media-amazon.com/images/I/516i3WKREOL._SL500_.jpg"
+      },
+      "product_page_url": null,
+      "product_site_launch_date": null,
+      "product_state": "AVAILABLE_FOR_PREORDER",
+      "profile_sharing": null,
+      "program_participation": null,
+      "provided_review": null,
+      "publication_datetime": "2026-01-13T08:00:00Z",
+      "publication_name": "Harry Potter (Full-Cast Editions)",
+      "publisher_name": "Pottermore Publishing and Audible Studios",
+      "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>'Welcome to the Knight Bus, emergency transport for the stranded witch or wizard. Just stick out your wand hand, step on board and we can take you anywhere you want to go.'</i></p> <p>When the Knight Bus crashes through the darkness and screeches to a halt in front of him, it's the start of another far from ordinary year at Hogwarts for Harry Potter. Sirius Black, escaped mass-murderer and follower of Lord Voldemort, is on the run\u2014and they say he is coming after Harry. In his first ever Divination class, Professor Trelawney sees an omen of death in Harry's tea leaves... But perhaps most terrifying of all are the Dementors patrolling the school grounds, with their soul-sucking kiss...</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Frankie Treadaway as Harry Potter, Max Lester as Ron Weasley, Arabella Stanton as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, Simon Pegg as Arthur Weasley, Iwan Rheon as Remus Lupin, David Holmes as Stan Shunpike, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+      "rating": {
+        "num_reviews": 0,
+        "overall_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "performance_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "story_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        }
+      },
+      "read_along_support": null,
+      "reasons_for_reporting_review": null,
+      "registry_id": null,
+      "registry_item_id": null,
+      "relationships": [
+        {
+          "asin": "B0FJMLG5DN",
+          "content_delivery_type": "BookSeries",
+          "relationship_to_product": "parent",
+          "relationship_type": "series",
+          "sequence": "3",
+          "sku": "SE_RIES_105047",
+          "sku_lite": "SE_RIES_105047",
+          "sort": "3",
+          "title": "Harry Potter (Full-Cast Editions)",
+          "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+        }
+      ],
+      "release_date": "2026-01-13",
+      "revenue_allocation_id": null,
+      "review_keywords": null,
+      "review_status": null,
+      "review_summary": null,
+      "rich_images": null,
+      "runtime_length_min": null,
+      "sample_url": null,
+      "season_number": null,
+      "selected_sort_option_for_reviews": null,
+      "series": null,
+      "short_description": null,
+      "sku": "BK_POTR_000575",
+      "sku_lite": "BK_POTR_000575",
+      "social_media_images": {
+        "facebook": "https://m.media-amazon.com/images/I/516i3WKREOL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C516i3WKREOL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+        "ig_bg": "https://m.media-amazon.com/images/I/516i3WKREOL._SL200_BL80_UR1080,2160.jpg",
+        "ig_static_with_bg": "https://m.media-amazon.com/images/I/516i3WKREOL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C516i3WKREOL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20Pr...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+        "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C516i3WKREOL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+        "twitter": "https://m.media-amazon.com/images/I/516i3WKREOL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C516i3WKREOL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+      },
+      "sort_options_for_reviews": null,
+      "spotlight_tags": null,
+      "story_summary": null,
+      "subtitle": null,
+      "tags": null,
+      "text_to_speech": null,
+      "thesaurus_subject_keywords": [
+        "coming_of_age",
+        "literature-and-fiction"
+      ],
+      "title": "Harry Potter and the Prisoner of Azkaban (Full-Cast Edition)",
+      "video_url": null,
+      "voice_description": null,
+      "ws4v_companion_asin": null,
+      "ws4v_details": null
+    },
+    {
+      "accolades": null,
+      "added_timestamp": "2025-10-09T02:12:31Z",
+      "amazon_asin": null,
+      "asin": "B0F14PB6WN",
+      "asin_trends": null,
+      "asset_badges": null,
+      "asset_details": [],
+      "audible_editors_summary": null,
+      "author_pages": null,
+      "authors": [
+        {
+          "asin": "B000AP9A6K",
+          "name": "J.K. Rowling"
+        }
+      ],
+      "availability": null,
+      "available_codecs": null,
+      "badges": null,
+      "book_tags": null,
+      "buying_options": null,
+      "category_ladders": null,
+      "chart_ranks": null,
+      "claim_code_url": null,
+      "content_delivery_type": "SinglePartBook",
+      "content_level": null,
+      "content_rating": null,
+      "content_type": "Product",
+      "continuity": null,
+      "copyright": null,
+      "credits_required": null,
+      "customer_reviews": null,
+      "customer_rights": {
+        "is_book_qa_eligible": false,
+        "is_consumable": false,
+        "is_consumable_indefinitely": false,
+        "is_consumable_offline": false,
+        "is_consumable_until": null
+      },
+      "date_first_available": null,
+      "destination_asin": null,
+      "distribution_rights_region": [
+        "AS",
+        "PR",
+        "MP",
+        "VI",
+        "PW",
+        "UM",
+        "PH",
+        "MH",
+        "GU",
+        "US"
+      ],
+      "editorial_reviews": null,
+      "episode_count": null,
+      "episode_number": null,
+      "episode_type": null,
+      "extended_product_description": null,
+      "format_type": "unabridged",
+      "generic_keyword": null,
+      "goodreads_ratings": null,
+      "has_children": false,
+      "image_url": null,
+      "invites_remaining": null,
+      "is_adult_product": false,
+      "is_buyable": true,
+      "is_getting_latest_episodes": null,
+      "is_in_wishlist": null,
+      "is_listenable": true,
+      "is_pdf_url_available": null,
+      "is_preorderable": true,
+      "is_prereleased": null,
+      "is_purchasability_suppressed": false,
+      "is_released": null,
+      "is_searchable": null,
+      "is_shared": null,
+      "is_vvab": false,
+      "is_world_rights": false,
+      "is_ws4v_companion_asin_owned": null,
+      "is_ws4v_enabled": null,
+      "isbn": null,
+      "issue_date": "2026-02-10",
+      "language": "english",
+      "library_status": null,
+      "library_status_badges": null,
+      "listening_status": null,
+      "long_tail_topic_tags": null,
+      "member_giving_status": null,
+      "merchandising_description": null,
+      "merchandising_summary": "<i>'There will be three tasks, spaced throughout the school year, and they will test the champions in many different ways ... their magical prowess - their daring - their powers of deduction - and, of course, their ability to cope with danger.'</i>",
+      "music_id": null,
+      "narration_accent": null,
+      "narrators": [
+        {
+          "asin": null,
+          "name": "Hugh Laurie"
+        },
+        {
+          "asin": null,
+          "name": "James McAvoy"
+        },
+        {
+          "asin": null,
+          "name": "Ruth Wilson"
+        },
+        {
+          "asin": null,
+          "name": "Michelle Gomez"
+        },
+        {
+          "asin": null,
+          "name": "Riz Ahmed"
+        },
+        {
+          "asin": null,
+          "name": "S\u0323o\u0323pe\u0323\u0301 Di\u0300ri\u0301su\u0300"
+        },
+        {
+          "asin": null,
+          "name": "Leo Woodall"
+        },
+        {
+          "asin": null,
+          "name": "Alex Hassell"
+        },
+        {
+          "asin": null,
+          "name": "Simon Pegg"
+        },
+        {
+          "asin": null,
+          "name": "Mark Addy"
+        },
+        {
+          "asin": null,
+          "name": "Daniel Mays"
+        },
+        {
+          "asin": null,
+          "name": "Cush Jumbo"
+        },
+        {
+          "asin": null,
+          "name": "Jaxon Knopf"
+        },
+        {
+          "asin": null,
+          "name": "Rhys Mulligan"
+        },
+        {
+          "asin": null,
+          "name": "Nina Barker-Francis"
+        }
+      ],
+      "new_episode_added_date": null,
+      "participation_plans": null,
+      "pdf_url": null,
+      "performance_summary": null,
+      "periodical_info": null,
+      "plans": [
+        {
+          "customer_eligible": null,
+          "detail_plan_names": null,
+          "end_date": "2099-12-31T00:00:00.00000Z",
+          "plan_name": "AccessViaMusic",
+          "start_date": "1970-01-01T00:00:00.00000Z"
+        }
+      ],
+      "platinum_keywords": null,
+      "preorder_release_date": "2026-02-10T08:00:00Z",
+      "preorder_status": null,
+      "price": {
+        "credit_price": 1.0,
+        "is_buy_for_free_eligible": null,
+        "is_credit_price_eligible": null,
+        "is_free_eligible": null,
+        "is_ws4v_upsell_eligible": null,
+        "list_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "list"
+        },
+        "lowest_price": {
+          "base": 31.489999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "member"
+        },
+        "ws4v_upsell_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "ws4v_upsell"
+        }
+      },
+      "product_images": {
+        "500": "https://m.media-amazon.com/images/I/61U3M9ctQQL._SL500_.jpg"
+      },
+      "product_page_url": null,
+      "product_site_launch_date": null,
+      "product_state": "AVAILABLE_FOR_PREORDER",
+      "profile_sharing": null,
+      "program_participation": null,
+      "provided_review": null,
+      "publication_datetime": "2026-02-10T08:00:00Z",
+      "publication_name": "Harry Potter (Full-Cast Editions)",
+      "publisher_name": "Pottermore Publishing and Audible Studios",
+      "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>'There will be three tasks, spaced throughout the school year, and they will test the champions in many different ways ... their magical prowess - their daring - their powers of deduction - and, of course, their ability to cope with danger.'</i></p> <p>The Triwizard Tournament is to be held at Hogwarts. Only wizards who are over seventeen are allowed to enter\u2014but that doesn't stop Harry dreaming that he will win the competition. Then at Hallowe'en, when the Goblet of Fire makes its selection, Harry is amazed to find his name is one of those that the magical cup picks out. He will face death-defying tasks, dragons and Dark wizards, but with the help of his best friends, Ron and Hermione, he might just make it through\u2014alive!</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Jaxon Knopf as Harry Potter, Rhys Mulligan as Ron Weasley, Nina Barker-Francis as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, James McAvoy as Alastor \u2018Mad Eye\u2019 Moody, Ruth Wilson as Bellatrix Lestrange, Simon Pegg as Arthur Weasley, Leo Woodall as Bill Weasley, Alex Hassell as Lucius Malfoy, David Holmes as Stan Shunpike, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+      "rating": {
+        "num_reviews": 0,
+        "overall_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "performance_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "story_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        }
+      },
+      "read_along_support": null,
+      "reasons_for_reporting_review": null,
+      "registry_id": null,
+      "registry_item_id": null,
+      "relationships": [
+        {
+          "asin": "B0FJMLG5DN",
+          "content_delivery_type": "BookSeries",
+          "relationship_to_product": "parent",
+          "relationship_type": "series",
+          "sequence": "4",
+          "sku": "SE_RIES_105047",
+          "sku_lite": "SE_RIES_105047",
+          "sort": "4",
+          "title": "Harry Potter (Full-Cast Editions)",
+          "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+        }
+      ],
+      "release_date": "2026-02-10",
+      "revenue_allocation_id": null,
+      "review_keywords": null,
+      "review_status": null,
+      "review_summary": null,
+      "rich_images": null,
+      "runtime_length_min": null,
+      "sample_url": null,
+      "season_number": null,
+      "selected_sort_option_for_reviews": null,
+      "series": null,
+      "short_description": null,
+      "sku": "BK_POTR_000576",
+      "sku_lite": "BK_POTR_000576",
+      "social_media_images": {
+        "facebook": "https://m.media-amazon.com/images/I/61U3M9ctQQL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C61U3M9ctQQL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+        "ig_bg": "https://m.media-amazon.com/images/I/61U3M9ctQQL._SL200_BL80_UR1080,2160.jpg",
+        "ig_static_with_bg": "https://m.media-amazon.com/images/I/61U3M9ctQQL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C61U3M9ctQQL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20Go...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+        "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C61U3M9ctQQL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+        "twitter": "https://m.media-amazon.com/images/I/61U3M9ctQQL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C61U3M9ctQQL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+      },
+      "sort_options_for_reviews": null,
+      "spotlight_tags": null,
+      "story_summary": null,
+      "subtitle": null,
+      "tags": null,
+      "text_to_speech": null,
+      "thesaurus_subject_keywords": [
+        "coming_of_age",
+        "literature-and-fiction"
+      ],
+      "title": "Harry Potter and the Goblet of Fire (Full-Cast Edition)",
+      "video_url": null,
+      "voice_description": null,
+      "ws4v_companion_asin": null,
+      "ws4v_details": null
+    },
+    {
+      "accolades": null,
+      "added_timestamp": "2025-10-09T02:12:33Z",
+      "amazon_asin": null,
+      "asin": "B0F14P2632",
+      "asin_trends": null,
+      "asset_badges": null,
+      "asset_details": [],
+      "audible_editors_summary": null,
+      "author_pages": null,
+      "authors": [
+        {
+          "asin": "B000AP9A6K",
+          "name": "J.K. Rowling"
+        }
+      ],
+      "availability": null,
+      "available_codecs": null,
+      "badges": null,
+      "book_tags": null,
+      "buying_options": null,
+      "category_ladders": null,
+      "chart_ranks": null,
+      "claim_code_url": null,
+      "content_delivery_type": "SinglePartBook",
+      "content_level": null,
+      "content_rating": null,
+      "content_type": "Product",
+      "continuity": null,
+      "copyright": null,
+      "credits_required": null,
+      "customer_reviews": null,
+      "customer_rights": {
+        "is_book_qa_eligible": false,
+        "is_consumable": false,
+        "is_consumable_indefinitely": false,
+        "is_consumable_offline": false,
+        "is_consumable_until": null
+      },
+      "date_first_available": null,
+      "destination_asin": null,
+      "distribution_rights_region": [
+        "AS",
+        "PR",
+        "MP",
+        "VI",
+        "PW",
+        "UM",
+        "PH",
+        "MH",
+        "GU",
+        "US"
+      ],
+      "editorial_reviews": null,
+      "episode_count": null,
+      "episode_number": null,
+      "episode_type": null,
+      "extended_product_description": null,
+      "format_type": "unabridged",
+      "generic_keyword": null,
+      "goodreads_ratings": null,
+      "has_children": false,
+      "image_url": null,
+      "invites_remaining": null,
+      "is_adult_product": false,
+      "is_buyable": true,
+      "is_getting_latest_episodes": null,
+      "is_in_wishlist": null,
+      "is_listenable": true,
+      "is_pdf_url_available": null,
+      "is_preorderable": true,
+      "is_prereleased": null,
+      "is_purchasability_suppressed": false,
+      "is_released": null,
+      "is_searchable": null,
+      "is_shared": null,
+      "is_vvab": false,
+      "is_world_rights": false,
+      "is_ws4v_companion_asin_owned": null,
+      "is_ws4v_enabled": null,
+      "isbn": null,
+      "issue_date": "2026-03-10",
+      "language": "english",
+      "library_status": null,
+      "library_status_badges": null,
+      "listening_status": null,
+      "long_tail_topic_tags": null,
+      "member_giving_status": null,
+      "merchandising_description": null,
+      "merchandising_summary": "<i>'You are sharing the Dark Lord's thoughts and emotions. The Headmaster thinks it inadvisable for this to continue. He wishes me to teach you how to close your mind to the Dark Lord.'</i>",
+      "music_id": null,
+      "narration_accent": null,
+      "narrators": [
+        {
+          "asin": null,
+          "name": "Hugh Laurie"
+        },
+        {
+          "asin": null,
+          "name": "Keira Knightley"
+        },
+        {
+          "asin": null,
+          "name": "James McAvoy"
+        },
+        {
+          "asin": null,
+          "name": "Kit Harington"
+        },
+        {
+          "asin": null,
+          "name": "Ruth Wilson"
+        },
+        {
+          "asin": null,
+          "name": "Matthew MacFadyen"
+        },
+        {
+          "asin": null,
+          "name": "Michelle Gomez"
+        },
+        {
+          "asin": null,
+          "name": "Riz Ahmed"
+        },
+        {
+          "asin": null,
+          "name": "Leo Woodall"
+        },
+        {
+          "asin": null,
+          "name": "S\u0323o\u0323pe\u0323\u0301 Di\u0300ri\u0301su\u0300"
+        },
+        {
+          "asin": null,
+          "name": "Cush Jumbo"
+        },
+        {
+          "asin": null,
+          "name": "Simon Pegg"
+        },
+        {
+          "asin": null,
+          "name": "Jaxon Knopf"
+        },
+        {
+          "asin": null,
+          "name": "Rhys Mulligan"
+        },
+        {
+          "asin": null,
+          "name": "Nina Barker-Francis"
+        }
+      ],
+      "new_episode_added_date": null,
+      "participation_plans": null,
+      "pdf_url": null,
+      "performance_summary": null,
+      "periodical_info": null,
+      "plans": [
+        {
+          "customer_eligible": null,
+          "detail_plan_names": null,
+          "end_date": "2099-12-31T00:00:00.00000Z",
+          "plan_name": "AccessViaMusic",
+          "start_date": "1970-01-01T00:00:00.00000Z"
+        }
+      ],
+      "platinum_keywords": null,
+      "preorder_release_date": "2026-03-10T07:00:00Z",
+      "preorder_status": null,
+      "price": {
+        "credit_price": 1.0,
+        "is_buy_for_free_eligible": null,
+        "is_credit_price_eligible": null,
+        "is_free_eligible": null,
+        "is_ws4v_upsell_eligible": null,
+        "list_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "list"
+        },
+        "lowest_price": {
+          "base": 31.489999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "member"
+        },
+        "ws4v_upsell_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "ws4v_upsell"
+        }
+      },
+      "product_images": {
+        "500": "https://m.media-amazon.com/images/I/51qW73k+gWL._SL500_.jpg"
+      },
+      "product_page_url": null,
+      "product_site_launch_date": null,
+      "product_state": "AVAILABLE_FOR_PREORDER",
+      "profile_sharing": null,
+      "program_participation": null,
+      "provided_review": null,
+      "publication_datetime": "2026-03-10T07:00:00Z",
+      "publication_name": "Harry Potter (Full-Cast Editions)",
+      "publisher_name": "Pottermore Publishing and Audible Studios",
+      "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>'You are sharing the Dark Lord's thoughts and emotions. The Headmaster thinks it inadvisable for this to continue. He wishes me to teach you how to close your mind to the Dark Lord.'</i></p> <p>Dark times have come to Hogwarts. After the Dementors' attack on his cousin Dudley, Harry Potter knows that Voldemort will stop at nothing to find him. There are many who deny the Dark Lord's return, but Harry is not alone: a secret order gathers at Grimmauld Place to fight against the Dark forces. Harry must allow Professor Snape to teach him how to protect himself from Voldemort's savage assaults on his mind. But they are growing stronger by the day and Harry is running out of time...</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Jaxon Knopf as Harry Potter, Rhys Mulligan as Ron Weasley, Nina Barker-Francis as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, James McAvoy as Alastor \u2018Mad Eye\u2019 Moody, Keira Knightley as Dolores Umbridge, Kit Harington as Gilderoy Lockhart, Ruth Wilson as Bellatrix Lestrange, Simon Pegg as Arthur Weasley, Leo Woodall as Bill Weasley, Ambika Mod as Nymphadora Tonks, Alex Hassell as Lucius Malfoy, David Holmes as Stan Shunpike, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+      "rating": {
+        "num_reviews": 0,
+        "overall_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "performance_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "story_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        }
+      },
+      "read_along_support": null,
+      "reasons_for_reporting_review": null,
+      "registry_id": null,
+      "registry_item_id": null,
+      "relationships": [
+        {
+          "asin": "B0FJMLG5DN",
+          "content_delivery_type": "BookSeries",
+          "relationship_to_product": "parent",
+          "relationship_type": "series",
+          "sequence": "5",
+          "sku": "SE_RIES_105047",
+          "sku_lite": "SE_RIES_105047",
+          "sort": "5",
+          "title": "Harry Potter (Full-Cast Editions)",
+          "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+        }
+      ],
+      "release_date": "2026-03-10",
+      "revenue_allocation_id": null,
+      "review_keywords": null,
+      "review_status": null,
+      "review_summary": null,
+      "rich_images": null,
+      "runtime_length_min": null,
+      "sample_url": null,
+      "season_number": null,
+      "selected_sort_option_for_reviews": null,
+      "series": null,
+      "short_description": null,
+      "sku": "BK_POTR_000577",
+      "sku_lite": "BK_POTR_000577",
+      "social_media_images": {
+        "facebook": "https://m.media-amazon.com/images/I/51qW73k+gWL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51qW73k+gWL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+        "ig_bg": "https://m.media-amazon.com/images/I/51qW73k+gWL._SL200_BL80_UR1080,2160.jpg",
+        "ig_static_with_bg": "https://m.media-amazon.com/images/I/51qW73k+gWL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51qW73k+gWL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20Or...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+        "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51qW73k+gWL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+        "twitter": "https://m.media-amazon.com/images/I/51qW73k+gWL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51qW73k+gWL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+      },
+      "sort_options_for_reviews": null,
+      "spotlight_tags": null,
+      "story_summary": null,
+      "subtitle": null,
+      "tags": null,
+      "text_to_speech": null,
+      "thesaurus_subject_keywords": [
+        "coming_of_age",
+        "literature-and-fiction"
+      ],
+      "title": "Harry Potter and the Order of the Phoenix (Full-Cast Edition)",
+      "video_url": null,
+      "voice_description": null,
+      "ws4v_companion_asin": null,
+      "ws4v_details": null
+    },
+    {
+      "accolades": null,
+      "added_timestamp": "2025-10-09T02:12:34Z",
+      "amazon_asin": null,
+      "asin": "B0F14KKPH6",
+      "asin_trends": null,
+      "asset_badges": null,
+      "asset_details": [],
+      "audible_editors_summary": null,
+      "author_pages": null,
+      "authors": [
+        {
+          "asin": "B000AP9A6K",
+          "name": "J.K. Rowling"
+        }
+      ],
+      "availability": null,
+      "available_codecs": null,
+      "badges": null,
+      "book_tags": null,
+      "buying_options": null,
+      "category_ladders": null,
+      "chart_ranks": null,
+      "claim_code_url": null,
+      "content_delivery_type": "SinglePartBook",
+      "content_level": null,
+      "content_rating": null,
+      "content_type": "Product",
+      "continuity": null,
+      "copyright": null,
+      "credits_required": null,
+      "customer_reviews": null,
+      "customer_rights": {
+        "is_book_qa_eligible": false,
+        "is_consumable": false,
+        "is_consumable_indefinitely": false,
+        "is_consumable_offline": false,
+        "is_consumable_until": null
+      },
+      "date_first_available": null,
+      "destination_asin": null,
+      "distribution_rights_region": [
+        "AS",
+        "PR",
+        "MP",
+        "VI",
+        "PW",
+        "UM",
+        "PH",
+        "MH",
+        "GU",
+        "US"
+      ],
+      "editorial_reviews": null,
+      "episode_count": null,
+      "episode_number": null,
+      "episode_type": null,
+      "extended_product_description": null,
+      "format_type": "unabridged",
+      "generic_keyword": null,
+      "goodreads_ratings": null,
+      "has_children": false,
+      "image_url": null,
+      "invites_remaining": null,
+      "is_adult_product": false,
+      "is_buyable": true,
+      "is_getting_latest_episodes": null,
+      "is_in_wishlist": null,
+      "is_listenable": true,
+      "is_pdf_url_available": null,
+      "is_preorderable": true,
+      "is_prereleased": null,
+      "is_purchasability_suppressed": false,
+      "is_released": null,
+      "is_searchable": null,
+      "is_shared": null,
+      "is_vvab": false,
+      "is_world_rights": false,
+      "is_ws4v_companion_asin_owned": null,
+      "is_ws4v_enabled": null,
+      "isbn": null,
+      "issue_date": "2026-04-14",
+      "language": "english",
+      "library_status": null,
+      "library_status_badges": null,
+      "listening_status": null,
+      "long_tail_topic_tags": null,
+      "member_giving_status": null,
+      "merchandising_description": null,
+      "merchandising_summary": "<i>There it was, hanging in the sky above the school: the blazing green skull with a serpent tongue, the mark Death Eaters left behind whenever they had entered a building... wherever they had murdered...</i>",
+      "music_id": null,
+      "narration_accent": null,
+      "narrators": [
+        {
+          "asin": null,
+          "name": "Hugh Laurie"
+        },
+        {
+          "asin": null,
+          "name": "Ruth Wilson"
+        },
+        {
+          "asin": null,
+          "name": "Bill Nighy"
+        },
+        {
+          "asin": null,
+          "name": "Matthew Macfadyen"
+        },
+        {
+          "asin": null,
+          "name": "Riz Ahmed"
+        },
+        {
+          "asin": null,
+          "name": "Michelle Gomez"
+        },
+        {
+          "asin": null,
+          "name": "Cush Jumbo"
+        },
+        {
+          "asin": null,
+          "name": "Simon Pegg"
+        },
+        {
+          "asin": null,
+          "name": "Leo Woodall"
+        },
+        {
+          "asin": null,
+          "name": "Mark Addy"
+        },
+        {
+          "asin": null,
+          "name": "Daniel Mays"
+        },
+        {
+          "asin": null,
+          "name": "Gemma Whelan"
+        },
+        {
+          "asin": null,
+          "name": "Jaxon Knopf"
+        },
+        {
+          "asin": null,
+          "name": "Rhys Mulligan"
+        },
+        {
+          "asin": null,
+          "name": "Nina Barker-Francis"
+        }
+      ],
+      "new_episode_added_date": null,
+      "participation_plans": null,
+      "pdf_url": null,
+      "performance_summary": null,
+      "periodical_info": null,
+      "plans": [
+        {
+          "customer_eligible": null,
+          "detail_plan_names": null,
+          "end_date": "2099-12-31T00:00:00.00000Z",
+          "plan_name": "AccessViaMusic",
+          "start_date": "1970-01-01T00:00:00.00000Z"
+        }
+      ],
+      "platinum_keywords": null,
+      "preorder_release_date": "2026-04-14T07:00:00Z",
+      "preorder_status": null,
+      "price": {
+        "credit_price": 1.0,
+        "is_buy_for_free_eligible": null,
+        "is_credit_price_eligible": null,
+        "is_free_eligible": null,
+        "is_ws4v_upsell_eligible": null,
+        "list_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "list"
+        },
+        "lowest_price": {
+          "base": 31.489999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "member"
+        },
+        "ws4v_upsell_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "ws4v_upsell"
+        }
+      },
+      "product_images": {
+        "500": "https://m.media-amazon.com/images/I/51Pu7k4GKGL._SL500_.jpg"
+      },
+      "product_page_url": null,
+      "product_site_launch_date": null,
+      "product_state": "AVAILABLE_FOR_PREORDER",
+      "profile_sharing": null,
+      "program_participation": null,
+      "provided_review": null,
+      "publication_datetime": "2026-04-14T07:00:00Z",
+      "publication_name": "Harry Potter (Full-Cast Editions)",
+      "publisher_name": "Pottermore Publishing and Audible Studios",
+      "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>There it was, hanging in the sky above the school: the blazing green skull with a serpent tongue, the mark Death Eaters left behind whenever they had entered a building... wherever they had murdered...</i></p> <p>When Dumbledore arrives at Privet Drive one summer night to collect Harry Potter, his wand hand is blackened and shriveled, but he does not reveal why. Secrets and suspicion are spreading through the wizarding world, and Hogwarts itself is not safe. Harry is convinced that Malfoy bears the Dark Mark: there is a Death Eater amongst them. Harry will need powerful magic and true friends as he explores Voldemort's darkest secrets, and Dumbledore prepares him to face his destiny...</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Jaxon Knopf as Harry Potter, Rhys Mulligan as Ron Weasley, Nina Barker-Francis as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, Bill Nighy as Horace Slughorn, Ruth Wilson as Bellatrix Lestrange, Simon Pegg as Arthur Weasley, Leo Woodall as Bill Weasley, Ambika Mod as Nymphadora Tonks, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+      "rating": {
+        "num_reviews": 0,
+        "overall_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "performance_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "story_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        }
+      },
+      "read_along_support": null,
+      "reasons_for_reporting_review": null,
+      "registry_id": null,
+      "registry_item_id": null,
+      "relationships": [
+        {
+          "asin": "B0FJMLG5DN",
+          "content_delivery_type": "BookSeries",
+          "relationship_to_product": "parent",
+          "relationship_type": "series",
+          "sequence": "6",
+          "sku": "SE_RIES_105047",
+          "sku_lite": "SE_RIES_105047",
+          "sort": "6",
+          "title": "Harry Potter (Full-Cast Editions)",
+          "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+        }
+      ],
+      "release_date": "2026-04-14",
+      "revenue_allocation_id": null,
+      "review_keywords": null,
+      "review_status": null,
+      "review_summary": null,
+      "rich_images": null,
+      "runtime_length_min": null,
+      "sample_url": null,
+      "season_number": null,
+      "selected_sort_option_for_reviews": null,
+      "series": null,
+      "short_description": null,
+      "sku": "BK_POTR_000578",
+      "sku_lite": "BK_POTR_000578",
+      "social_media_images": {
+        "facebook": "https://m.media-amazon.com/images/I/51Pu7k4GKGL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51Pu7k4GKGL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+        "ig_bg": "https://m.media-amazon.com/images/I/51Pu7k4GKGL._SL200_BL80_UR1080,2160.jpg",
+        "ig_static_with_bg": "https://m.media-amazon.com/images/I/51Pu7k4GKGL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51Pu7k4GKGL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20Ha...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+        "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51Pu7k4GKGL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+        "twitter": "https://m.media-amazon.com/images/I/51Pu7k4GKGL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51Pu7k4GKGL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+      },
+      "sort_options_for_reviews": null,
+      "spotlight_tags": null,
+      "story_summary": null,
+      "subtitle": null,
+      "tags": null,
+      "text_to_speech": null,
+      "thesaurus_subject_keywords": [
+        "coming_of_age",
+        "literature-and-fiction"
+      ],
+      "title": "Harry Potter and the Half-Blood Prince (Full-Cast Edition)",
+      "video_url": null,
+      "voice_description": null,
+      "ws4v_companion_asin": null,
+      "ws4v_details": null
+    },
+    {
+      "accolades": null,
+      "added_timestamp": "2025-10-09T02:12:36Z",
+      "amazon_asin": null,
+      "asin": "B0F14RVHWN",
+      "asin_trends": null,
+      "asset_badges": null,
+      "asset_details": [],
+      "audible_editors_summary": null,
+      "author_pages": null,
+      "authors": [
+        {
+          "asin": "B000AP9A6K",
+          "name": "J.K. Rowling"
+        }
+      ],
+      "availability": null,
+      "available_codecs": null,
+      "badges": null,
+      "book_tags": null,
+      "buying_options": null,
+      "category_ladders": null,
+      "chart_ranks": null,
+      "claim_code_url": null,
+      "content_delivery_type": "SinglePartBook",
+      "content_level": null,
+      "content_rating": null,
+      "content_type": "Product",
+      "continuity": null,
+      "copyright": null,
+      "credits_required": null,
+      "customer_reviews": null,
+      "customer_rights": {
+        "is_book_qa_eligible": false,
+        "is_consumable": false,
+        "is_consumable_indefinitely": false,
+        "is_consumable_offline": false,
+        "is_consumable_until": null
+      },
+      "date_first_available": null,
+      "destination_asin": null,
+      "distribution_rights_region": [
+        "AS",
+        "PR",
+        "MP",
+        "VI",
+        "PW",
+        "PH",
+        "UM",
+        "MH",
+        "GU",
+        "US"
+      ],
+      "editorial_reviews": null,
+      "episode_count": null,
+      "episode_number": null,
+      "episode_type": null,
+      "extended_product_description": null,
+      "format_type": "unabridged",
+      "generic_keyword": null,
+      "goodreads_ratings": null,
+      "has_children": false,
+      "image_url": null,
+      "invites_remaining": null,
+      "is_adult_product": false,
+      "is_buyable": true,
+      "is_getting_latest_episodes": null,
+      "is_in_wishlist": null,
+      "is_listenable": true,
+      "is_pdf_url_available": null,
+      "is_preorderable": true,
+      "is_prereleased": null,
+      "is_purchasability_suppressed": false,
+      "is_released": null,
+      "is_searchable": null,
+      "is_shared": null,
+      "is_vvab": false,
+      "is_world_rights": false,
+      "is_ws4v_companion_asin_owned": null,
+      "is_ws4v_enabled": null,
+      "isbn": null,
+      "issue_date": "2026-05-12",
+      "language": "english",
+      "library_status": null,
+      "library_status_badges": null,
+      "listening_status": null,
+      "long_tail_topic_tags": null,
+      "member_giving_status": null,
+      "merchandising_description": null,
+      "merchandising_summary": "<i>'Give me Harry Potter,' said Voldemort's voice, 'and none shall be harmed. Give me Harry Potter, and I shall leave the school untouched. Give me Harry Potter, and you will be rewarded.'</i>",
+      "music_id": null,
+      "narration_accent": null,
+      "narrators": [
+        {
+          "asin": null,
+          "name": "Hugh Laurie"
+        },
+        {
+          "asin": null,
+          "name": "Matthew Macfadyen"
+        },
+        {
+          "asin": null,
+          "name": "James McAvoy"
+        },
+        {
+          "asin": null,
+          "name": "Ruth Wilson"
+        },
+        {
+          "asin": null,
+          "name": "Riz Ahmed"
+        },
+        {
+          "asin": null,
+          "name": "Michelle Gomez"
+        },
+        {
+          "asin": null,
+          "name": "Cush Jumbo"
+        },
+        {
+          "asin": null,
+          "name": "Alex Hassell"
+        },
+        {
+          "asin": null,
+          "name": "Mark Addy"
+        },
+        {
+          "asin": null,
+          "name": "Simon Pegg"
+        },
+        {
+          "asin": null,
+          "name": "Bill Nighy"
+        },
+        {
+          "asin": null,
+          "name": "Anna Maxwell Martin"
+        },
+        {
+          "asin": null,
+          "name": "Jaxon Knopf"
+        },
+        {
+          "asin": null,
+          "name": "Rhys Mulligan"
+        },
+        {
+          "asin": null,
+          "name": "Nina Barker-Francis"
+        }
+      ],
+      "new_episode_added_date": null,
+      "participation_plans": null,
+      "pdf_url": null,
+      "performance_summary": null,
+      "periodical_info": null,
+      "plans": [
+        {
+          "customer_eligible": null,
+          "detail_plan_names": null,
+          "end_date": "2099-12-31T00:00:00.00000Z",
+          "plan_name": "AccessViaMusic",
+          "start_date": "1970-01-01T00:00:00.00000Z"
+        }
+      ],
+      "platinum_keywords": null,
+      "preorder_release_date": "2026-05-12T07:00:00Z",
+      "preorder_status": null,
+      "price": {
+        "credit_price": 1.0,
+        "is_buy_for_free_eligible": null,
+        "is_credit_price_eligible": null,
+        "is_free_eligible": null,
+        "is_ws4v_upsell_eligible": null,
+        "list_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "list"
+        },
+        "lowest_price": {
+          "base": 31.489999771118164,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "member"
+        },
+        "ws4v_upsell_price": {
+          "base": 44.9900016784668,
+          "currency_code": "USD",
+          "merchant_id": "A2ZO8JX97D5MN9",
+          "type": "ws4v_upsell"
+        }
+      },
+      "product_images": {
+        "500": "https://m.media-amazon.com/images/I/51O+Ql2lQuL._SL500_.jpg"
+      },
+      "product_page_url": null,
+      "product_site_launch_date": null,
+      "product_state": "AVAILABLE_FOR_PREORDER",
+      "profile_sharing": null,
+      "program_participation": null,
+      "provided_review": null,
+      "publication_datetime": "2026-05-12T07:00:00Z",
+      "publication_name": "Harry Potter (Full-Cast Editions)",
+      "publisher_name": "Pottermore Publishing and Audible Studios",
+      "publisher_summary": "<p>The beloved stories as you\u2019ve never experienced them. Get ready to be transported to the world of Harry Potter in a captivating production that features hundreds of unique voices and immersive sound design that brings the wizarding world vividly to life in Dolby Atmos. You\u2019ll hear footsteps echoing through the corridors of Hogwarts and the heart-racing whoosh of the Golden Snitch as it darts past your ears in the heat of a Quidditch match. Also featuring an electrifying new musical score, The Full-Cast Audio Editions present J.K. Rowling\u2019s iconic series as a truly spellbinding listening event for the whole family.</p> <p><i>'Give me Harry Potter,' said Voldemort's voice, 'and none shall be harmed. Give me Harry Potter, and I shall leave the school untouched. Give me Harry Potter, and you will be rewarded.'</i></p> <p>As he climbs into the sidecar of Hagrid's motorbike and takes to the skies, leaving Privet Drive for the last time, Harry Potter knows that Lord Voldemort and the Death Eaters are not far behind. The protective charm that has kept Harry safe until now is broken, but he cannot keep hiding. The Dark Lord is breathing fear into everything Harry loves, and to stop him Harry will have to find and destroy the remaining Horcruxes. The final battle must begin\u2014Harry must stand and face his enemy...</p> <p>Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.</p> <p>Starring Jaxon Knopf as Harry Potter, Rhys Mulligan as Ron Weasley, Nina Barker-Francis as Hermione Granger, Hugh Laurie as Albus Dumbledore, Riz Ahmed as Professor Snape, Michelle Gomez as Professor McGonagall, Matthew Macfadyen as Lord Voldemort, Ruth Wilson as Bellatrix Lestrange, Alex Hassell as Lucius Malfoy, James McAvoy as \u2018Mad-Eye Moody,\u2019 Simon Pegg as Arthur Weasley, Bill Nighy as Horace Slughhorn, Ambika Mod as Nymphadora Tonks, Cush Jumbo as Narrator, and a full cast.</p> <p>Available in Dolby Atmos on Audible.</p>",
+      "rating": {
+        "num_reviews": 0,
+        "overall_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "performance_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        },
+        "story_distribution": {
+          "average_rating": 0.0,
+          "display_average_rating": "0.0",
+          "display_stars": 0.0,
+          "num_five_star_ratings": 0,
+          "num_four_star_ratings": 0,
+          "num_one_star_ratings": 0,
+          "num_ratings": 0,
+          "num_three_star_ratings": 0,
+          "num_two_star_ratings": 0
+        }
+      },
+      "read_along_support": null,
+      "reasons_for_reporting_review": null,
+      "registry_id": null,
+      "registry_item_id": null,
+      "relationships": [
+        {
+          "asin": "B0FJMLG5DN",
+          "content_delivery_type": "BookSeries",
+          "relationship_to_product": "parent",
+          "relationship_type": "series",
+          "sequence": "7",
+          "sku": "SE_RIES_105047",
+          "sku_lite": "SE_RIES_105047",
+          "sort": "7",
+          "title": "Harry Potter (Full-Cast Editions)",
+          "url": "/pd/Harry-Potter-Full-Cast-Editions-Audiobook/B0FJMLG5DN"
+        }
+      ],
+      "release_date": "2026-05-12",
+      "revenue_allocation_id": null,
+      "review_keywords": null,
+      "review_status": null,
+      "review_summary": null,
+      "rich_images": null,
+      "runtime_length_min": null,
+      "sample_url": null,
+      "season_number": null,
+      "selected_sort_option_for_reviews": null,
+      "series": null,
+      "short_description": null,
+      "sku": "BK_POTR_000579",
+      "sku_lite": "BK_POTR_000579",
+      "social_media_images": {
+        "facebook": "https://m.media-amazon.com/images/I/51O+Ql2lQuL._SL10_UR1600,800_CR200,50,1200,630_CLa%7C1200,630%7C51O+Ql2lQuL.jpg%7C0,0,1200,630+82,82,465,465_PJAdblSocialShare-Gradientoverlay-largeasin-0to70,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Large,TopLeft,600,270_OU01_ZBLISTENING%20ON,617,216,52,500,AudibleSansMd,30,255,255,255.jpg",
+        "ig_bg": "https://m.media-amazon.com/images/I/51O+Ql2lQuL._SL200_BL80_UR1080,2160.jpg",
+        "ig_static_with_bg": "https://m.media-amazon.com/images/I/51O+Ql2lQuL._SL200_BL80_UR1080,2160_CLa%7C1080,2160%7C51O+Ql2lQuL.jpg%7C0,0,1080,2160+288,614,500,500_PJAdblSocialShare-Gradientoverlay-Radial,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Small,TopLeft,290,461_ZBLISTENING%20ON,290,410,52,500,AudibleSansMd,34,255,255,255_ZBHarry%20Potter%20and%20the%20De...,290,1183,52,500,AudibleSansSm,32,255,255,255_ZBJ.K.%20Rowling,290,1247,52,500,AudibleSansRg,28,255,255,255.jpg",
+        "ig_sticker": "https://m.media-amazon.com/images/I/71UyRin7-TL._CLa%7C614,913%7C51O+Ql2lQuL.jpg%7C0,0,614,913+70,79,471,473_FMpng_PJAudible-logo-dk,BottomLeft,70,-100_ZAHarry%20Potter%20an...,70,560,65,500,AudibleSansSm,42,54,54,54_ZAby%20J.K.%20Rowling,70,640,52,517,AudibleSansRg,32,0,0,0.png",
+        "twitter": "https://m.media-amazon.com/images/I/51O+Ql2lQuL._SL10_UR1600,800_CR200,50,1024,512_CLa%7C1024,512%7C51O+Ql2lQuL.jpg%7C0,0,1024,512+67,67,376,376_PJAdblSocialShare-Gradientoverlay-twitter-largeasin-0to60,TopLeft,0,0_PJAdblSocialShare-AudibleLogo-Medium,TopLeft,490,223_OU01_ZBLISTENING%20ON,483,152,55,450,AudibleSansMd,32,255,255,255.jpg"
+      },
+      "sort_options_for_reviews": null,
+      "spotlight_tags": null,
+      "story_summary": null,
+      "subtitle": null,
+      "tags": null,
+      "text_to_speech": null,
+      "thesaurus_subject_keywords": [
+        "coming_of_age",
+        "literature-and-fiction"
+      ],
+      "title": "Harry Potter and the Deathly Hallows (Full-Cast Edition)",
+      "video_url": null,
+      "voice_description": null,
+      "ws4v_companion_asin": null,
+      "ws4v_details": null
+    }
+  ],
+  "response_groups": [
+    "customer_rights",
+    "rating",
+    "media",
+    "product_attrs",
+    "sample",
+    "relationships",
+    "always-returned",
+    "product_desc",
+    "product_extended_attrs",
+    "contributors",
+    "product_plans",
+    "price",
+    "sku",
+    "product_plan_details"
+  ],
+  "total_results": 7
+}
