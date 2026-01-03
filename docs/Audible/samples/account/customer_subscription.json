@@ -1,0 +1,20 @@
+{
+  "customer_details": {
+    "login_customer_id": "REDACTED",
+    "preference": {
+      "amazon_language": "en_US",
+      "audit_info": {
+        "amazon_language_last_updated_at": "2025-06-11T03:04:50.000Z",
+        "is_amazon_language_default": false,
+        "is_currency_default": true,
+        "is_language_default": true
+      },
+      "currency": "USD",
+      "language": "en_US"
+    }
+  },
+  "response_groups": [
+    "always-returned",
+    "subscription_details"
+  ]
+}
