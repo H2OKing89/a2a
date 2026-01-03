@@ -6,16 +6,80 @@ Provides efficient storage and retrieval of cached data with:
 - Indexed lookups by key, namespace, and common fields
 - Full-text search capability
 - Cross-referencing between data sources
+- Month-boundary-aware TTL for pricing data
 """
 
+import calendar
 import sqlite3
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import orjson
+
+# =============================================================================
+# Month-Boundary-Aware TTL Utilities
+# =============================================================================
+
+
+def get_seconds_until_next_month() -> float:
+    """
+    Calculate seconds remaining until the 1st of next month (UTC).
+
+    Audible's monthly deals reset on the 1st of each month, so pricing
+    cache should not extend past month boundaries to avoid stale deal data.
+
+    Returns:
+        Seconds until midnight UTC on the 1st of next month
+    """
+    now = datetime.now(timezone.utc)
+    # Calculate next month's 1st at midnight UTC
+    if now.month == 12:
+        next_month_start = datetime(now.year + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    else:
+        next_month_start = datetime(now.year, now.month + 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    return (next_month_start - now).total_seconds()
+
+
+def calculate_pricing_ttl_seconds(requested_ttl_seconds: float) -> float:
+    """
+    Calculate TTL for pricing data that respects month boundaries.
+
+    Ensures pricing cache expires before the next month starts, since
+    Audible monthly deals reset on the 1st of each month.
+
+    Args:
+        requested_ttl_seconds: The desired TTL in seconds
+
+    Returns:
+        The lesser of requested_ttl or seconds until next month (min 60s)
+    """
+    seconds_until_month_end = get_seconds_until_next_month()
+    # Use the smaller of requested TTL or time until month end
+    # Add a small buffer (1 hour) before month end to be safe
+    safe_month_boundary = max(0, seconds_until_month_end - 3600)
+
+    if safe_month_boundary <= 0:
+        # Within 1 hour of month end - use short TTL to avoid crossing boundary
+        # Clamp to at least 60 seconds to avoid hammering the API
+        return min(requested_ttl_seconds, max(60, seconds_until_month_end))
+
+    return min(requested_ttl_seconds, safe_month_boundary)
+
+
+# Namespaces that contain pricing/deal data and should use month-aware TTL
+PRICING_NAMESPACES = frozenset(
+    {
+        "audible_enrichment",
+        "audible_enrichment_v2",
+        "catalog",
+        "search",
+        "library",  # Library items also have pricing data
+    }
+)
 
 
 class SQLiteCache:
@@ -541,6 +605,34 @@ class SQLiteCache:
         with self._get_connection() as conn:
             cursor = conn.execute("DELETE FROM cache WHERE expires_at <= ?", (now,))
             return cursor.rowcount
+
+    def clear_pricing_caches(self) -> dict[str, int]:
+        """
+        Clear all pricing-related caches.
+
+        Call this at the start of a new month or when monthly deals change.
+        Clears enrichment, catalog, search, and library namespaces that
+        contain pricing/deal information.
+
+        Returns:
+            Dict with counts per namespace cleared
+        """
+        cleared: dict[str, int] = {}
+
+        for namespace in PRICING_NAMESPACES:
+            # Clear from memory
+            prefix = f"{namespace}:"
+            mem_keys_to_delete = [k for k in self._memory_cache if k.startswith(prefix)]
+            for k in mem_keys_to_delete:
+                del self._memory_cache[k]
+
+            # Clear from database
+            with self._get_connection() as conn:
+                cursor = conn.execute("DELETE FROM cache WHERE namespace = ?", (namespace,))
+                if cursor.rowcount > 0:
+                    cleared[namespace] = cursor.rowcount
+
+        return cleared
 
     # -------------------------------------------------------------------------
     # Search Operations

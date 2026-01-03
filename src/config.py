@@ -123,6 +123,10 @@ class CacheSettings(BaseSettings):
     default_ttl_hours: float = Field(default=2.0, description="Default TTL for cached items")
     abs_ttl_hours: float = Field(default=2.0, description="TTL for ABS data")
     audible_ttl_hours: float = Field(default=240.0, description="TTL for Audible data (10 days default)")
+    pricing_ttl_hours: float = Field(
+        default=6.0,
+        description="TTL for pricing/deal data (shorter, respects month boundaries)",
+    )
     max_memory_entries: int = Field(default=500, description="Max entries in memory cache layer")
 
 

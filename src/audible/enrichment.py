@@ -5,7 +5,7 @@ Provides rich metadata enrichment for audiobooks by combining:
 - Catalog data (pricing, availability, quality)
 - Library data (ownership status)
 - Plus Catalog info (free listening availability)
-- Actual audio quality via license requests
+- Actual audio quality via metadata endpoint (fast_quality_check)
 
 This module is used by multiple features:
 - Quality analysis (upgrade candidates)
@@ -26,10 +26,9 @@ from .models import ContentQualityInfo, PlusCatalogInfo, PricingInfo
 if TYPE_CHECKING:
     from ..cache import SQLiteCache
     from .async_client import AsyncAudibleClient
-else:
-    # Import for exception handling at runtime
-    from .async_client import AsyncAudibleError
 
+# Import for exception handling at runtime (not just type checking)
+from .async_client import AsyncAudibleError
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +59,9 @@ class AudibleEnrichment(BaseModel):
     best_bitrate: int | None = Field(default=None, description="Best available bitrate from catalog (kbps)")
     available_codecs: list[str] = Field(default_factory=list, description="Available codecs from catalog")
 
-    # Actual quality from license requests (most accurate)
+    # Actual quality from metadata endpoint (fast_quality_check)
     actual_quality: ContentQualityInfo | None = Field(
-        default=None, description="Actual quality info from license requests"
+        default=None, description="Actual quality info from metadata endpoint"
     )
 
     # API reliability
@@ -77,7 +76,7 @@ class AudibleEnrichment(BaseModel):
     @property
     def actual_best_bitrate(self) -> int | None:
         """
-        Get the actual best bitrate from license requests.
+        Get the actual best bitrate from metadata endpoint.
 
         This is more accurate than best_bitrate which comes from the catalog API
         and only shows legacy AAX formats (max ~64 kbps).
@@ -88,7 +87,7 @@ class AudibleEnrichment(BaseModel):
 
     @property
     def actual_best_format(self) -> str | None:
-        """Get the best format name from license request quality discovery."""
+        """Get the best format name from metadata endpoint quality discovery."""
         if self.actual_quality and self.actual_quality.best_format:
             return self.actual_quality.best_format.codec_name
         return None
@@ -195,10 +194,13 @@ class AudibleEnrichmentService:
 
     Uses caching to avoid repeated API calls. Can be used by any feature
     that needs rich Audible metadata (quality analysis, series matching, etc.).
+
+    Note: Cache TTL is calculated to not extend past month boundaries since
+    Audible's monthly deals reset on the 1st of each month.
     """
 
     CACHE_NAMESPACE = "audible_enrichment"
-    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours (prices change)
+    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours base (actual TTL may be shorter near month end)
 
     def __init__(
         self,
@@ -381,10 +383,12 @@ class AudibleEnrichmentService:
             enrichment.api_quality_reliable = False
 
         # Cache result (ownership excluded since it's checked separately)
+        # Use month-boundary-aware TTL to avoid stale pricing across month resets
         if self._cache:
-            self._cache.set(
-                self.CACHE_NAMESPACE, cache_key, enrichment.model_dump(), ttl_seconds=self.CACHE_TTL_SECONDS
-            )
+            from ..cache.sqlite_cache import calculate_pricing_ttl_seconds
+
+            ttl = calculate_pricing_ttl_seconds(self.CACHE_TTL_SECONDS)
+            self._cache.set(self.CACHE_NAMESPACE, cache_key, enrichment.model_dump(), ttl_seconds=ttl)
 
         return enrichment
 
@@ -424,12 +428,15 @@ class AsyncAudibleEnrichmentService:
     """
     Async service for enriching audiobooks with Audible data including actual quality.
 
-    This service uses the async client to make license requests and discover
-    the actual best available audio quality (including modern formats like
+    This service uses the async client's fast_quality_check() method (metadata endpoint)
+    to discover the actual best available audio quality (including modern formats like
     Widevine HE-AAC at ~114 kbps and Dolby Atmos).
 
     The catalog API's available_codecs field only shows legacy AAX formats
-    (max ~64 kbps), so license requests are required for accurate quality info.
+    (max ~64 kbps), so the metadata endpoint is used for accurate quality info.
+
+    Note: Cache TTL is calculated to not extend past month boundaries since
+    Audible's monthly deals reset on the 1st of each month.
 
     Example:
         async with AsyncAudibleClient.from_file("auth.json") as client:
@@ -438,7 +445,7 @@ class AsyncAudibleEnrichmentService:
     """
 
     CACHE_NAMESPACE = "audible_enrichment_v2"  # New namespace for quality-enriched data
-    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours (prices change)
+    CACHE_TTL_SECONDS = 3600 * 6  # 6 hours base (actual TTL may be shorter near month end)
 
     def __init__(
         self,
@@ -580,15 +587,18 @@ class AsyncAudibleEnrichmentService:
                         if bitrate <= 320 and bitrate > (enrichment.best_bitrate or 0):
                             enrichment.best_bitrate = bitrate
 
-        # Discover actual quality via license requests
+        # Discover actual quality via fast metadata endpoint (~3x faster than license requests)
         if discover_quality:
             self._quality_discoveries += 1
             try:
-                quality_info = await self._client.discover_content_quality(asin, use_cache=use_cache)
-                enrichment.actual_quality = quality_info
-                enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
-                if quality_info.best_bitrate_kbps > 0:
-                    enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
+                # Use fast_quality_check (metadata endpoint) instead of discover_content_quality (license requests)
+                # This is ~3x faster and has less aggressive rate limiting
+                quality_info = await self._client.fast_quality_check(asin, use_cache=use_cache)
+                if quality_info:
+                    enrichment.actual_quality = quality_info
+                    enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
+                    if quality_info.best_bitrate_kbps > 0:
+                        enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
             except (AsyncAudibleError, ValidationError) as e:
                 logger.debug("Failed to discover quality for ASIN %s: %s", asin, str(e))
 
@@ -596,13 +606,16 @@ class AsyncAudibleEnrichmentService:
         if enrichment.has_atmos or (enrichment.actual_quality and enrichment.actual_quality.has_atmos):
             enrichment.api_quality_reliable = False
 
-        # Cache result
+        # Cache result with month-boundary-aware TTL
         if self._cache:
+            from ..cache.sqlite_cache import calculate_pricing_ttl_seconds
+
+            ttl = calculate_pricing_ttl_seconds(self.CACHE_TTL_SECONDS)
             self._cache.set(
                 self.CACHE_NAMESPACE,
                 cache_key,
                 enrichment.model_dump(),
-                ttl_seconds=self.CACHE_TTL_SECONDS,
+                ttl_seconds=ttl,
             )
 
         return enrichment
@@ -613,18 +626,20 @@ class AsyncAudibleEnrichmentService:
         use_cache: bool = True,
         discover_quality: bool = True,
         max_concurrent: int = 5,
+        use_fast_quality: bool = True,
     ) -> dict[str, AudibleEnrichment]:
         """
         Enrich multiple ASINs with Audible data including actual quality.
 
-        This method fetches catalog data and makes license requests concurrently
+        This method fetches catalog data and discovers quality concurrently
         for efficient batch processing. Progress is reported as each item completes.
 
         Args:
             asins: List of ASINs to enrich
             use_cache: Use cached data if available
-            discover_quality: Make license requests to discover actual quality
+            discover_quality: Discover actual audio quality
             max_concurrent: Max concurrent enrichment operations
+            use_fast_quality: Use fast metadata endpoint (default) vs slower license requests
 
         Returns:
             Dict mapping ASIN to enrichment data

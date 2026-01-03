@@ -1,0 +1,498 @@
+{
+  "content_metadata": {
+    "chapter_info": {
+      "brandIntroDurationMs": 3924,
+      "brandOutroDurationMs": 4945,
+      "chapters": [
+        {
+          "length_ms": 20688,
+          "start_offset_ms": 0,
+          "start_offset_sec": 0,
+          "title": "Opening Credits"
+        },
+        {
+          "length_ms": 1187236,
+          "start_offset_ms": 20688,
+          "start_offset_sec": 20,
+          "title": "Chapter 1: Climbing Mountains"
+        },
+        {
+          "length_ms": 918117,
+          "start_offset_ms": 1207924,
+          "start_offset_sec": 1207,
+          "title": "Chapter 2: Nothing Can Hurt You Like Hope"
+        },
+        {
+          "length_ms": 892435,
+          "start_offset_ms": 2126041,
+          "start_offset_sec": 2126,
+          "title": "Chapter 3: See You in Court"
+        },
+        {
+          "length_ms": 945400,
+          "start_offset_ms": 3018476,
+          "start_offset_sec": 3018,
+          "title": "Chapter 4: Six-Month Lease"
+        },
+        {
+          "length_ms": 1369257,
+          "start_offset_ms": 3963876,
+          "start_offset_sec": 3963,
+          "title": "Chapter 5: The Perks of Being an Essence User"
+        },
+        {
+          "length_ms": 892389,
+          "start_offset_ms": 5333133,
+          "start_offset_sec": 5333,
+          "title": "Chapter 6: This Is the Moment"
+        },
+        {
+          "length_ms": 1191392,
+          "start_offset_ms": 6225522,
+          "start_offset_sec": 6225,
+          "title": "Chapter 7: Iron Rank"
+        },
+        {
+          "length_ms": 1367910,
+          "start_offset_ms": 7416914,
+          "start_offset_sec": 7416,
+          "title": "Chapter 8: Getting Stoned"
+        },
+        {
+          "length_ms": 1078961,
+          "start_offset_ms": 8784824,
+          "start_offset_sec": 8784,
+          "title": "Chapter 9: Children"
+        },
+        {
+          "length_ms": 1104526,
+          "start_offset_ms": 9863785,
+          "start_offset_sec": 9863,
+          "title": "Chapter 10: Star Seed"
+        },
+        {
+          "length_ms": 964487,
+          "start_offset_ms": 10968311,
+          "start_offset_sec": 10968,
+          "title": "Chapter 11: It's About How You Use It"
+        },
+        {
+          "length_ms": 1041832,
+          "start_offset_ms": 11932798,
+          "start_offset_sec": 11932,
+          "title": "Chapter 12: We End Here"
+        },
+        {
+          "length_ms": 1172329,
+          "start_offset_ms": 12974630,
+          "start_offset_sec": 12974,
+          "title": "Chapter 13: Poison Pill"
+        },
+        {
+          "length_ms": 910059,
+          "start_offset_ms": 14146959,
+          "start_offset_sec": 14146,
+          "title": "Chapter 14: Let's Just Fight Monsters"
+        },
+        {
+          "length_ms": 775407,
+          "start_offset_ms": 15057018,
+          "start_offset_sec": 15057,
+          "title": "Chapter 15: Damage You Shouldn't Walk Away From"
+        },
+        {
+          "length_ms": 756320,
+          "start_offset_ms": 15832425,
+          "start_offset_sec": 15832,
+          "title": "Chapter 16: Picking Out the Good Ones"
+        },
+        {
+          "length_ms": 1204024,
+          "start_offset_ms": 16588745,
+          "start_offset_sec": 16588,
+          "title": "Chapter 17: Events Loom Large"
+        },
+        {
+          "length_ms": 648092,
+          "start_offset_ms": 17792769,
+          "start_offset_sec": 17792,
+          "title": "Chapter 18: What the Geller Name Is Worth"
+        },
+        {
+          "length_ms": 959843,
+          "start_offset_ms": 18440861,
+          "start_offset_sec": 18440,
+          "title": "Chapter 19: Cleansed"
+        },
+        {
+          "length_ms": 1051562,
+          "start_offset_ms": 19400704,
+          "start_offset_sec": 19400,
+          "title": "Chapter 20: It Just Takes Practice"
+        },
+        {
+          "length_ms": 1400581,
+          "start_offset_ms": 20452266,
+          "start_offset_sec": 20452,
+          "title": "Chapter 21: World Building"
+        },
+        {
+          "length_ms": 1101763,
+          "start_offset_ms": 21852847,
+          "start_offset_sec": 21852,
+          "title": "Chapter 22: Fabulous Prizes"
+        },
+        {
+          "length_ms": 836893,
+          "start_offset_ms": 22954610,
+          "start_offset_sec": 22954,
+          "title": "Chapter 23: Any Team Except Yours"
+        },
+        {
+          "length_ms": 968527,
+          "start_offset_ms": 23791503,
+          "start_offset_sec": 23791,
+          "title": "Chapter 24: More Than One Clown"
+        },
+        {
+          "length_ms": 884215,
+          "start_offset_ms": 24760030,
+          "start_offset_sec": 24760,
+          "title": "Chapter 25: Resurrection"
+        },
+        {
+          "length_ms": 888465,
+          "start_offset_ms": 25644245,
+          "start_offset_sec": 25644,
+          "title": "Chapter 26: Manifestation"
+        },
+        {
+          "length_ms": 1290007,
+          "start_offset_ms": 26532710,
+          "start_offset_sec": 26532,
+          "title": "Chapter 27: Potential"
+        },
+        {
+          "length_ms": 998040,
+          "start_offset_ms": 27822717,
+          "start_offset_sec": 27822,
+          "title": "Chapter 28: Weaponizing a Barbecue"
+        },
+        {
+          "length_ms": 1042854,
+          "start_offset_ms": 28820757,
+          "start_offset_sec": 28820,
+          "title": "Chapter 29: This Town Ain't Big Enough"
+        },
+        {
+          "length_ms": 1229194,
+          "start_offset_ms": 29863611,
+          "start_offset_sec": 29863,
+          "title": "Chapter 30: The Second-Best Iron Ranker"
+        },
+        {
+          "length_ms": 713525,
+          "start_offset_ms": 31092805,
+          "start_offset_sec": 31092,
+          "title": "Chapter 31: Arrival"
+        },
+        {
+          "length_ms": 897242,
+          "start_offset_ms": 31806330,
+          "start_offset_sec": 31806,
+          "title": "Chapter 32: Full Jason"
+        },
+        {
+          "length_ms": 844068,
+          "start_offset_ms": 32703572,
+          "start_offset_sec": 32703,
+          "title": "Chapter 33: Versatile"
+        },
+        {
+          "length_ms": 1091639,
+          "start_offset_ms": 33547640,
+          "start_offset_sec": 33547,
+          "title": "Chapter 34: I Don't Like this Plan"
+        },
+        {
+          "length_ms": 826235,
+          "start_offset_ms": 34639279,
+          "start_offset_sec": 34639,
+          "title": "Chapter 35: Impossible to Subdue"
+        },
+        {
+          "length_ms": 1068489,
+          "start_offset_ms": 35465514,
+          "start_offset_sec": 35465,
+          "title": "Chapter 36: The Price We Pay Doesn't Matter"
+        },
+        {
+          "length_ms": 1184612,
+          "start_offset_ms": 36534003,
+          "start_offset_sec": 36534,
+          "title": "Chapter 37: Make the Most of It"
+        },
+        {
+          "length_ms": 1214357,
+          "start_offset_ms": 37718615,
+          "start_offset_sec": 37718,
+          "title": "Chapter 38: Wake"
+        },
+        {
+          "length_ms": 1110331,
+          "start_offset_ms": 38932972,
+          "start_offset_sec": 38932,
+          "title": "Chapter 39: I Can't Trust Any of It"
+        },
+        {
+          "length_ms": 1006097,
+          "start_offset_ms": 40043303,
+          "start_offset_sec": 40043,
+          "title": "Chapter 40: Legacy"
+        },
+        {
+          "length_ms": 895500,
+          "start_offset_ms": 41049400,
+          "start_offset_sec": 41049,
+          "title": "Chapter 41: A Rash Decision"
+        },
+        {
+          "length_ms": 1059944,
+          "start_offset_ms": 41944900,
+          "start_offset_sec": 41944,
+          "title": "Chapter 42: It's a Good One"
+        },
+        {
+          "length_ms": 991143,
+          "start_offset_ms": 43004844,
+          "start_offset_sec": 43004,
+          "title": "Chapter 43: The City of Fallen Echoes"
+        },
+        {
+          "length_ms": 1269760,
+          "start_offset_ms": 43995987,
+          "start_offset_sec": 43995,
+          "title": "Chapter 44: Shade"
+        },
+        {
+          "length_ms": 876785,
+          "start_offset_ms": 45265747,
+          "start_offset_sec": 45265,
+          "title": "Chapter 45: Seriously Hardcore"
+        },
+        {
+          "length_ms": 1028481,
+          "start_offset_ms": 46142532,
+          "start_offset_sec": 46142,
+          "title": "Chapter 46: Mixed Medication"
+        },
+        {
+          "length_ms": 1039092,
+          "start_offset_ms": 47171013,
+          "start_offset_sec": 47171,
+          "title": "Chapter 47: Giving People Choices"
+        },
+        {
+          "length_ms": 900376,
+          "start_offset_ms": 48210105,
+          "start_offset_sec": 48210,
+          "title": "Chapter 48: A Well-Informed Man"
+        },
+        {
+          "length_ms": 1050145,
+          "start_offset_ms": 49110481,
+          "start_offset_sec": 49110,
+          "title": "Chapter 49: The Danger Is Us"
+        },
+        {
+          "length_ms": 803317,
+          "start_offset_ms": 50160626,
+          "start_offset_sec": 50160,
+          "title": "Chapter 50: Surplus to Requirements"
+        },
+        {
+          "length_ms": 954107,
+          "start_offset_ms": 50963943,
+          "start_offset_sec": 50963,
+          "title": "Chapter 51: A Worse Plan"
+        },
+        {
+          "length_ms": 1327461,
+          "start_offset_ms": 51918050,
+          "start_offset_sec": 51918,
+          "title": "Chapter 52: No One Has That Coming"
+        },
+        {
+          "length_ms": 816970,
+          "start_offset_ms": 53245511,
+          "start_offset_sec": 53245,
+          "title": "Chapter 53: Part of Being a Team"
+        },
+        {
+          "length_ms": 1279651,
+          "start_offset_ms": 54062481,
+          "start_offset_sec": 54062,
+          "title": "Chapter 54: Making a Spectacle of Himself"
+        },
+        {
+          "length_ms": 824261,
+          "start_offset_ms": 55342132,
+          "start_offset_sec": 55342,
+          "title": "Chapter 55: Team Change"
+        },
+        {
+          "length_ms": 1080029,
+          "start_offset_ms": 56166393,
+          "start_offset_sec": 56166,
+          "title": "Chapter 56: Company Worth Keeping"
+        },
+        {
+          "length_ms": 1279117,
+          "start_offset_ms": 57246422,
+          "start_offset_sec": 57246,
+          "title": "Chapter 57: He Who Fights with Monsters"
+        },
+        {
+          "length_ms": 982993,
+          "start_offset_ms": 58525539,
+          "start_offset_sec": 58525,
+          "title": "Chapter 58: Irreconcilable Ideals"
+        },
+        {
+          "length_ms": 1355859,
+          "start_offset_ms": 59508532,
+          "start_offset_sec": 59508,
+          "title": "Chapter 59: Meanwhile, Two Weeks Ago in Greenstone..."
+        },
+        {
+          "length_ms": 1224039,
+          "start_offset_ms": 60864391,
+          "start_offset_sec": 60864,
+          "title": "Chapter 60: Take the Loot and Go"
+        },
+        {
+          "length_ms": 1187352,
+          "start_offset_ms": 62088430,
+          "start_offset_sec": 62088,
+          "title": "Chapter 61: Making an Exit"
+        },
+        {
+          "length_ms": 785670,
+          "start_offset_ms": 63275782,
+          "start_offset_sec": 63275,
+          "title": "Chapter 62: Shallow Earth"
+        },
+        {
+          "length_ms": 1118783,
+          "start_offset_ms": 64061452,
+          "start_offset_sec": 64061,
+          "title": "Chapter 63: Relief"
+        },
+        {
+          "length_ms": 1314017,
+          "start_offset_ms": 65180235,
+          "start_offset_sec": 65180,
+          "title": "Chapter 64: Glory"
+        },
+        {
+          "length_ms": 1127537,
+          "start_offset_ms": 66494252,
+          "start_offset_sec": 66494,
+          "title": "Chapter 65: Display of Gratitude"
+        },
+        {
+          "length_ms": 967482,
+          "start_offset_ms": 67621789,
+          "start_offset_sec": 67621,
+          "title": "Chapter 66: The Person I Decided to Be"
+        },
+        {
+          "length_ms": 1239806,
+          "start_offset_ms": 68589271,
+          "start_offset_sec": 68589,
+          "title": "Chapter 67: You Have Friends to Help You"
+        },
+        {
+          "length_ms": 921739,
+          "start_offset_ms": 69829077,
+          "start_offset_sec": 69829,
+          "title": "Chapter 68: Blob Body"
+        },
+        {
+          "length_ms": 1031291,
+          "start_offset_ms": 70750816,
+          "start_offset_sec": 70750,
+          "title": "Chapter 69: Particular Appetites"
+        },
+        {
+          "length_ms": 1002080,
+          "start_offset_ms": 71782107,
+          "start_offset_sec": 71782,
+          "title": "Chapter 70: Domineering, Territorial, and Robust"
+        },
+        {
+          "length_ms": 909804,
+          "start_offset_ms": 72784187,
+          "start_offset_sec": 72784,
+          "title": "Chapter 71: More Shady as We Go Along"
+        },
+        {
+          "length_ms": 1045106,
+          "start_offset_ms": 73693991,
+          "start_offset_sec": 73693,
+          "title": "Chapter 72: Magnificent Entity"
+        },
+        {
+          "length_ms": 1078032,
+          "start_offset_ms": 74739097,
+          "start_offset_sec": 74739,
+          "title": "Chapter 73: I Try to Find the Truth, but That's Your Hiding Place"
+        },
+        {
+          "length_ms": 880384,
+          "start_offset_ms": 75817129,
+          "start_offset_sec": 75817,
+          "title": "Chapter 74: The Last Reward"
+        },
+        {
+          "length_ms": 1103528,
+          "start_offset_ms": 76697513,
+          "start_offset_sec": 76697,
+          "title": "Chapter 75: Impossible Wasn't Enough"
+        },
+        {
+          "length_ms": 1451131,
+          "start_offset_ms": 77801041,
+          "start_offset_sec": 77801,
+          "title": "Chapter 76: Eclipse"
+        },
+        {
+          "length_ms": 65572,
+          "start_offset_ms": 79252172,
+          "start_offset_sec": 79252,
+          "title": "End Credits"
+        }
+      ],
+      "is_accurate": true,
+      "runtime_length_ms": 79317744,
+      "runtime_length_sec": 79317
+    },
+    "content_reference": {
+      "acr": "CR!MSCAPDPE0564K0YPQQPN0WD35KYG",
+      "asin": "1774249162",
+      "codec": "mp4a.40.2",
+      "content_format": "AAX_44_128",
+      "content_size_in_bytes": 1277539429,
+      "file_version": "22",
+      "marketplace": "AF2M0KC94RCEA",
+      "sku": "BK_PODM_002523",
+      "tempo": "1.0",
+      "version": "29154171"
+    }
+  },
+  "response_groups": [
+    "always-returned",
+    "chapter_info",
+    "content_reference"
+  ]
+}
