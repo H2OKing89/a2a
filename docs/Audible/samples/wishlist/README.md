@@ -10,7 +10,7 @@ Retrieve items from user's Audible wishlist with pricing and availability inform
 
 - **Header:** `Authorization: Bearer {access_token}`
 - **Token Source:** Obtained via Audible OAuth login (see [Audible Authentication](../../../ABS/auth.md) for details)
-- **Required Scopes:** Full account access (wishlist data requires authenticated session)
+- **Required Scopes:** Full account access (wishlist data requires as authenticated session)
 
 ## Pagination & Rate Limiting
 
@@ -105,7 +105,7 @@ Retrieve items from user's Audible wishlist with pricing and availability inform
 | `merchandising_summary` | `<i>'Welcome to the Knight Bus, emergency transport for th...` |
 | `music_id` | `None` |
 | `narration_accent` | `None` |
-| `narrators` | [array of 15 objects] |
+| `narrators` | `[array of 15 objects]` |
 | `narrators[0].asin` | `None` |
 | `narrators[0].name` | `Hugh Laurie` |
 | `new_episode_added_date` | `None` |

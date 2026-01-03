@@ -122,7 +122,8 @@ from src.cache import calculate_pricing_ttl_seconds
 
 ttl_sec = calculate_pricing_ttl_seconds(requested_ttl_seconds=3600)  # 1 hour → capped to month boundary
 cache.set("audible_deals", asin, deal_data, ttl_seconds=ttl_sec)
-```
+
+```python
 `clear_pricing_caches()` takes no parameters and clears all `PRICING_NAMESPACES` internally.
 
 ### Async Clients
