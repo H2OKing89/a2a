@@ -5,7 +5,7 @@ Provides rich metadata enrichment for audiobooks by combining:
 - Catalog data (pricing, availability, quality)
 - Library data (ownership status)
 - Plus Catalog info (free listening availability)
-- Actual audio quality via license requests
+- Actual audio quality via metadata endpoint (fast_quality_check)
 
 This module is used by multiple features:
 - Quality analysis (upgrade candidates)
@@ -59,9 +59,9 @@ class AudibleEnrichment(BaseModel):
     best_bitrate: int | None = Field(default=None, description="Best available bitrate from catalog (kbps)")
     available_codecs: list[str] = Field(default_factory=list, description="Available codecs from catalog")
 
-    # Actual quality from license requests (most accurate)
+    # Actual quality from metadata endpoint (fast_quality_check)
     actual_quality: ContentQualityInfo | None = Field(
-        default=None, description="Actual quality info from license requests"
+        default=None, description="Actual quality info from metadata endpoint"
     )
 
     # API reliability
@@ -76,7 +76,7 @@ class AudibleEnrichment(BaseModel):
     @property
     def actual_best_bitrate(self) -> int | None:
         """
-        Get the actual best bitrate from license requests.
+        Get the actual best bitrate from metadata endpoint.
 
         This is more accurate than best_bitrate which comes from the catalog API
         and only shows legacy AAX formats (max ~64 kbps).
@@ -87,7 +87,7 @@ class AudibleEnrichment(BaseModel):
 
     @property
     def actual_best_format(self) -> str | None:
-        """Get the best format name from license request quality discovery."""
+        """Get the best format name from metadata endpoint quality discovery."""
         if self.actual_quality and self.actual_quality.best_format:
             return self.actual_quality.best_format.codec_name
         return None
@@ -428,12 +428,12 @@ class AsyncAudibleEnrichmentService:
     """
     Async service for enriching audiobooks with Audible data including actual quality.
 
-    This service uses the async client to make license requests and discover
-    the actual best available audio quality (including modern formats like
+    This service uses the async client's fast_quality_check() method (metadata endpoint)
+    to discover the actual best available audio quality (including modern formats like
     Widevine HE-AAC at ~114 kbps and Dolby Atmos).
 
     The catalog API's available_codecs field only shows legacy AAX formats
-    (max ~64 kbps), so license requests are required for accurate quality info.
+    (max ~64 kbps), so the metadata endpoint is used for accurate quality info.
 
     Note: Cache TTL is calculated to not extend past month boundaries since
     Audible's monthly deals reset on the 1st of each month.
