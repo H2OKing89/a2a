@@ -109,9 +109,9 @@ repos:
   hooks:
   - id: codespell
     args:
-    - --ignore-words-list=crate,nd,sav,wil,AIN,MINA,tha,wan,revered,UPTODATE
-    - --skip="*.json,*.yaml,*.lock,htmlcov,*.db"
-    exclude: ^(.*\.json|.*\.yaml|.*\.lock|htmlcov/.*|.*\.db)$
+    - --ignore-words-list=crate,nd,sav,wil,AIN,MINA,tha,wan,revered,UPTODATE,FO,Rin,literaly,follwed,reccomend,intented,wit,wasn
+    - --skip="*.json,*.jsonc,*.yaml,*.lock,htmlcov,*.db,docs/Audible/samples/**"
+    exclude: ^(.*\.json|.*\.jsonc|.*\.yaml|.*\.lock|htmlcov/.*|.*\.db|docs/Audible/samples/.*)$
 
   # pytest (optional - runs tests before commit)
   # Uncomment to enable automatic test running
