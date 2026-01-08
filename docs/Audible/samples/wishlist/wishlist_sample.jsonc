@@ -1,4 +1,16 @@
 {
+  // Sample response from: GET /1.0/wishlist
+  // Returns your Audible wishlist items
+  // Supports pagination (page parameter) and sorting (sort_by parameter)
+  //
+  // KEY FIELDS:
+  // - added_timestamp: When you added it to wishlist
+  // - asin: Unique identifier for the audiobook
+  // - price: Current pricing (watch for sales!)
+  // - is_preorderable: true = Can preorder (not yet released)
+  // - available_date: Release date for preorderable items
+  // - plans: Check for "US Minerva" = Free in Plus Catalog
+
   "bin_fields": null,
   "products": [
     {

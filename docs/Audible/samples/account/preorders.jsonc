@@ -1,0 +1,76 @@
+{
+  // NOTE: There is NO dedicated /1.0/preorders endpoint in the Audible API.
+  // Preorders are found by filtering /1.0/orders for:
+  //   - order.state == "ORDER_PENDING_PREORDER"
+  //   - item.is_preorder == true
+  //
+  // This sample shows what preorder data looks like when extracted from orders.
+  // Data source: GET /1.0/orders (filtered for pending preorders)
+  // Date captured: 2025-12-20
+
+  "items": [
+    {
+      // Preorder captured from actual orders response
+      "acquisition_type": null,
+      "action_code": "REDACTED",
+      "amount_charged": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "asin": "B0G6T8MXVY",  // ASIN of preordered book
+      "combined_order_id": null,
+      "coupon_amount": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "credit_promo_id": null,
+      "credits_applied": 1.0,  // Used 1 credit for preorder
+      "date_returned": null,
+      "emp_provider_id": null,
+      "id": "REDACTED",
+      "institution_benefit_plan_id": null,
+      "institution_id": null,
+      "is_combined_order_id": false,
+      "is_externally_managed_payment": false,
+      "is_gift": false,
+      "is_preorder": true,  // KEY FIELD: Indicates this is a preorder
+      "is_returned": false,
+      "is_vet_charge_refunded": false,
+      "merchant_id": "A2ZO8JX97D5MN9",
+      "next_billing_date": null,
+      "payment_method": "CREDIT",  // Paid with Audible credit
+      "plan_id": "REDACTED",
+      "plan_status": null,
+      "promo_ids": null,
+      "promotion_amount": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "return_information": null,
+      "return_reason": null,
+      "source": null,
+      "tax_amount": {
+        "amount": 0.0,
+        "currency": "USD"
+      },
+      "tax_transaction_id": null,
+      "taxes": null,
+
+      // Additional order-level context (from parent order):
+      "order_date": "2025-12-20T00:42:59Z",
+      "order_state": "ORDER_PENDING_PREORDER",  // KEY FIELD: Order is pending preorder fulfillment
+      "detail_state": "ORDER_CREATED"
+    }
+  ],
+
+  // How to get preorders in your code:
+  // 1. Call GET /1.0/orders
+  // 2. Filter for orders where state == "ORDER_PENDING_PREORDER"
+  // 3. Extract items where is_preorder == true
+
+  "response_groups": [
+    "always-returned",
+    "product_attrs",
+    "product_details"
+  ]
+}

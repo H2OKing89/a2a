@@ -1,9 +1,0 @@
-{
-  "aggregated_total_listening_stats": {
-    "aggregated_sum": 917769829.0,
-    "unit": "Milliseconds"
-  },
-  "response_groups": [
-    "total_listening_stats"
-  ]
-}

@@ -1,4 +1,15 @@
 {
+  // Sample response from: GET /1.0/catalog/products/{asin}
+  // Returns detailed product information from Audible's catalog
+  // ASIN: B0F154ZCSN (Harry Potter and the Philosopher's Stone - Dolby Atmos)
+  //
+  // KEY FIELDS:
+  // - asset_details[].is_spatial: true = Dolby Atmos/spatial audio available
+  // - available_codecs: Audio quality options (LC_128_44100 = AAC-LC @ 128kbps)
+  // - plans: Check for "US Minerva" = Free in Plus Catalog
+  // - price: Pricing info (lowest_price.type: "sale" = Monthly deal)
+  // - has_dolby_atmos: Direct flag for Atmos support
+
   "product": {
     "asin": "B0F154ZCSN",
     "asset_details": [

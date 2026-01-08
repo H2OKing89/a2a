@@ -1,0 +1,1596 @@
+{
+  "id": "089b48d1-d3a1-4a77-b9b5-eb19ea68af0e",
+  "ino": "-356910253284297771",
+  "library_id": "d00f643c-7973-42dd-9139-2708e68e0b4e",
+  "folder_id": "de22a9bb-deb6-463f-8e83-78ac2e70a0d6",
+  "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]",
+  "rel_path": "Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]",
+  "is_file": false,
+  "mtime_ms": 1766637699496,
+  "ctime_ms": 1766754518252,
+  "birthtime_ms": 0,
+  "added_at": 1766637699392,
+  "updated_at": 1767240675526,
+  "is_missing": false,
+  "is_invalid": false,
+  "media_type": "book",
+  "media": {
+    "library_item_id": "089b48d1-d3a1-4a77-b9b5-eb19ea68af0e",
+    "metadata": {
+      "title": "He Who Fights with Monsters: A LitRPG Adventure",
+      "title_ignore_prefix": "He Who Fights with Monsters: A LitRPG Adventure",
+      "subtitle": "He Who Fights with Monsters, Book 1",
+      "authors": [
+        {
+          "id": "1cb7dcaf-e7a2-49d9-b5c5-9b4b9e78c67e",
+          "name": "Shirtaloon"
+        },
+        {
+          "id": "f3bcef61-86e1-421c-a66c-fc4f2e3c379d",
+          "name": "Travis Deverell"
+        }
+      ],
+      "narrators": [
+        "Heath Miller"
+      ],
+      "series": [
+        {
+          "id": "8a49a46d-a6e9-4930-bd75-d33d29e1eaef",
+          "name": "He Who Fights with Monsters",
+          "sequence": "1"
+        }
+      ],
+      "genres": [
+        "Science Fiction & Fantasy"
+      ],
+      "published_year": "2021",
+      "published_date": null,
+      "publisher": "Podium Audio",
+      "description": "<p><b><i>Selected as one of Audible's best audiobooks of 2021</i></b> </p> <p><b>Jason wakes up in a mysterious world of magic and monsters. </b></p> <p>It\u2019s not easy making the career jump from office-supplies-store middle manager to heroic interdimensional adventurer. At least, Jason<i> tries </i>to be heroic, but it's hard to be good when all your powers are evil.</p> <p>He\u2019ll face off against cannibals, cultists, wizards, monsters...and that\u2019s just on the first day. He\u2019s going to need courage, he\u2019s going to need wit, and he\u2019s going to need some magic powers of his own. But first, he\u2019s going to need pants.</p> <p><b>After cementing itself as one of the best-rated serial novels on Royal Road with an astonishing 13 million views,</b><b><i> He Who Fights with Monsters</i></b><b> is now brought to you in professionally formatted audio. </b></p>",
+      "isbn": "9781774248188",
+      "asin": "1774248182",
+      "language": "English",
+      "explicit": false,
+      "abridged": false,
+      "author_name": "Shirtaloon, Travis Deverell",
+      "author_name_lf": "Shirtaloon, Deverell, Travis",
+      "narrator_name": "Heath Miller",
+      "series_name": "He Who Fights with Monsters #1"
+    },
+    "cover_path": "/metadata/items/089b48d1-d3a1-4a77-b9b5-eb19ea68af0e/cover.jpg",
+    "tags": [
+      "Fantasy",
+      "Action & Adventure",
+      "Epic",
+      "Paranormal & Urban",
+      "Urban"
+    ],
+    "audio_files": [
+      {
+        "index": 1,
+        "ino": "-356910253284297770",
+        "metadata": {
+          "filename": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "ext": ".m4b",
+          "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "rel_path": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "size": 1564116076,
+          "mtime_ms": 1759187300000,
+          "ctime_ms": 1759232711409,
+          "birthtime_ms": 0
+        },
+        "added_at": 1766637699390,
+        "updated_at": 1766637699390,
+        "track_num_from_meta": null,
+        "disc_num_from_meta": null,
+        "track_num_from_filename": 1,
+        "disc_num_from_filename": null,
+        "manual_track_num": null,
+        "invalid": false,
+        "exclude": false,
+        "error": null,
+        "format": "QuickTime / MOV",
+        "duration": 104183.760862,
+        "bit_rate": 118653,
+        "language": "und",
+        "codec": "aac",
+        "time_base": "1/44100",
+        "channels": 2,
+        "channel_layout": "stereo",
+        "chapters": [
+          {
+            "start": 0,
+            "end": 19.764989,
+            "title": "Opening Credits",
+            "id": 0
+          },
+          {
+            "start": 19.764989,
+            "end": 1014.252971,
+            "title": "1. Strange Business",
+            "id": 1
+          },
+          {
+            "start": 1014.252971,
+            "end": 1720.350952,
+            "title": "2. Of Course Magic Is a Thing",
+            "id": 2
+          },
+          {
+            "start": 1720.350952,
+            "end": 2359.490952,
+            "title": "3. Local Cuisine",
+            "id": 3
+          },
+          {
+            "start": 2359.490952,
+            "end": 3010.229932,
+            "title": "4. Cannibals and Spelunking",
+            "id": 4
+          },
+          {
+            "start": 3010.229932,
+            "end": 3688.189932,
+            "title": "5. Wizard",
+            "id": 5
+          },
+          {
+            "start": 3688.189932,
+            "end": 4353.265918,
+            "title": "6. Potent Potable",
+            "id": 6
+          },
+          {
+            "start": 4353.265918,
+            "end": 5194.231905,
+            "title": "7. Spoils",
+            "id": 7
+          },
+          {
+            "start": 5194.231905,
+            "end": 6106.827891,
+            "title": "8. Dark Magic",
+            "id": 8
+          },
+          {
+            "start": 6106.827891,
+            "end": 7021.07288,
+            "title": "9. Escape",
+            "id": 9
+          },
+          {
+            "start": 7021.07288,
+            "end": 7724.233878,
+            "title": "10. The Evil Pit of Evil",
+            "id": 10
+          },
+          {
+            "start": 7724.233878,
+            "end": 8519.588866,
+            "title": "11. Dashing Heroics",
+            "id": 11
+          },
+          {
+            "start": 8519.588866,
+            "end": 9216.35585,
+            "title": "12. Sanguine Horror",
+            "id": 12
+          },
+          {
+            "start": 9216.35585,
+            "end": 10195.927846,
+            "title": "13. This Is the Part Where We Step Back",
+            "id": 13
+          },
+          {
+            "start": 10195.927846,
+            "end": 11020.919841,
+            "title": "14. Worlds Apart",
+            "id": 14
+          },
+          {
+            "start": 11020.919841,
+            "end": 11981.703832,
+            "title": "15. Outworlder",
+            "id": 15
+          },
+          {
+            "start": 11981.703832,
+            "end": 12890.701814,
+            "title": "16. Rescue Party",
+            "id": 16
+          },
+          {
+            "start": 12890.701814,
+            "end": 13750.26381,
+            "title": "17. A Conservative Pillage",
+            "id": 17
+          },
+          {
+            "start": 13750.26381,
+            "end": 14563.0778,
+            "title": "18. One of Us",
+            "id": 18
+          },
+          {
+            "start": 14563.0778,
+            "end": 15272.138798,
+            "title": "19. I Want a Lava Cannon",
+            "id": 19
+          },
+          {
+            "start": 15272.138798,
+            "end": 16486.503787,
+            "title": "20. By the Power of Grayskull",
+            "id": 20
+          },
+          {
+            "start": 16486.503787,
+            "end": 17274.409773,
+            "title": "21. I Have the Power",
+            "id": 21
+          },
+          {
+            "start": 17274.409773,
+            "end": 18396.744762,
+            "title": "22. Apocalypse Stone",
+            "id": 22
+          },
+          {
+            "start": 18396.744762,
+            "end": 19390.840748,
+            "title": "23. I May Have Made a Huge Mistake",
+            "id": 23
+          },
+          {
+            "start": 19390.840748,
+            "end": 20091.801746,
+            "title": "24. Astral Space",
+            "id": 24
+          },
+          {
+            "start": 20091.801746,
+            "end": 20818.161746,
+            "title": "25. Blasphemy Is Kind of My Thing",
+            "id": 25
+          },
+          {
+            "start": 20818.161746,
+            "end": 21538.867732,
+            "title": "26. Waterfall",
+            "id": 26
+          },
+          {
+            "start": 21538.867732,
+            "end": 22381.316712,
+            "title": "27. Water, Fall",
+            "id": 27
+          },
+          {
+            "start": 22381.316712,
+            "end": 23168.839705,
+            "title": "28. How Did You All Fit in There?",
+            "id": 28
+          },
+          {
+            "start": 23168.839705,
+            "end": 23985.645692,
+            "title": "29. That\u2019s What Adventurers Do",
+            "id": 29
+          },
+          {
+            "start": 23985.645692,
+            "end": 24708.078685,
+            "title": "30. Closing the Door Too Hard",
+            "id": 30
+          },
+          {
+            "start": 24708.078685,
+            "end": 25885.663673,
+            "title": "31. Taming the Beast",
+            "id": 31
+          },
+          {
+            "start": 25885.663673,
+            "end": 26889.18966,
+            "title": "32. Monster Hunting for Beginners",
+            "id": 32
+          },
+          {
+            "start": 26889.18966,
+            "end": 27706.133651,
+            "title": "33. Mistrun River",
+            "id": 33
+          },
+          {
+            "start": 27706.133651,
+            "end": 28355.097642,
+            "title": "34. Waving the Flag for Secular Morality",
+            "id": 34
+          },
+          {
+            "start": 28355.097642,
+            "end": 29237.626621,
+            "title": "35. Greenstone",
+            "id": 35
+          },
+          {
+            "start": 29237.626621,
+            "end": 30130.048617,
+            "title": "36. The Island",
+            "id": 36
+          },
+          {
+            "start": 30130.048617,
+            "end": 31298.762608,
+            "title": "37. A Good Adventurer and a Great One",
+            "id": 37
+          },
+          {
+            "start": 31298.762608,
+            "end": 32645.346599,
+            "title": "38. Just Another Adventurer",
+            "id": 38
+          },
+          {
+            "start": 32645.346599,
+            "end": 33764.755578,
+            "title": "39. Training",
+            "id": 39
+          },
+          {
+            "start": 33764.755578,
+            "end": 34807.489569,
+            "title": "40. Eyebeams and the Ethics of Adventuring",
+            "id": 40
+          },
+          {
+            "start": 34807.489569,
+            "end": 35816.715556,
+            "title": "41. Vulnerable and Exposed",
+            "id": 41
+          },
+          {
+            "start": 35816.715556,
+            "end": 36583.443537,
+            "title": "42. This Is the Pits",
+            "id": 42
+          },
+          {
+            "start": 36583.443537,
+            "end": 37330.950522,
+            "title": "43. Nightingale",
+            "id": 43
+          },
+          {
+            "start": 37330.950522,
+            "end": 38169.347506,
+            "title": "44. Complimentary Ointment",
+            "id": 44
+          },
+          {
+            "start": 38169.347506,
+            "end": 38969.176485,
+            "title": "45. So Much for Atheism",
+            "id": 45
+          },
+          {
+            "start": 38969.176485,
+            "end": 40212.544467,
+            "title": "46. Blatant Manipulation",
+            "id": 46
+          },
+          {
+            "start": 40212.544467,
+            "end": 41144.392449,
+            "title": "47. Mirage Chamber",
+            "id": 47
+          },
+          {
+            "start": 41144.392449,
+            "end": 42245.372449,
+            "title": "48. An Endless, Inescapable Nightmare",
+            "id": 48
+          },
+          {
+            "start": 42245.372449,
+            "end": 43181.213447,
+            "title": "49. A Voice from Home",
+            "id": 49
+          },
+          {
+            "start": 43181.213447,
+            "end": 44082.991429,
+            "title": "50. The Full Keanu",
+            "id": 50
+          },
+          {
+            "start": 44082.991429,
+            "end": 44789.163424,
+            "title": "51. Song of the Nightingale",
+            "id": 51
+          },
+          {
+            "start": 44789.163424,
+            "end": 45603.717415,
+            "title": "52. Pain",
+            "id": 52
+          },
+          {
+            "start": 45603.717415,
+            "end": 46744.827392,
+            "title": "53. Nightlife",
+            "id": 53
+          },
+          {
+            "start": 46744.827392,
+            "end": 47722.18839,
+            "title": "54. Field Assessment",
+            "id": 54
+          },
+          {
+            "start": 47722.18839,
+            "end": 48528.742381,
+            "title": "55. Rune Tortoise",
+            "id": 55
+          },
+          {
+            "start": 48528.742381,
+            "end": 49269.384376,
+            "title": "56. Gary\u2019s Gift",
+            "id": 56
+          },
+          {
+            "start": 49269.384376,
+            "end": 50130.026372,
+            "title": "57. Rainbow Smoke",
+            "id": 57
+          },
+          {
+            "start": 50130.026372,
+            "end": 51212.805351,
+            "title": "58. A Man of Malevolent Intellect",
+            "id": 58
+          },
+          {
+            "start": 51212.805351,
+            "end": 51961.379342,
+            "title": "59. Falling Short",
+            "id": 59
+          },
+          {
+            "start": 51961.379342,
+            "end": 52710.299342,
+            "title": "60. Making Music",
+            "id": 60
+          },
+          {
+            "start": 52710.299342,
+            "end": 53872.002336,
+            "title": "61. Trade Hall",
+            "id": 61
+          },
+          {
+            "start": 53872.002336,
+            "end": 54723.268322,
+            "title": "62. Have Some Damn Adventures",
+            "id": 62
+          },
+          {
+            "start": 54723.268322,
+            "end": 55736.063311,
+            "title": "63. Sunk-Cost Fallacy",
+            "id": 63
+          },
+          {
+            "start": 55736.063311,
+            "end": 56428.306304,
+            "title": "64. Take My Wife, Please",
+            "id": 64
+          },
+          {
+            "start": 56428.306304,
+            "end": 57545.96229,
+            "title": "65. Curious Urges",
+            "id": 65
+          },
+          {
+            "start": 57545.96229,
+            "end": 58367.59229,
+            "title": "66. A Stronger Weapon Than the One in Your Hand",
+            "id": 66
+          },
+          {
+            "start": 58367.59229,
+            "end": 59841.254286,
+            "title": "67. This Is What It Means to Fight Me",
+            "id": 67
+          },
+          {
+            "start": 59841.254286,
+            "end": 60742.669274,
+            "title": "68. Good News for Clive",
+            "id": 68
+          },
+          {
+            "start": 60742.669274,
+            "end": 61708.405261,
+            "title": "69. Dumpling Soup",
+            "id": 69
+          },
+          {
+            "start": 61708.405261,
+            "end": 62660.205261,
+            "title": "70. Rewards",
+            "id": 70
+          },
+          {
+            "start": 62660.205261,
+            "end": 63557.593243,
+            "title": "71. A Bit of Poo",
+            "id": 71
+          },
+          {
+            "start": 63557.593243,
+            "end": 64217.596236,
+            "title": "72. Rat Race",
+            "id": 72
+          },
+          {
+            "start": 64217.596236,
+            "end": 64848.48322,
+            "title": "73. A Grim Sword to Live By",
+            "id": 73
+          },
+          {
+            "start": 64848.48322,
+            "end": 65643.718209,
+            "title": "74. Doing Better",
+            "id": 74
+          },
+          {
+            "start": 65643.718209,
+            "end": 66512.098209,
+            "title": "75. Progress",
+            "id": 75
+          },
+          {
+            "start": 66512.098209,
+            "end": 67343.470204,
+            "title": "76. Preparations",
+            "id": 76
+          },
+          {
+            "start": 67343.470204,
+            "end": 68181.54619,
+            "title": "77. Group Cohesion",
+            "id": 77
+          },
+          {
+            "start": 68181.54619,
+            "end": 68969.238186,
+            "title": "78. Jason Has the Good Biscuits",
+            "id": 78
+          },
+          {
+            "start": 68969.238186,
+            "end": 69754.004172,
+            "title": "79. Sand Everywhere",
+            "id": 79
+          },
+          {
+            "start": 69754.004172,
+            "end": 70698.824172,
+            "title": "80. It\u2019s Not Work If You Love What You Do",
+            "id": 80
+          },
+          {
+            "start": 70698.824172,
+            "end": 71336.610159,
+            "title": "81. Crazy Desperation Move",
+            "id": 81
+          },
+          {
+            "start": 71336.610159,
+            "end": 72255.099138,
+            "title": "82. Choices",
+            "id": 82
+          },
+          {
+            "start": 72255.099138,
+            "end": 73054.571134,
+            "title": "83. It Makes No Difference to the Ant",
+            "id": 83
+          },
+          {
+            "start": 73054.571134,
+            "end": 73955.866122,
+            "title": "84. Injury and Death",
+            "id": 84
+          },
+          {
+            "start": 73955.866122,
+            "end": 74738.914104,
+            "title": "85. Because I\u2019m an Adventurer",
+            "id": 85
+          },
+          {
+            "start": 74738.914104,
+            "end": 75912.034082,
+            "title": "86. Some Kind of Secret",
+            "id": 86
+          },
+          {
+            "start": 75912.034082,
+            "end": 77406.128073,
+            "title": "87. Can\u2019t Lose",
+            "id": 87
+          },
+          {
+            "start": 77406.128073,
+            "end": 78461.278073,
+            "title": "88. The Nature of Absolution",
+            "id": 88
+          },
+          {
+            "start": 78461.278073,
+            "end": 79321.582063,
+            "title": "89. Anti-Pirate Operations",
+            "id": 89
+          },
+          {
+            "start": 79321.582063,
+            "end": 80183.326054,
+            "title": "90. The Path to Bronze",
+            "id": 90
+          },
+          {
+            "start": 80183.326054,
+            "end": 80856.883039,
+            "title": "91. Life and Death",
+            "id": 91
+          },
+          {
+            "start": 80856.883039,
+            "end": 81935.824036,
+            "title": "92. Unusual Contract",
+            "id": 92
+          },
+          {
+            "start": 81935.824036,
+            "end": 82998.373016,
+            "title": "93. Truth",
+            "id": 93
+          },
+          {
+            "start": 82998.373016,
+            "end": 83883.260998,
+            "title": "94. Consequences",
+            "id": 94
+          },
+          {
+            "start": 83883.260998,
+            "end": 85462.46898,
+            "title": "95. Punishment",
+            "id": 95
+          },
+          {
+            "start": 85462.46898,
+            "end": 86256.402971,
+            "title": "96. You Don\u2019t Get a Third",
+            "id": 96
+          },
+          {
+            "start": 86256.402971,
+            "end": 87613.944966,
+            "title": "97. Integrity Is Sexy",
+            "id": 97
+          },
+          {
+            "start": 87613.944966,
+            "end": 88482.040952,
+            "title": "98. The Point of Money and Power",
+            "id": 98
+          },
+          {
+            "start": 88482.040952,
+            "end": 89831.254943,
+            "title": "99. Someone Else\u2019s Game",
+            "id": 99
+          },
+          {
+            "start": 89831.254943,
+            "end": 90694.856939,
+            "title": "100. Legwork",
+            "id": 100
+          },
+          {
+            "start": 90694.856939,
+            "end": 91669.753923,
+            "title": "101. Fantasy World Goodness",
+            "id": 101
+          },
+          {
+            "start": 91669.753923,
+            "end": 92644.423923,
+            "title": "102. You Fight Like Me",
+            "id": 102
+          },
+          {
+            "start": 92644.423923,
+            "end": 94054.195918,
+            "title": "103. Silver Hair",
+            "id": 103
+          },
+          {
+            "start": 94054.195918,
+            "end": 95131.2239,
+            "title": "104. An Outcome That Satisfies",
+            "id": 104
+          },
+          {
+            "start": 95131.2239,
+            "end": 95927.636893,
+            "title": "105. You Aren\u2019t in Control of What Happens Next",
+            "id": 105
+          },
+          {
+            "start": 95927.636893,
+            "end": 96944.159887,
+            "title": "106. Something Shady",
+            "id": 106
+          },
+          {
+            "start": 96944.159887,
+            "end": 98049.488866,
+            "title": "107. All the Good People We Can Get",
+            "id": 107
+          },
+          {
+            "start": 98049.488866,
+            "end": 99194.552857,
+            "title": "108. You Don\u2019t Have the Strength",
+            "id": 108
+          },
+          {
+            "start": 99194.552857,
+            "end": 100054.057846,
+            "title": "109. The Tyranny of Rank",
+            "id": 109
+          },
+          {
+            "start": 100054.057846,
+            "end": 100967.806825,
+            "title": "110. Help Arrives",
+            "id": 110
+          },
+          {
+            "start": 100967.806825,
+            "end": 102001.604807,
+            "title": "111. Strange Star",
+            "id": 111
+          },
+          {
+            "start": 102001.604807,
+            "end": 103125.942789,
+            "title": "112. The Accumulation of a Life",
+            "id": 112
+          },
+          {
+            "start": 103125.942789,
+            "end": 104124.301769,
+            "title": "113. You Need to Work on Making Enemies",
+            "id": 113
+          },
+          {
+            "start": 104124.301769,
+            "end": 104183.759615,
+            "title": "End Credits",
+            "id": 114
+          }
+        ],
+        "embedded_cover_art": "mjpeg",
+        "meta_tags": {
+          "tag_album": "He Who Fights with Monsters: A LitRPG Adventure: He Who Fights with Monsters, Book 1",
+          "tag_artist": "Shirtaloon; Travis Deverell",
+          "tag_genre": "Action & Adventure, Epic, Urban",
+          "tag_title": "He Who Fights with Monsters: A LitRPG Adventure",
+          "tag_track": null,
+          "tag_album_artist": "Shirtaloon; Travis Deverell",
+          "tag_composer": "Heath Miller",
+          "tag_date": "2021",
+          "tag_encoder": null
+        },
+        "mime_type": "audio/mp4"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 0,
+        "start": 0.0,
+        "end": 19.764989,
+        "title": "Opening Credits"
+      },
+      {
+        "id": 1,
+        "start": 19.764989,
+        "end": 1014.252971,
+        "title": "1. Strange Business"
+      },
+      {
+        "id": 2,
+        "start": 1014.252971,
+        "end": 1720.350952,
+        "title": "2. Of Course Magic Is a Thing"
+      },
+      {
+        "id": 3,
+        "start": 1720.350952,
+        "end": 2359.490952,
+        "title": "3. Local Cuisine"
+      },
+      {
+        "id": 4,
+        "start": 2359.490952,
+        "end": 3010.229932,
+        "title": "4. Cannibals and Spelunking"
+      },
+      {
+        "id": 5,
+        "start": 3010.229932,
+        "end": 3688.189932,
+        "title": "5. Wizard"
+      },
+      {
+        "id": 6,
+        "start": 3688.189932,
+        "end": 4353.265918,
+        "title": "6. Potent Potable"
+      },
+      {
+        "id": 7,
+        "start": 4353.265918,
+        "end": 5194.231905,
+        "title": "7. Spoils"
+      },
+      {
+        "id": 8,
+        "start": 5194.231905,
+        "end": 6106.827891,
+        "title": "8. Dark Magic"
+      },
+      {
+        "id": 9,
+        "start": 6106.827891,
+        "end": 7021.07288,
+        "title": "9. Escape"
+      },
+      {
+        "id": 10,
+        "start": 7021.07288,
+        "end": 7724.233878,
+        "title": "10. The Evil Pit of Evil"
+      },
+      {
+        "id": 11,
+        "start": 7724.233878,
+        "end": 8519.588866,
+        "title": "11. Dashing Heroics"
+      },
+      {
+        "id": 12,
+        "start": 8519.588866,
+        "end": 9216.35585,
+        "title": "12. Sanguine Horror"
+      },
+      {
+        "id": 13,
+        "start": 9216.35585,
+        "end": 10195.927846,
+        "title": "13. This Is the Part Where We Step Back"
+      },
+      {
+        "id": 14,
+        "start": 10195.927846,
+        "end": 11020.919841,
+        "title": "14. Worlds Apart"
+      },
+      {
+        "id": 15,
+        "start": 11020.919841,
+        "end": 11981.703832,
+        "title": "15. Outworlder"
+      },
+      {
+        "id": 16,
+        "start": 11981.703832,
+        "end": 12890.701814,
+        "title": "16. Rescue Party"
+      },
+      {
+        "id": 17,
+        "start": 12890.701814,
+        "end": 13750.26381,
+        "title": "17. A Conservative Pillage"
+      },
+      {
+        "id": 18,
+        "start": 13750.26381,
+        "end": 14563.0778,
+        "title": "18. One of Us"
+      },
+      {
+        "id": 19,
+        "start": 14563.0778,
+        "end": 15272.138798,
+        "title": "19. I Want a Lava Cannon"
+      },
+      {
+        "id": 20,
+        "start": 15272.138798,
+        "end": 16486.503787,
+        "title": "20. By the Power of Grayskull"
+      },
+      {
+        "id": 21,
+        "start": 16486.503787,
+        "end": 17274.409773,
+        "title": "21. I Have the Power"
+      },
+      {
+        "id": 22,
+        "start": 17274.409773,
+        "end": 18396.744762,
+        "title": "22. Apocalypse Stone"
+      },
+      {
+        "id": 23,
+        "start": 18396.744762,
+        "end": 19390.840748,
+        "title": "23. I May Have Made a Huge Mistake"
+      },
+      {
+        "id": 24,
+        "start": 19390.840748,
+        "end": 20091.801746,
+        "title": "24. Astral Space"
+      },
+      {
+        "id": 25,
+        "start": 20091.801746,
+        "end": 20818.161746,
+        "title": "25. Blasphemy Is Kind of My Thing"
+      },
+      {
+        "id": 26,
+        "start": 20818.161746,
+        "end": 21538.867732,
+        "title": "26. Waterfall"
+      },
+      {
+        "id": 27,
+        "start": 21538.867732,
+        "end": 22381.316712,
+        "title": "27. Water, Fall"
+      },
+      {
+        "id": 28,
+        "start": 22381.316712,
+        "end": 23168.839705,
+        "title": "28. How Did You All Fit in There?"
+      },
+      {
+        "id": 29,
+        "start": 23168.839705,
+        "end": 23985.645692,
+        "title": "29. That\u2019s What Adventurers Do"
+      },
+      {
+        "id": 30,
+        "start": 23985.645692,
+        "end": 24708.078685,
+        "title": "30. Closing the Door Too Hard"
+      },
+      {
+        "id": 31,
+        "start": 24708.078685,
+        "end": 25885.663673,
+        "title": "31. Taming the Beast"
+      },
+      {
+        "id": 32,
+        "start": 25885.663673,
+        "end": 26889.18966,
+        "title": "32. Monster Hunting for Beginners"
+      },
+      {
+        "id": 33,
+        "start": 26889.18966,
+        "end": 27706.133651,
+        "title": "33. Mistrun River"
+      },
+      {
+        "id": 34,
+        "start": 27706.133651,
+        "end": 28355.097642,
+        "title": "34. Waving the Flag for Secular Morality"
+      },
+      {
+        "id": 35,
+        "start": 28355.097642,
+        "end": 29237.626621,
+        "title": "35. Greenstone"
+      },
+      {
+        "id": 36,
+        "start": 29237.626621,
+        "end": 30130.048617,
+        "title": "36. The Island"
+      },
+      {
+        "id": 37,
+        "start": 30130.048617,
+        "end": 31298.762608,
+        "title": "37. A Good Adventurer and a Great One"
+      },
+      {
+        "id": 38,
+        "start": 31298.762608,
+        "end": 32645.346599,
+        "title": "38. Just Another Adventurer"
+      },
+      {
+        "id": 39,
+        "start": 32645.346599,
+        "end": 33764.755578,
+        "title": "39. Training"
+      },
+      {
+        "id": 40,
+        "start": 33764.755578,
+        "end": 34807.489569,
+        "title": "40. Eyebeams and the Ethics of Adventuring"
+      },
+      {
+        "id": 41,
+        "start": 34807.489569,
+        "end": 35816.715556,
+        "title": "41. Vulnerable and Exposed"
+      },
+      {
+        "id": 42,
+        "start": 35816.715556,
+        "end": 36583.443537,
+        "title": "42. This Is the Pits"
+      },
+      {
+        "id": 43,
+        "start": 36583.443537,
+        "end": 37330.950522,
+        "title": "43. Nightingale"
+      },
+      {
+        "id": 44,
+        "start": 37330.950522,
+        "end": 38169.347506,
+        "title": "44. Complimentary Ointment"
+      },
+      {
+        "id": 45,
+        "start": 38169.347506,
+        "end": 38969.176485,
+        "title": "45. So Much for Atheism"
+      },
+      {
+        "id": 46,
+        "start": 38969.176485,
+        "end": 40212.544467,
+        "title": "46. Blatant Manipulation"
+      },
+      {
+        "id": 47,
+        "start": 40212.544467,
+        "end": 41144.392449,
+        "title": "47. Mirage Chamber"
+      },
+      {
+        "id": 48,
+        "start": 41144.392449,
+        "end": 42245.372449,
+        "title": "48. An Endless, Inescapable Nightmare"
+      },
+      {
+        "id": 49,
+        "start": 42245.372449,
+        "end": 43181.213447,
+        "title": "49. A Voice from Home"
+      },
+      {
+        "id": 50,
+        "start": 43181.213447,
+        "end": 44082.991429,
+        "title": "50. The Full Keanu"
+      },
+      {
+        "id": 51,
+        "start": 44082.991429,
+        "end": 44789.163424,
+        "title": "51. Song of the Nightingale"
+      },
+      {
+        "id": 52,
+        "start": 44789.163424,
+        "end": 45603.717415,
+        "title": "52. Pain"
+      },
+      {
+        "id": 53,
+        "start": 45603.717415,
+        "end": 46744.827392,
+        "title": "53. Nightlife"
+      },
+      {
+        "id": 54,
+        "start": 46744.827392,
+        "end": 47722.18839,
+        "title": "54. Field Assessment"
+      },
+      {
+        "id": 55,
+        "start": 47722.18839,
+        "end": 48528.742381,
+        "title": "55. Rune Tortoise"
+      },
+      {
+        "id": 56,
+        "start": 48528.742381,
+        "end": 49269.384376,
+        "title": "56. Gary\u2019s Gift"
+      },
+      {
+        "id": 57,
+        "start": 49269.384376,
+        "end": 50130.026372,
+        "title": "57. Rainbow Smoke"
+      },
+      {
+        "id": 58,
+        "start": 50130.026372,
+        "end": 51212.805351,
+        "title": "58. A Man of Malevolent Intellect"
+      },
+      {
+        "id": 59,
+        "start": 51212.805351,
+        "end": 51961.379342,
+        "title": "59. Falling Short"
+      },
+      {
+        "id": 60,
+        "start": 51961.379342,
+        "end": 52710.299342,
+        "title": "60. Making Music"
+      },
+      {
+        "id": 61,
+        "start": 52710.299342,
+        "end": 53872.002336,
+        "title": "61. Trade Hall"
+      },
+      {
+        "id": 62,
+        "start": 53872.002336,
+        "end": 54723.268322,
+        "title": "62. Have Some Damn Adventures"
+      },
+      {
+        "id": 63,
+        "start": 54723.268322,
+        "end": 55736.063311,
+        "title": "63. Sunk-Cost Fallacy"
+      },
+      {
+        "id": 64,
+        "start": 55736.063311,
+        "end": 56428.306304,
+        "title": "64. Take My Wife, Please"
+      },
+      {
+        "id": 65,
+        "start": 56428.306304,
+        "end": 57545.96229,
+        "title": "65. Curious Urges"
+      },
+      {
+        "id": 66,
+        "start": 57545.96229,
+        "end": 58367.59229,
+        "title": "66. A Stronger Weapon Than the One in Your Hand"
+      },
+      {
+        "id": 67,
+        "start": 58367.59229,
+        "end": 59841.254286,
+        "title": "67. This Is What It Means to Fight Me"
+      },
+      {
+        "id": 68,
+        "start": 59841.254286,
+        "end": 60742.669274,
+        "title": "68. Good News for Clive"
+      },
+      {
+        "id": 69,
+        "start": 60742.669274,
+        "end": 61708.405261,
+        "title": "69. Dumpling Soup"
+      },
+      {
+        "id": 70,
+        "start": 61708.405261,
+        "end": 62660.205261,
+        "title": "70. Rewards"
+      },
+      {
+        "id": 71,
+        "start": 62660.205261,
+        "end": 63557.593243,
+        "title": "71. A Bit of Poo"
+      },
+      {
+        "id": 72,
+        "start": 63557.593243,
+        "end": 64217.596236,
+        "title": "72. Rat Race"
+      },
+      {
+        "id": 73,
+        "start": 64217.596236,
+        "end": 64848.48322,
+        "title": "73. A Grim Sword to Live By"
+      },
+      {
+        "id": 74,
+        "start": 64848.48322,
+        "end": 65643.718209,
+        "title": "74. Doing Better"
+      },
+      {
+        "id": 75,
+        "start": 65643.718209,
+        "end": 66512.098209,
+        "title": "75. Progress"
+      },
+      {
+        "id": 76,
+        "start": 66512.098209,
+        "end": 67343.470204,
+        "title": "76. Preparations"
+      },
+      {
+        "id": 77,
+        "start": 67343.470204,
+        "end": 68181.54619,
+        "title": "77. Group Cohesion"
+      },
+      {
+        "id": 78,
+        "start": 68181.54619,
+        "end": 68969.238186,
+        "title": "78. Jason Has the Good Biscuits"
+      },
+      {
+        "id": 79,
+        "start": 68969.238186,
+        "end": 69754.004172,
+        "title": "79. Sand Everywhere"
+      },
+      {
+        "id": 80,
+        "start": 69754.004172,
+        "end": 70698.824172,
+        "title": "80. It\u2019s Not Work If You Love What You Do"
+      },
+      {
+        "id": 81,
+        "start": 70698.824172,
+        "end": 71336.610159,
+        "title": "81. Crazy Desperation Move"
+      },
+      {
+        "id": 82,
+        "start": 71336.610159,
+        "end": 72255.099138,
+        "title": "82. Choices"
+      },
+      {
+        "id": 83,
+        "start": 72255.099138,
+        "end": 73054.571134,
+        "title": "83. It Makes No Difference to the Ant"
+      },
+      {
+        "id": 84,
+        "start": 73054.571134,
+        "end": 73955.866122,
+        "title": "84. Injury and Death"
+      },
+      {
+        "id": 85,
+        "start": 73955.866122,
+        "end": 74738.914104,
+        "title": "85. Because I\u2019m an Adventurer"
+      },
+      {
+        "id": 86,
+        "start": 74738.914104,
+        "end": 75912.034082,
+        "title": "86. Some Kind of Secret"
+      },
+      {
+        "id": 87,
+        "start": 75912.034082,
+        "end": 77406.128073,
+        "title": "87. Can\u2019t Lose"
+      },
+      {
+        "id": 88,
+        "start": 77406.128073,
+        "end": 78461.278073,
+        "title": "88. The Nature of Absolution"
+      },
+      {
+        "id": 89,
+        "start": 78461.278073,
+        "end": 79321.582063,
+        "title": "89. Anti-Pirate Operations"
+      },
+      {
+        "id": 90,
+        "start": 79321.582063,
+        "end": 80183.326054,
+        "title": "90. The Path to Bronze"
+      },
+      {
+        "id": 91,
+        "start": 80183.326054,
+        "end": 80856.883039,
+        "title": "91. Life and Death"
+      },
+      {
+        "id": 92,
+        "start": 80856.883039,
+        "end": 81935.824036,
+        "title": "92. Unusual Contract"
+      },
+      {
+        "id": 93,
+        "start": 81935.824036,
+        "end": 82998.373016,
+        "title": "93. Truth"
+      },
+      {
+        "id": 94,
+        "start": 82998.373016,
+        "end": 83883.260998,
+        "title": "94. Consequences"
+      },
+      {
+        "id": 95,
+        "start": 83883.260998,
+        "end": 85462.46898,
+        "title": "95. Punishment"
+      },
+      {
+        "id": 96,
+        "start": 85462.46898,
+        "end": 86256.402971,
+        "title": "96. You Don\u2019t Get a Third"
+      },
+      {
+        "id": 97,
+        "start": 86256.402971,
+        "end": 87613.944966,
+        "title": "97. Integrity Is Sexy"
+      },
+      {
+        "id": 98,
+        "start": 87613.944966,
+        "end": 88482.040952,
+        "title": "98. The Point of Money and Power"
+      },
+      {
+        "id": 99,
+        "start": 88482.040952,
+        "end": 89831.254943,
+        "title": "99. Someone Else\u2019s Game"
+      },
+      {
+        "id": 100,
+        "start": 89831.254943,
+        "end": 90694.856939,
+        "title": "100. Legwork"
+      },
+      {
+        "id": 101,
+        "start": 90694.856939,
+        "end": 91669.753923,
+        "title": "101. Fantasy World Goodness"
+      },
+      {
+        "id": 102,
+        "start": 91669.753923,
+        "end": 92644.423923,
+        "title": "102. You Fight Like Me"
+      },
+      {
+        "id": 103,
+        "start": 92644.423923,
+        "end": 94054.195918,
+        "title": "103. Silver Hair"
+      },
+      {
+        "id": 104,
+        "start": 94054.195918,
+        "end": 95131.2239,
+        "title": "104. An Outcome That Satisfies"
+      },
+      {
+        "id": 105,
+        "start": 95131.2239,
+        "end": 95927.636893,
+        "title": "105. You Aren\u2019t in Control of What Happens Next"
+      },
+      {
+        "id": 106,
+        "start": 95927.636893,
+        "end": 96944.159887,
+        "title": "106. Something Shady"
+      },
+      {
+        "id": 107,
+        "start": 96944.159887,
+        "end": 98049.488866,
+        "title": "107. All the Good People We Can Get"
+      },
+      {
+        "id": 108,
+        "start": 98049.488866,
+        "end": 99194.552857,
+        "title": "108. You Don\u2019t Have the Strength"
+      },
+      {
+        "id": 109,
+        "start": 99194.552857,
+        "end": 100054.057846,
+        "title": "109. The Tyranny of Rank"
+      },
+      {
+        "id": 110,
+        "start": 100054.057846,
+        "end": 100967.806825,
+        "title": "110. Help Arrives"
+      },
+      {
+        "id": 111,
+        "start": 100967.806825,
+        "end": 102001.604807,
+        "title": "111. Strange Star"
+      },
+      {
+        "id": 112,
+        "start": 102001.604807,
+        "end": 103125.942789,
+        "title": "112. The Accumulation of a Life"
+      },
+      {
+        "id": 113,
+        "start": 103125.942789,
+        "end": 104124.301769,
+        "title": "113. You Need to Work on Making Enemies"
+      },
+      {
+        "id": 114,
+        "start": 104124.301769,
+        "end": 104183.759615,
+        "title": "End Credits"
+      }
+    ],
+    "duration": 104183.760862,
+    "size": 1564116076,
+    "tracks": [
+      {
+        "index": 1,
+        "start_offset": 0.0,
+        "duration": 104183.760862,
+        "title": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+        "content_url": "/api/items/089b48d1-d3a1-4a77-b9b5-eb19ea68af0e/file/-356910253284297770",
+        "mime_type": "audio/mp4",
+        "metadata": {
+          "filename": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "ext": ".m4b",
+          "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "rel_path": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+          "size": 1564116076,
+          "mtime_ms": 1759187300000,
+          "ctime_ms": 1759232711409,
+          "birthtime_ms": 0
+        }
+      }
+    ],
+    "ebook_file": null,
+    "num_tracks": null,
+    "num_audio_files": null,
+    "num_chapters": null,
+    "ebook_file_format": null
+  },
+  "last_scan": 1767240675526,
+  "scan_version": "2.32.1",
+  "library_files": [
+    {
+      "ino": "-356910253284297770",
+      "metadata": {
+        "filename": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+        "ext": ".m4b",
+        "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+        "rel_path": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+        "size": 1564116076,
+        "mtime_ms": 1759187300000,
+        "ctime_ms": 1759232711409,
+        "birthtime_ms": 0
+      },
+      "added_at": 1766637684723,
+      "updated_at": 1766637684723,
+      "file_type": "audio"
+    },
+    {
+      "ino": "-355221416313494082",
+      "metadata": {
+        "filename": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.cue",
+        "ext": ".cue",
+        "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.cue",
+        "rel_path": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.cue",
+        "size": 8472,
+        "mtime_ms": 1759028206000,
+        "ctime_ms": 1759059917306,
+        "birthtime_ms": 0
+      },
+      "added_at": 1766637684723,
+      "updated_at": 1766637684723,
+      "file_type": "unknown"
+    },
+    {
+      "ino": "-355221416313494085",
+      "metadata": {
+        "filename": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.jpg",
+        "ext": ".jpg",
+        "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.jpg",
+        "rel_path": "He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.jpg",
+        "size": 479402,
+        "mtime_ms": 1759028206000,
+        "ctime_ms": 1759059917303,
+        "birthtime_ms": 0
+      },
+      "added_at": 1766637684723,
+      "updated_at": 1766637684723,
+      "file_type": "image"
+    },
+    {
+      "ino": "27584547717654810",
+      "metadata": {
+        "filename": "metadata.json",
+        "ext": ".json",
+        "path": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/metadata.json",
+        "rel_path": "metadata.json",
+        "size": 15908,
+        "mtime_ms": 1767223146054,
+        "ctime_ms": 1767223146054,
+        "birthtime_ms": 0
+      },
+      "added_at": 1766637699507,
+      "updated_at": 1767240675526,
+      "file_type": "metadata"
+    }
+  ],
+  "size": 1564619858
+}
