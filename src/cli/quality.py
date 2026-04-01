@@ -603,7 +603,12 @@ def quality_upgrades(
     plus_only: bool = typer.Option(False, "--plus-only", "-p", help="Show only Plus Catalog items (FREE)"),
     deals_only: bool = typer.Option(False, "--deals", "-d", help="Show only items under $9.00"),
     monthly_deals: bool = typer.Option(False, "--monthly-deals", "-m", help="Show only monthly deal items"),
-    fast: bool = typer.Option(False, "--fast", "-f", help="Skip license requests (faster but less accurate bitrate)"),
+    fast: bool = typer.Option(
+        False,
+        "--fast",
+        "-f",
+        help="Use metadata-only quality discovery (faster, skips slower license fallback)",
+    ),
     show_minor: bool = typer.Option(False, "--show-minor", help="Include minor upgrades (8-16 kbps improvement)"),
     show_all: bool = typer.Option(False, "--show-all", "-a", help="Show ALL candidates (disable smart filtering)"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Export to JSON file"),
@@ -616,7 +621,7 @@ def quality_upgrades(
     - Plus Catalog availability (FREE!)
     - Monthly deals (up to 80% off!)
     - Current pricing and discounts
-    - ACTUAL best audio quality via license requests (unless --fast)
+    - Best available quality via fast metadata discovery, with license fallback when needed
     - Buy recommendation (FREE, MONTHLY_DEAL, GOOD_DEAL, CREDIT, etc)
     """
     start_time = time.time()
@@ -691,11 +696,13 @@ def quality_upgrades(
             # Phase 2: Enrich with Audible data using async for actual quality discovery
             if fast:
                 console.print(
-                    f"\nPhase 2: Fetching Audible pricing for {len(upgrade_candidates)} items (fast mode)...\n"
+                    f"\nPhase 2: Fetching Audible pricing & fast metadata quality for "
+                    f"{len(upgrade_candidates)} items (skipping slow fallback)...\n"
                 )
             else:
                 console.print(
-                    f"\nPhase 2: Fetching Audible pricing & actual quality for {len(upgrade_candidates)} items...\n"
+                    f"\nPhase 2: Fetching Audible pricing & best available quality for "
+                    f"{len(upgrade_candidates)} items...\n"
                 )
 
             asins = [c.asin for c in upgrade_candidates if c.asin]
@@ -705,7 +712,8 @@ def quality_upgrades(
                 _async_enrich_upgrades(
                     asins=asins,
                     cache=cache,
-                    discover_quality=not fast,
+                    discover_quality=True,
+                    allow_license_fallback=not fast,
                     console=console,
                 )
             )
@@ -726,7 +734,7 @@ def quality_upgrades(
                         candidate.is_good_deal = enrichment.pricing.is_good_deal
                         candidate.is_monthly_deal = enrichment.pricing.is_monthly_deal
                     candidate.has_atmos_upgrade = enrichment.has_atmos
-                    # Use actual_best_bitrate which comes from metadata endpoint
+                    # Use quality from the metadata probe, upgraded by slow fallback when needed.
                     candidate.audible_best_bitrate = enrichment.actual_best_bitrate
                     candidate.audible_best_codec = enrichment.actual_best_format
                     candidate.acquisition_recommendation = enrichment.acquisition_recommendation
@@ -976,15 +984,17 @@ async def _async_enrich_upgrades(
     asins: list[str],
     cache,
     discover_quality: bool = True,
+    allow_license_fallback: bool = True,
     console=None,
 ):
     """
-    Async helper to enrich ASINs with actual quality via license requests.
+    Async helper to enrich ASINs with Audible pricing and best-available quality.
 
     Args:
         asins: List of ASINs to enrich
         cache: SQLiteCache instance
-        discover_quality: Whether to make license requests for actual quality
+        discover_quality: Whether to run metadata-based quality discovery
+        allow_license_fallback: Whether to use slower license requests when metadata is incomplete
         console: Rich console for output
 
     Returns:
@@ -1029,6 +1039,7 @@ async def _async_enrich_upgrades(
                 asins,
                 use_cache=True,
                 discover_quality=discover_quality,
+                allow_license_fallback=allow_license_fallback,
                 max_concurrent=5,  # Limit concurrent API calls
             )
 

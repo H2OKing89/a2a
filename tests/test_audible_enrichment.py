@@ -1,12 +1,12 @@
 """Tests for Audible enrichment module."""
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.audible.enrichment import AudibleEnrichment, AudibleEnrichmentService
-from src.audible.models import PlusCatalogInfo, PricingInfo
+from src.audible.enrichment import AsyncAudibleEnrichmentService, AudibleEnrichment, AudibleEnrichmentService
+from src.audible.models import AudioFormat, ContentQualityInfo, PlusCatalogInfo, PricingInfo
 
 
 class TestAudibleEnrichment:
@@ -142,6 +142,89 @@ class TestAudibleEnrichmentService:
         assert len(results) == 2
         assert "B001" in results
         assert "B002" in results
+
+
+class TestAsyncAudibleEnrichmentService:
+    """Test async quality enrichment behavior."""
+
+    @pytest.mark.asyncio
+    async def test_enrich_single_uses_license_fallback_for_unresolved_metadata(self):
+        """Test incomplete metadata quality triggers the slower license fallback."""
+        client = MagicMock()
+        client.get_all_library_items = AsyncMock(return_value=[])
+        client.fast_quality_check = AsyncMock(
+            return_value=ContentQualityInfo.from_formats(
+                "B001",
+                [
+                    AudioFormat(
+                        codec="mp4a.40.42",
+                        codec_name="HE-AAC v2",
+                        drm_type="Widevine",
+                        bitrate_kbps=0,
+                        size_bytes=120_000_000,
+                        runtime_ms=0,
+                        is_spatial=False,
+                    ),
+                    AudioFormat(
+                        codec="mp4a.40.2",
+                        codec_name="AAC-LC",
+                        drm_type="Adrm",
+                        bitrate_kbps=64,
+                        size_bytes=80_000_000,
+                        runtime_ms=0,
+                        is_spatial=False,
+                    ),
+                ],
+            )
+        )
+        client.discover_content_quality = AsyncMock(
+            return_value=ContentQualityInfo.from_formats(
+                "B001",
+                [
+                    AudioFormat(
+                        codec="mp4a.40.42",
+                        codec_name="HE-AAC v2",
+                        drm_type="Widevine",
+                        bitrate_kbps=128,
+                        size_bytes=120_000_000,
+                        runtime_ms=3_600_000,
+                        is_spatial=False,
+                    ),
+                    AudioFormat(
+                        codec="mp4a.40.2",
+                        codec_name="AAC-LC",
+                        drm_type="Adrm",
+                        bitrate_kbps=64,
+                        size_bytes=80_000_000,
+                        runtime_ms=3_600_000,
+                        is_spatial=False,
+                    ),
+                ],
+            )
+        )
+
+        product = MagicMock()
+        product.title = "Test Book"
+        product.product_images = {}
+        product.price = None
+        product.is_ayce = False
+        product.plans = []
+        product.has_dolby_atmos = False
+        product.model_extra = {}
+        client.get_catalog_product = AsyncMock(return_value=product)
+
+        service = AsyncAudibleEnrichmentService(client, cache=None)
+        result = await service.enrich_single_with_quality(
+            "B001",
+            use_cache=False,
+            discover_quality=True,
+            allow_license_fallback=True,
+        )
+
+        assert result is not None
+        assert result.actual_best_bitrate == 128
+        assert result.actual_best_format == "HE-AAC v2"
+        client.discover_content_quality.assert_awaited_once_with("B001", use_cache=False)
 
 
 class TestPricingInfoIntegration:

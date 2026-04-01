@@ -223,6 +223,14 @@ class TestQualitySubApp:
         result = runner.invoke(app, ["quality", "upgrades", "--help"])
         assert result.exit_code == 0
 
+    def test_quality_upgrades_help_describes_metadata_and_fallback(self):
+        """Test quality upgrades help reflects metadata-first discovery and fast mode behavior."""
+        result = runner.invoke(app, ["quality", "upgrades", "--help"])
+        assert result.exit_code == 0
+        assert "metadata" in result.output
+        assert "license fallback" in result.output
+        assert "metadata-only quality discovery" in result.output
+
 
 class TestGlobalStatus:
     """Test global status command."""

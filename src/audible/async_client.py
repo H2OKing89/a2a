@@ -801,39 +801,45 @@ class AsyncAudibleClient:
 
         formats: list[AudioFormat] = []
 
+        def build_format(metadata: ContentMetadata | None, drm_type: str) -> AudioFormat | None:
+            """Convert metadata endpoint output into an AudioFormat, even if bitrate is unresolved."""
+            if not metadata or not metadata.parsed_content_ref:
+                return None
+
+            ref = metadata.parsed_content_ref
+            bitrate_kbps = metadata.bitrate_kbps
+            runtime_ms = 0
+            if metadata.chapter_info:
+                runtime_ms = metadata.chapter_info.get("runtime_length_ms", 0)
+            if runtime_ms <= 0:
+                runtime_ms = ref.runtime_ms
+
+            has_quality_signal = bool(ref.codec or ref.content_format or ref.content_size_bytes > 0)
+            if not has_quality_signal:
+                return None
+
+            codec_name = ref.codec_name if ref.codec else (ref.content_format or "Unknown")
+            return AudioFormat(
+                codec=ref.codec or "unknown",
+                codec_name=codec_name,
+                drm_type=drm_type,
+                bitrate_kbps=bitrate_kbps,
+                size_bytes=ref.content_size_bytes,
+                runtime_ms=runtime_ms,
+                is_spatial=ref.is_atmos,
+            )
+
         # Try Widevine first (modern formats: HE-AAC/USAC, Atmos)
         widevine = await self.get_content_metadata(asin, drm_type="Widevine", use_cache=use_cache)
-        if widevine and widevine.parsed_content_ref:
-            ref = widevine.parsed_content_ref
-            if ref.bitrate_kbps > 0:
-                formats.append(
-                    AudioFormat(
-                        codec=ref.codec or "unknown",
-                        codec_name=ref.codec_name,
-                        drm_type="Widevine",
-                        bitrate_kbps=ref.bitrate_kbps,
-                        size_bytes=ref.content_size_bytes,
-                        runtime_ms=ref.runtime_ms,
-                        is_spatial=ref.is_atmos,
-                    )
-                )
+        widevine_format = build_format(widevine, "Widevine")
+        if widevine_format:
+            formats.append(widevine_format)
 
         # Also try Adrm for comparison (legacy AAC-LC format)
         adrm = await self.get_content_metadata(asin, drm_type="Adrm", use_cache=use_cache)
-        if adrm and adrm.parsed_content_ref:
-            ref = adrm.parsed_content_ref
-            if ref.bitrate_kbps > 0:
-                formats.append(
-                    AudioFormat(
-                        codec=ref.codec or "unknown",
-                        codec_name=ref.codec_name,
-                        drm_type="Adrm",
-                        bitrate_kbps=ref.bitrate_kbps,
-                        size_bytes=ref.content_size_bytes,
-                        runtime_ms=ref.runtime_ms,
-                        is_spatial=ref.is_atmos,
-                    )
-                )
+        adrm_format = build_format(adrm, "Adrm")
+        if adrm_format:
+            formats.append(adrm_format)
 
         if formats:
             quality_info = ContentQualityInfo.from_formats(asin, formats)
