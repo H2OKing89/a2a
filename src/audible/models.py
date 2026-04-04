@@ -7,6 +7,7 @@ Based on the Audible API response structures with response_groups:
 """
 
 import logging
+import re
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
@@ -783,12 +784,25 @@ class ContentReference(BaseModel):
     model_config = {"extra": "ignore", "populate_by_name": True}
 
     @property
+    def bitrate_hint_kbps(self) -> float:
+        """Infer bitrate from content_format when runtime data is unavailable."""
+        if not self.content_format:
+            return 0.0
+
+        numeric_parts = [int(part) for part in re.findall(r"\d+", self.content_format)]
+        bitrate_candidates = [value for value in numeric_parts if 8 <= value <= 320]
+        if not bitrate_candidates:
+            return 0.0
+
+        return float(max(bitrate_candidates))
+
+    @property
     def bitrate_kbps(self) -> float:
-        """Calculate bitrate from size and runtime."""
+        """Calculate bitrate from size/runtime, or infer it from content_format hints."""
         if self.runtime_ms > 0 and self.content_size_bytes > 0:
             # bitrate = (bytes * 8 bits/byte) / (ms / 1000 ms/s) / 1000 bits/kbit
             return (self.content_size_bytes * 8) / (self.runtime_ms / 1000) / 1000
-        return 0.0
+        return self.bitrate_hint_kbps
 
     @property
     def is_atmos(self) -> bool:
@@ -906,6 +920,8 @@ class ContentMetadata(BaseModel):
             runtime_ms = self.parsed_content_ref.runtime_ms
 
         if runtime_ms <= 0:
+            if self.parsed_content_ref:
+                return self.parsed_content_ref.bitrate_kbps
             return 0.0
 
         # Calculate: (bytes * 8 bits/byte) / (ms / 1000 ms/s) / 1000 bits/kbit

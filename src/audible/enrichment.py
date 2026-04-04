@@ -429,8 +429,9 @@ class AsyncAudibleEnrichmentService:
     Async service for enriching audiobooks with Audible data including actual quality.
 
     This service uses the async client's fast_quality_check() method (metadata endpoint)
-    to discover the actual best available audio quality (including modern formats like
-    Widevine HE-AAC at ~114 kbps and Dolby Atmos).
+    first, then falls back to the slower license request probe only when metadata
+    exposes a format but not a usable bitrate. This preserves the fast path for most
+    titles while recovering best-available quality for incomplete metadata responses.
 
     The catalog API's available_codecs field only shows legacy AAX formats
     (max ~64 kbps), so the metadata endpoint is used for accurate quality info.
@@ -444,7 +445,7 @@ class AsyncAudibleEnrichmentService:
             enrichments = await service.enrich_batch_with_quality(asins)
     """
 
-    CACHE_NAMESPACE = "audible_enrichment_v2"  # New namespace for quality-enriched data
+    CACHE_NAMESPACE = "audible_enrichment_v3"  # Includes metadata bitrate hints + license fallback
     CACHE_TTL_SECONDS = 3600 * 6  # 6 hours base (actual TTL may be shorter near month end)
 
     def __init__(
@@ -480,6 +481,16 @@ class AsyncAudibleEnrichmentService:
             "quality_discoveries": self._quality_discoveries,
         }
 
+    @staticmethod
+    def _needs_license_fallback(quality_info: ContentQualityInfo | None) -> bool:
+        """Return True when fast metadata found a format but could not resolve its bitrate."""
+        if not quality_info:
+            return False
+
+        return any(
+            fmt.bitrate_kbps <= 0 and (fmt.codec != "unknown" or fmt.size_bytes > 0) for fmt in quality_info.formats
+        )
+
     async def _load_library_asins(self) -> set[str]:
         """Load all ASINs from user's Audible library."""
         if self._library_asins is None:
@@ -492,6 +503,7 @@ class AsyncAudibleEnrichmentService:
         asin: str,
         use_cache: bool = True,
         discover_quality: bool = True,
+        allow_license_fallback: bool = True,
     ) -> AudibleEnrichment | None:
         """
         Enrich a single ASIN with Audible data including actual quality.
@@ -499,12 +511,13 @@ class AsyncAudibleEnrichmentService:
         Args:
             asin: Audible ASIN
             use_cache: Use cached data if available
-            discover_quality: Make license requests to discover actual quality
+            discover_quality: Run metadata-based quality discovery
+            allow_license_fallback: Use slower license requests when metadata is incomplete
 
         Returns:
             AudibleEnrichment or None if not found
         """
-        cache_key = f"enrich_v2_{asin}"
+        cache_key = f"enrich_v3_{asin}"
 
         # Check cache first
         if use_cache and self._cache:
@@ -587,18 +600,23 @@ class AsyncAudibleEnrichmentService:
                         if bitrate <= 320 and bitrate > (enrichment.best_bitrate or 0):
                             enrichment.best_bitrate = bitrate
 
-        # Discover actual quality via fast metadata endpoint (~3x faster than license requests)
+        # Discover actual quality via fast metadata endpoint, with slow fallback only when needed.
         if discover_quality:
             self._quality_discoveries += 1
             try:
-                # Use fast_quality_check (metadata endpoint) instead of discover_content_quality (license requests)
-                # This is ~3x faster and has less aggressive rate limiting
                 quality_info = await self._client.fast_quality_check(asin, use_cache=use_cache)
-                if quality_info:
-                    enrichment.actual_quality = quality_info
-                    enrichment.has_atmos = quality_info.has_atmos or enrichment.has_atmos
-                    if quality_info.best_bitrate_kbps > 0:
-                        enrichment.best_bitrate = int(quality_info.best_bitrate_kbps)
+                effective_quality = quality_info
+
+                if allow_license_fallback and self._needs_license_fallback(quality_info):
+                    slow_quality = await self._client.discover_content_quality(asin, use_cache=use_cache)
+                    if slow_quality.formats:
+                        effective_quality = slow_quality
+
+                if effective_quality:
+                    enrichment.actual_quality = effective_quality
+                    enrichment.has_atmos = effective_quality.has_atmos or enrichment.has_atmos
+                    if effective_quality.best_bitrate_kbps > 0:
+                        enrichment.best_bitrate = int(effective_quality.best_bitrate_kbps)
             except (AsyncAudibleError, ValidationError) as e:
                 logger.debug("Failed to discover quality for ASIN %s: %s", asin, str(e))
 
@@ -625,8 +643,8 @@ class AsyncAudibleEnrichmentService:
         asins: list[str],
         use_cache: bool = True,
         discover_quality: bool = True,
+        allow_license_fallback: bool = True,
         max_concurrent: int = 5,
-        use_fast_quality: bool = True,
     ) -> dict[str, AudibleEnrichment]:
         """
         Enrich multiple ASINs with Audible data including actual quality.
@@ -638,8 +656,8 @@ class AsyncAudibleEnrichmentService:
             asins: List of ASINs to enrich
             use_cache: Use cached data if available
             discover_quality: Discover actual audio quality
+            allow_license_fallback: Use slower license requests when metadata is incomplete
             max_concurrent: Max concurrent enrichment operations
-            use_fast_quality: Use fast metadata endpoint (default) vs slower license requests
 
         Returns:
             Dict mapping ASIN to enrichment data
@@ -656,7 +674,10 @@ class AsyncAudibleEnrichmentService:
             nonlocal completed
             async with semaphore:
                 result = await self.enrich_single_with_quality(
-                    asin, use_cache=use_cache, discover_quality=discover_quality
+                    asin,
+                    use_cache=use_cache,
+                    discover_quality=discover_quality,
+                    allow_license_fallback=allow_license_fallback,
                 )
                 # Update progress after completion (not at start)
                 completed += 1

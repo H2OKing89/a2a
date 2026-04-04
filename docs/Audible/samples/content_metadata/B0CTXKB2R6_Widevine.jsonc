@@ -1,4 +1,16 @@
 {
+  // Sample response from: GET /1.0/content/{asin}/metadata?drm_type=Widevine
+  // Returns content metadata including chapter info and quality details
+  // ASIN: B0CTXKB2R6
+  // DRM Type: Widevine (used for HE-AAC v2 and Dolby Atmos discovery)
+  //
+  // This endpoint is ~3x faster than license requests for quality checking
+  // Use content_reference.codec to determine actual audio quality:
+  // - "mp4a.40.2" = AAC-LC (standard)
+  // - "mp4a.40.42" = HE-AAC v2 (high efficiency, ~114 kbps)
+  // - "ec+3" = Dolby Digital Plus
+  // - "ac-4" = Dolby AC-4 (Atmos)
+
   "content_metadata": {
     "chapter_info": {
       "brandIntroDurationMs": 0,

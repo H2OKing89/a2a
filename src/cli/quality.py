@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import time
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -22,10 +23,252 @@ from rich.text import Text
 from src.audible import AsyncAudibleClient, AsyncAudibleEnrichmentService, AudibleEnrichmentService
 from src.cli.common import Icons, console, get_abs_client, get_audible_client, get_cache, get_default_library_id, ui
 from src.config import get_settings
-from src.quality import QualityAnalyzer, QualityReport, QualityTier
+from src.quality import AudioQuality, QualityAnalyzer, QualityReport, QualityTier
 from src.utils.ui import BarColumn, Panel, Progress, SpinnerColumn, Table, TaskProgressColumn, TextColumn
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Upgrade Filtering Logic
+# =============================================================================
+
+
+class UpgradeTier(str, Enum):
+    """Upgrade significance tiers."""
+
+    NOISE = "noise"  # Not worth showing (Δkbps < 8 or Δ% < 10%)
+    MINOR = "minor"  # Passes hard gate but fails band threshold
+    WORTH = "worth"  # Passes band threshold - meaningful upgrade
+    BIG = "big"  # Δkbps ≥ 24 OR Δ% ≥ 25% - definitely show
+
+
+def _get_band_requirements(cur_kbps: float) -> tuple[int, float]:
+    """
+    Get (min_delta_kbps, min_delta_pct) thresholds for current bitrate band.
+
+    Lower bitrates have more lenient thresholds since small improvements
+    are more noticeable. Higher bitrates need bigger jumps to matter.
+    """
+    if cur_kbps < 48:
+        return 16, 0.25  # Very low: need big jump or 25%
+    if cur_kbps < 80:
+        return 12, 0.20  # Low: 12 kbps or 20%
+    if cur_kbps < 110:
+        return 16, 0.15  # Medium: 16 kbps or 15%
+    if cur_kbps < 128:
+        return 18, 0.15  # Good: 18 kbps or 15%
+    return 24, 0.20  # High: need 24 kbps or 20%
+
+
+# Cost multipliers - lower = more lenient, higher = stricter
+COST_MULTIPLIERS = {
+    "OWNED": 0.7,  # Free redownload - be lenient
+    "FREE": 0.5,  # Plus Catalog - very lenient
+    "MONTHLY_DEAL": 0.9,  # Good deal - slightly lenient
+    "GOOD_DEAL": 0.95,  # Under $9 - nearly normal
+    "CREDIT": 1.2,  # Credits are precious - be strict
+    "EXPENSIVE": 1.4,  # Full price - very strict
+    "N/A": 1.3,  # Unknown - strict
+}
+
+
+def classify_upgrade(
+    cur_kbps: float,
+    best_kbps: float | None,
+    best_codec: str | None,
+    recommendation: str | None,
+) -> tuple[UpgradeTier, int, float]:
+    """
+    Classify an upgrade into tiers and return (tier, delta_kbps, delta_pct).
+
+    Args:
+        cur_kbps: Current file bitrate
+        best_kbps: Best available bitrate on Audible (None if unknown)
+        best_codec: Best available codec on Audible (e.g., "AAC-LC", "HE-AAC v2")
+        recommendation: Acquisition recommendation (OWNED, CREDIT, etc.)
+
+    Returns:
+        (UpgradeTier, delta_kbps, delta_percent)
+    """
+    # No Audible data available
+    if best_kbps is None:
+        return UpgradeTier.NOISE, 0, 0.0
+
+    delta = int(best_kbps - cur_kbps)
+    pct = delta / max(cur_kbps, 1)
+
+    # Sanity check: "upgrade" must actually be higher bitrate
+    if delta <= 0:
+        return UpgradeTier.NOISE, delta, pct
+
+    # Hard noise gate: Δkbps < 8 OR Δ% < 10%
+    if delta < 8 or pct < 0.10:
+        return UpgradeTier.NOISE, delta, pct
+
+    # Special case: AAC-LC ≤72k ceiling (that's all Audible offers for this title)
+    # Only show if current is truly low (≤52 kbps)
+    if best_codec == "AAC-LC" and best_kbps <= 72 and cur_kbps >= 52:
+        return UpgradeTier.NOISE, delta, pct
+
+    # Check for "Big" upgrade first (always show regardless of cost)
+    if delta >= 24 or pct >= 0.25:
+        return UpgradeTier.BIG, delta, pct
+
+    # Get band-based requirements
+    req_delta, req_pct = _get_band_requirements(cur_kbps)
+
+    # Apply cost multiplier
+    rec_key = "N/A"
+    if recommendation:
+        rec_simple = recommendation.split(" (")[0]  # Strip price details
+        if rec_simple in COST_MULTIPLIERS:
+            rec_key = rec_simple
+        elif rec_simple.startswith("FREE"):
+            rec_key = "FREE"
+        elif rec_simple.startswith("MONTHLY_DEAL"):
+            rec_key = "MONTHLY_DEAL"
+        elif rec_simple.startswith("GOOD_DEAL"):
+            rec_key = "GOOD_DEAL"
+
+    mult = COST_MULTIPLIERS.get(rec_key, 1.0)
+    adj_req_delta = round(req_delta * mult)
+    adj_req_pct = req_pct * mult
+
+    # Check if it meets adjusted thresholds
+    if delta >= adj_req_delta or pct >= adj_req_pct:
+        return UpgradeTier.WORTH, delta, pct
+
+    # Passes hard gate but not band threshold
+    return UpgradeTier.MINOR, delta, pct
+
+
+def should_show_upgrade(
+    cur_kbps: float,
+    best_kbps: float | None,
+    best_codec: str | None,
+    recommendation: str | None,
+    show_minor: bool = False,
+) -> bool:
+    """
+    Determine if an upgrade should be shown in the output.
+
+    Args:
+        cur_kbps: Current file bitrate
+        best_kbps: Best available bitrate on Audible
+        best_codec: Best available codec on Audible
+        recommendation: Acquisition recommendation
+        show_minor: If True, also show MINOR tier upgrades
+
+    Returns:
+        True if upgrade should be displayed
+    """
+    tier, _, _ = classify_upgrade(cur_kbps, best_kbps, best_codec, recommendation)
+
+    if tier == UpgradeTier.NOISE:
+        return False
+    if tier == UpgradeTier.MINOR:
+        return show_minor
+    # WORTH and BIG always shown
+    return True
+
+
+def _normalize_acquisition_recommendation(recommendation: str | None) -> str:
+    """Normalize recommendation strings to stable dashboard filter keys."""
+    if not recommendation:
+        return "N/A"
+
+    rec_simple = recommendation.split(" (")[0]
+    if rec_simple.startswith("FREE"):
+        return "FREE"
+    if rec_simple.startswith("MONTHLY_DEAL"):
+        return "MONTHLY_DEAL"
+    if rec_simple.startswith("GOOD_DEAL"):
+        return "GOOD_DEAL"
+    if rec_simple in COST_MULTIPLIERS:
+        return rec_simple
+    return rec_simple or "N/A"
+
+
+def _build_upgrade_export_data(upgrade_candidates: list[AudioQuality]) -> dict[str, Any]:
+    """Build JSON/dashboard export data for a list of enriched upgrade candidates."""
+    plus_count = sum(1 for candidate in upgrade_candidates if candidate.is_plus_catalog)
+    monthly_deals_count = sum(1 for candidate in upgrade_candidates if getattr(candidate, "is_monthly_deal", False))
+    deals_count = sum(1 for candidate in upgrade_candidates if candidate.is_good_deal)
+    owned_count = sum(1 for candidate in upgrade_candidates if candidate.owned_on_audible)
+    atmos_count = sum(1 for candidate in upgrade_candidates if candidate.has_atmos_upgrade)
+
+    return {
+        "summary": {
+            "total_candidates": len(upgrade_candidates),
+            "plus_catalog_count": plus_count,
+            "monthly_deals_count": monthly_deals_count,
+            "good_deals_count": deals_count,
+            "already_owned_count": owned_count,
+            "atmos_available_count": atmos_count,
+        },
+        "upgrade_candidates": [
+            {
+                "item_id": item.item_id,
+                "title": item.title,
+                "subtitle": item.subtitle,
+                "author": item.author,
+                "narrators": item.narrators,
+                "primary_narrator": item.primary_narrator,
+                "series": [
+                    {
+                        "name": series_entry.name,
+                        "sequence": series_entry.sequence,
+                        "label": series_entry.label,
+                    }
+                    for series_entry in item.series
+                ],
+                "series_label": item.series_label,
+                "publisher": item.publisher,
+                "language": item.language,
+                "published_year": item.published_year,
+                "published_date": item.published_date,
+                "asin": item.asin,
+                "codec": item.codec,
+                "codec_mix": item.codec_mix,
+                "bitrate_kbps": round(item.bitrate_kbps, 0),
+                "channels": item.channels,
+                "channel_layout": item.channel_layout,
+                "format": item.format_label,
+                "format_mix": item.format_mix,
+                "size_mb": round(item.size_mb, 1),
+                "duration_hours": round(item.duration_hours, 1),
+                "file_count": item.file_count,
+                "primary_filename": item.primary_filename,
+                "path": item.path,
+                "tier": item.tier_label,
+                "quality_score": round(item.quality_score, 1),
+                "upgrade_priority": item.upgrade_priority,
+                "upgrade_reason": item.upgrade_reason,
+                "is_current_atmos": item.is_atmos,
+                "owned_on_audible": item.owned_on_audible,
+                "is_plus_catalog": item.is_plus_catalog,
+                "plus_expiration": item.plus_expiration,
+                "is_monthly_deal": getattr(item, "is_monthly_deal", False),
+                "list_price": round(item.list_price, 2) if item.list_price else None,
+                "sale_price": round(item.sale_price, 2) if item.sale_price else None,
+                "discount_percent": round(item.discount_percent, 1) if item.discount_percent else None,
+                "is_good_deal": item.is_good_deal,
+                "has_atmos_upgrade": item.has_atmos_upgrade,
+                "audible_best_bitrate": item.audible_best_bitrate,
+                "audible_best_codec": item.audible_best_codec,
+                "delta_kbps": (
+                    round(item.audible_best_bitrate - item.bitrate_kbps, 0) if item.audible_best_bitrate else None
+                ),
+                "acquisition_recommendation": _normalize_acquisition_recommendation(item.acquisition_recommendation),
+                "acquisition_label": item.acquisition_recommendation,
+                "audible_url": getattr(item, "audible_url", None),
+                "cover_image_url": getattr(item, "cover_image_url", None),
+            }
+            for item in upgrade_candidates
+        ],
+    }
+
 
 # Create Quality sub-app
 quality_app = typer.Typer(help="💎 Audio quality analysis commands")
@@ -453,12 +696,20 @@ def quality_upgrades(
         None, "--library", "-l", help="Library ID (default: ABS_LIBRARY_ID from .env)"
     ),
     threshold: int = typer.Option(110, "--threshold", "-t", help="Bitrate threshold in kbps"),
-    limit: int = typer.Option(50, "--limit", "-n", help="Max items to show"),
+    limit: int = typer.Option(50, "--limit", "-n", help="Max items to show in terminal table"),
     plus_only: bool = typer.Option(False, "--plus-only", "-p", help="Show only Plus Catalog items (FREE)"),
     deals_only: bool = typer.Option(False, "--deals", "-d", help="Show only items under $9.00"),
     monthly_deals: bool = typer.Option(False, "--monthly-deals", "-m", help="Show only monthly deal items"),
-    fast: bool = typer.Option(False, "--fast", "-f", help="Skip license requests (faster but less accurate bitrate)"),
+    fast: bool = typer.Option(
+        False,
+        "--fast",
+        "-f",
+        help="Use metadata-only quality discovery (faster, skips slower license fallback)",
+    ),
+    show_minor: bool = typer.Option(False, "--show-minor", help="Include minor upgrades (8-16 kbps improvement)"),
+    show_all: bool = typer.Option(False, "--show-all", "-a", help="Show ALL candidates (disable smart filtering)"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Export to JSON file"),
+    publish: bool = typer.Option(False, "--publish", help="Generate HTML dashboard and deploy to web server"),
 ):
     """
     Find upgrade candidates enriched with Audible pricing data.
@@ -468,7 +719,7 @@ def quality_upgrades(
     - Plus Catalog availability (FREE!)
     - Monthly deals (up to 80% off!)
     - Current pricing and discounts
-    - ACTUAL best audio quality via license requests (unless --fast)
+    - Best available quality via fast metadata discovery, with license fallback when needed
     - Buy recommendation (FREE, MONTHLY_DEAL, GOOD_DEAL, CREDIT, etc)
     """
     start_time = time.time()
@@ -543,11 +794,13 @@ def quality_upgrades(
             # Phase 2: Enrich with Audible data using async for actual quality discovery
             if fast:
                 console.print(
-                    f"\nPhase 2: Fetching Audible pricing for {len(upgrade_candidates)} items (fast mode)...\n"
+                    f"\nPhase 2: Fetching Audible pricing & fast metadata quality for "
+                    f"{len(upgrade_candidates)} items (skipping slow fallback)...\n"
                 )
             else:
                 console.print(
-                    f"\nPhase 2: Fetching Audible pricing & actual quality for {len(upgrade_candidates)} items...\n"
+                    f"\nPhase 2: Fetching Audible pricing & best available quality for "
+                    f"{len(upgrade_candidates)} items...\n"
                 )
 
             asins = [c.asin for c in upgrade_candidates if c.asin]
@@ -557,7 +810,8 @@ def quality_upgrades(
                 _async_enrich_upgrades(
                     asins=asins,
                     cache=cache,
-                    discover_quality=not fast,
+                    discover_quality=True,
+                    allow_license_fallback=not fast,
                     console=console,
                 )
             )
@@ -578,15 +832,72 @@ def quality_upgrades(
                         candidate.is_good_deal = enrichment.pricing.is_good_deal
                         candidate.is_monthly_deal = enrichment.pricing.is_monthly_deal
                     candidate.has_atmos_upgrade = enrichment.has_atmos
-                    # Use actual_best_bitrate which comes from license requests
+                    # Use quality from the metadata probe, upgraded by slow fallback when needed.
                     candidate.audible_best_bitrate = enrichment.actual_best_bitrate
+                    candidate.audible_best_codec = enrichment.actual_best_format
                     candidate.acquisition_recommendation = enrichment.acquisition_recommendation
                     candidate.audible_url = enrichment.audible_url
                     candidate.cover_image_url = enrichment.cover_image_url
                     # Boost priority based on acquisition opportunity
                     candidate.upgrade_priority = int(candidate.upgrade_priority * enrichment.priority_boost)
 
-            # Filter if requested
+            # Smart upgrade filtering (unless --show-all)
+            filtered_out = {"noise": 0, "minor": 0, "no_improvement": 0}
+
+            if not show_all:
+                filtered_candidates = []
+                for c in upgrade_candidates:
+                    # Skip items with no Audible quality data
+                    if not c.audible_best_bitrate:
+                        filtered_candidates.append(c)  # Keep - can't evaluate
+                        continue
+
+                    # Skip if Audible quality is same or worse
+                    if c.audible_best_bitrate <= c.bitrate_kbps:
+                        filtered_out["no_improvement"] += 1
+                        continue
+
+                    # Apply smart filtering
+                    if should_show_upgrade(
+                        cur_kbps=c.bitrate_kbps,
+                        best_kbps=c.audible_best_bitrate,
+                        best_codec=c.audible_best_codec,
+                        recommendation=c.acquisition_recommendation or "",
+                        show_minor=show_minor,
+                    ):
+                        filtered_candidates.append(c)
+                    else:
+                        tier, _, _ = classify_upgrade(
+                            c.bitrate_kbps,
+                            c.audible_best_bitrate,
+                            c.audible_best_codec,
+                            c.acquisition_recommendation or "",
+                        )
+                        if tier == UpgradeTier.NOISE:
+                            filtered_out["noise"] += 1
+                        else:
+                            filtered_out["minor"] += 1
+
+                upgrade_candidates = filtered_candidates
+
+                # Show filtering summary
+                total_filtered = sum(filtered_out.values())
+                if total_filtered > 0:
+                    filter_details = []
+                    if filtered_out["noise"]:
+                        filter_details.append(f"{filtered_out['noise']} noise")
+                    if filtered_out["minor"]:
+                        filter_details.append(f"{filtered_out['minor']} minor")
+                    if filtered_out["no_improvement"]:
+                        filter_details.append(f"{filtered_out['no_improvement']} no-improvement")
+                    console.print(
+                        f"[dim]Smart filter: Hiding {total_filtered} low-value upgrades "
+                        f"({', '.join(filter_details)}). Use --show-all to see all.[/dim]"
+                    )
+
+            dashboard_candidates = list(upgrade_candidates)
+
+            # Filter if requested for the terminal view only
             if plus_only:
                 upgrade_candidates = [c for c in upgrade_candidates if c.is_plus_catalog]
                 console.print(f"[cyan]Filtering to Plus Catalog: {len(upgrade_candidates)} items[/cyan]")
@@ -600,141 +911,146 @@ def quality_upgrades(
                 ui.info(f"Filtering to good deals (<$9): {len(upgrade_candidates)} items")
 
             # Sort by priority (highest first)
+            dashboard_candidates.sort(key=lambda x: x.upgrade_priority, reverse=True)
             upgrade_candidates.sort(key=lambda x: x.upgrade_priority, reverse=True)
 
             if not upgrade_candidates:
-                ui.warning("No items match the selected filters")
-                return
-
-            # Display table
-            console.print()
-            table = Table(title=f"Upgrade Candidates ({len(upgrade_candidates)} items)")
-            table.add_column("kbps", justify="right")
-            table.add_column("Title", max_width=35)
-            table.add_column("Author", max_width=20)
-            table.add_column("ASIN", style="dim")
-            table.add_column("Recommendation", style="bold")
-            table.add_column("Price")
-            table.add_column("Best Available", justify="center")
-
-            for item in upgrade_candidates[:limit]:
-                # Determine recommendation color and simplify text
-                rec = item.acquisition_recommendation or "N/A"
-                # Strip price info from recommendation (e.g., "MONTHLY_DEAL ($7.99, 87% off)" -> "MONTHLY_DEAL")
-                rec_simple = rec.split(" (")[0] if " (" in rec else rec
-                if rec.startswith("FREE"):
-                    rec_style = "[green bold]"
-                elif rec.startswith("MONTHLY_DEAL"):
-                    rec_style = "[magenta bold]"
-                elif rec.startswith("GOOD_DEAL"):
-                    rec_style = "[cyan]"
-                elif rec == "OWNED":
-                    rec_style = "[dim]"
+                if publish and dashboard_candidates:
+                    ui.warning(
+                        "No items match the selected terminal filters. "
+                        "Skipping terminal table and publishing the full dashboard instead."
+                    )
                 else:
-                    rec_style = "[white]"
+                    ui.warning("No items match the selected filters")
+                    return
 
-                # Price display
-                if item.sale_price:
-                    if item.discount_percent and item.discount_percent > 0:
-                        price_display = f"${item.sale_price:.2f} ({item.discount_percent:.0f}% off)"
+            if upgrade_candidates:
+                # Display table
+                console.print()
+                table = Table(title=f"Upgrade Candidates ({len(upgrade_candidates)} items)")
+                table.add_column("Current", justify="right", style="dim")
+                table.add_column("Best Avail", justify="center")
+                table.add_column("Δ", justify="right", style="green")
+                table.add_column("Title", max_width=30)
+                table.add_column("Author", max_width=18)
+                table.add_column("ASIN", style="dim")
+                table.add_column("Recommendation", style="bold")
+                table.add_column("Price")
+
+                for item in upgrade_candidates[:limit]:
+                    # Determine recommendation color and simplify text
+                    rec = item.acquisition_recommendation or "N/A"
+                    # Strip price info from recommendation (e.g., "MONTHLY_DEAL ($7.99, 87% off)" -> "MONTHLY_DEAL")
+                    rec_simple = rec.split(" (")[0] if " (" in rec else rec
+                    if rec.startswith("FREE"):
+                        rec_style = "[green bold]"
+                    elif rec.startswith("MONTHLY_DEAL"):
+                        rec_style = "[magenta bold]"
+                    elif rec.startswith("GOOD_DEAL"):
+                        rec_style = "[cyan]"
+                    elif rec == "OWNED":
+                        rec_style = "[dim]"
                     else:
-                        price_display = f"${item.sale_price:.2f}"
-                elif item.list_price:
-                    price_display = f"${item.list_price:.2f}"
-                else:
-                    price_display = "-"
+                        rec_style = "[white]"
 
-                # Author display (first author only)
-                author_display = item.author.split(",")[0].strip()[:20] if item.author else "-"
+                    # Price display
+                    if item.sale_price:
+                        if item.discount_percent and item.discount_percent > 0:
+                            price_display = f"${item.sale_price:.2f} ({item.discount_percent:.0f}% off)"
+                        else:
+                            price_display = f"${item.sale_price:.2f}"
+                    elif item.list_price:
+                        price_display = f"${item.list_price:.2f}"
+                    else:
+                        price_display = "-"
 
-                # Best available quality display
-                # Show Atmos badge if available, otherwise show best bitrate from Audible
-                if item.has_atmos_upgrade:
-                    quality_display = "[magenta]🎧 Atmos[/magenta]"
-                elif item.audible_best_bitrate:
-                    quality_display = f"{item.audible_best_bitrate} kbps"
-                else:
-                    quality_display = "-"
+                    # Author display (first author only)
+                    author_display = item.author.split(",")[0].strip()[:20] if item.author else "-"
 
-                table.add_row(
-                    f"{item.bitrate_kbps:.0f}",
-                    item.title[:35],
-                    author_display,
-                    item.asin or "-",
-                    f"{rec_style}{rec_simple}[/]" if rec_style else rec_simple,
-                    price_display,
-                    quality_display,
-                )
+                    # Current quality display (codec + bitrate)
+                    # Map codec names to short display names
+                    codec_map = {
+                        "aac": "AAC",
+                        "mp3": "MP3",
+                        "opus": "Opus",
+                        "flac": "FLAC",
+                        "eac3": "Atmos",
+                        "ac3": "AC3",
+                    }
+                    cur_codec = codec_map.get((item.codec or "").lower(), item.codec or "")
+                    current_display = (
+                        f"{cur_codec} {item.bitrate_kbps:.0f}k" if cur_codec else f"{item.bitrate_kbps:.0f}k"
+                    )
 
-            console.print(table)
+                    # Best available quality display
+                    # Show Atmos badge if available, otherwise show codec + bitrate from Audible
+                    if item.has_atmos_upgrade:
+                        quality_display = "[magenta]🎧 Atmos[/magenta]"
+                    elif item.audible_best_bitrate and item.audible_best_codec:
+                        # Show codec name + bitrate (e.g., "HE-AAC 128k")
+                        codec_short = item.audible_best_codec.replace(" v2", "")
+                        quality_display = f"{codec_short} {item.audible_best_bitrate}k"
+                    elif item.audible_best_bitrate:
+                        quality_display = f"{item.audible_best_bitrate}k"
+                    else:
+                        quality_display = "-"
 
-            if len(upgrade_candidates) > limit:
-                console.print(
-                    f"\n[dim]Showing {limit} of {len(upgrade_candidates)} items. Use --limit to show more.[/dim]"
-                )
+                    # Delta display (improvement)
+                    if item.audible_best_bitrate and item.audible_best_bitrate > item.bitrate_kbps:
+                        delta = item.audible_best_bitrate - item.bitrate_kbps
+                        delta_display = f"+{delta:.0f}"
+                    else:
+                        delta_display = "-"
 
-            # Summary stats
-            plus_count = sum(1 for c in upgrade_candidates if c.is_plus_catalog)
-            deals_count = sum(1 for c in upgrade_candidates if c.is_good_deal)
-            owned_count = sum(1 for c in upgrade_candidates if c.owned_on_audible)
-            atmos_count = sum(1 for c in upgrade_candidates if c.has_atmos_upgrade)
+                    table.add_row(
+                        current_display,
+                        quality_display,
+                        delta_display,
+                        item.title[:30],
+                        author_display,
+                        item.asin or "-",
+                        f"{rec_style}{rec_simple}[/]" if rec_style else rec_simple,
+                        price_display,
+                    )
 
-            console.print("\n[bold]Summary:[/bold]")
-            console.print(f"  [green]Plus Catalog (FREE):[/green] {plus_count}")
-            console.print(f"  [cyan]Good Deals (<$9):[/cyan] {deals_count}")
-            console.print(f"  [dim]Already Owned:[/dim] {owned_count}")
-            console.print(f"  [magenta]Atmos Available:[/magenta] {atmos_count}")
+                console.print(table)
+
+                if len(upgrade_candidates) > limit:
+                    console.print(
+                        f"\n[dim]Showing {limit} of {len(upgrade_candidates)} items. Use --limit to show more.[/dim]"
+                    )
+
+                # Summary stats
+                plus_count = sum(1 for c in upgrade_candidates if c.is_plus_catalog)
+                deals_count = sum(1 for c in upgrade_candidates if c.is_good_deal)
+                owned_count = sum(1 for c in upgrade_candidates if c.owned_on_audible)
+                atmos_count = sum(1 for c in upgrade_candidates if c.has_atmos_upgrade)
+
+                console.print("\n[bold]Summary:[/bold]")
+                console.print(f"  [green]Plus Catalog (FREE):[/green] {plus_count}")
+                console.print(f"  [cyan]Good Deals (<$9):[/cyan] {deals_count}")
+                console.print(f"  [dim]Already Owned:[/dim] {owned_count}")
+                console.print(f"  [magenta]Atmos Available:[/magenta] {atmos_count}")
 
             total_time = time.time() - start_time
             console.print(f"\n[dim]Total time: {total_time:.1f}s[/dim]")
 
-            # Export if requested
+            # Build export data (terminal filters affect JSON export, not dashboard publish)
             if output:
+                export_data = _build_upgrade_export_data(upgrade_candidates)
                 output.parent.mkdir(parents=True, exist_ok=True)
-
-                monthly_deals_count = sum(1 for c in upgrade_candidates if getattr(c, "is_monthly_deal", False))
-
-                export_data = {
-                    "summary": {
-                        "total_candidates": len(upgrade_candidates),
-                        "plus_catalog_count": plus_count,
-                        "monthly_deals_count": monthly_deals_count,
-                        "good_deals_count": deals_count,
-                        "already_owned_count": owned_count,
-                        "atmos_available_count": atmos_count,
-                    },
-                    "upgrade_candidates": [
-                        {
-                            "title": item.title,
-                            "author": item.author,
-                            "asin": item.asin,
-                            "bitrate_kbps": round(item.bitrate_kbps, 0),
-                            "format": item.format_label,
-                            "size_mb": round(item.size_mb, 1),
-                            "path": item.path,
-                            "tier": item.tier_label,
-                            "upgrade_priority": item.upgrade_priority,
-                            "owned_on_audible": item.owned_on_audible,
-                            "is_plus_catalog": item.is_plus_catalog,
-                            "plus_expiration": item.plus_expiration,
-                            "is_monthly_deal": getattr(item, "is_monthly_deal", False),
-                            "list_price": round(item.list_price, 2) if item.list_price else None,
-                            "sale_price": round(item.sale_price, 2) if item.sale_price else None,
-                            "discount_percent": round(item.discount_percent, 1) if item.discount_percent else None,
-                            "is_good_deal": item.is_good_deal,
-                            "has_atmos_upgrade": item.has_atmos_upgrade,
-                            "acquisition_recommendation": item.acquisition_recommendation,
-                            "audible_url": getattr(item, "audible_url", None),
-                            "cover_image_url": getattr(item, "cover_image_url", None),
-                        }
-                        for item in upgrade_candidates
-                    ],
-                }
-
                 with open(output, "w") as f:
                     json.dump(export_data, f, indent=2)
-
                 console.print(f"\n[green]✓[/green] Exported {len(upgrade_candidates)} items to {output}")
+
+            if publish:
+                if len(dashboard_candidates) != len(upgrade_candidates):
+                    console.print(
+                        f"[dim]Publishing full dashboard with {len(dashboard_candidates)} upgrade candidates; "
+                        f"terminal filters currently show {len(upgrade_candidates)}.[/dim]"
+                    )
+                publish_data = _build_upgrade_export_data(dashboard_candidates)
+                _publish_dashboard(publish_data, console)
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -746,15 +1062,17 @@ async def _async_enrich_upgrades(
     asins: list[str],
     cache,
     discover_quality: bool = True,
+    allow_license_fallback: bool = True,
     console=None,
 ):
     """
-    Async helper to enrich ASINs with actual quality via license requests.
+    Async helper to enrich ASINs with Audible pricing and best-available quality.
 
     Args:
         asins: List of ASINs to enrich
         cache: SQLiteCache instance
-        discover_quality: Whether to make license requests for actual quality
+        discover_quality: Whether to run metadata-based quality discovery
+        allow_license_fallback: Whether to use slower license requests when metadata is incomplete
         console: Rich console for output
 
     Returns:
@@ -799,6 +1117,7 @@ async def _async_enrich_upgrades(
                 asins,
                 use_cache=True,
                 discover_quality=discover_quality,
+                allow_license_fallback=allow_license_fallback,
                 max_concurrent=5,  # Limit concurrent API calls
             )
 
@@ -811,3 +1130,59 @@ async def _async_enrich_upgrades(
             )
 
     return enrichments
+
+
+def _publish_dashboard(export_data: dict[str, Any], console) -> None:
+    """Generate HTML dashboard and optionally deploy via SCP."""
+    from src.web.dashboard import DashboardGenerator, DeploymentError, deploy_dashboard
+
+    settings = get_settings()
+
+    with ui.spinner("Generating HTML dashboard..."):
+        generator = DashboardGenerator(export_data)
+        html_path = generator.save(settings.paths.reports_dir / "dashboard.html")
+
+    console.print(f"[green]✓[/green] Dashboard saved to {html_path}")
+
+    web_settings = settings.web
+    if web_settings.ssh_host and web_settings.ssh_user and web_settings.path:
+        with ui.spinner("Deploying to web server..."):
+            try:
+                url = deploy_dashboard(html_path, web_settings)
+                console.print(f"[green]✓[/green] Dashboard live at [link={url}]{url}[/link]")
+            except DeploymentError as e:
+                console.print(f"[yellow]⚠ Deploy failed:[/yellow] {e}")
+                console.print("[dim]Dashboard was saved locally. Configure WEB_SERVER_* in .env for auto-deploy.[/dim]")
+    else:
+        console.print("[dim]Web server not configured. Set WEB_SERVER_* in .env to enable auto-deploy.[/dim]")
+
+
+@quality_app.command("publish")
+def quality_publish(
+    from_json: Path = typer.Option(..., "--from-json", "-f", help="Path to upgrades JSON export"),
+):
+    """
+    Publish a previously exported upgrades JSON as an HTML dashboard.
+
+    Re-generates the dashboard from cached JSON data without re-scanning the library.
+    """
+    if not from_json.exists():
+        ui.error(f"File not found: {from_json}")
+        raise typer.Exit(1)
+
+    try:
+        with open(from_json) as f:
+            export_data = json.load(f)
+
+        total = len(export_data.get("upgrade_candidates", []))
+        console.print(f"Loaded {total} upgrade candidates from {from_json}")
+
+        _publish_dashboard(export_data, console)
+
+    except json.JSONDecodeError as e:
+        ui.error(f"Invalid JSON: {e}")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        ui.print_exception()
+        raise typer.Exit(1)

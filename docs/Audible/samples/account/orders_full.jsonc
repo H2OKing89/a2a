@@ -1,6 +1,17 @@
 {
+  // Sample response from: GET /1.0/orders
+  // Returns order history from at least the past 6 months with pagination support
+  // Date captured: 2026-01-02
+  //
+  // KEY FIELDS TO LOOK FOR:
+  // - state: "ORDER_PENDING_PREORDER" = Pending preorder
+  // - state: "ORDER_CLOSED" = Completed order
+  // - items[].is_preorder: true = Item is/was a preorder
+  // - items[].payment_method: "CREDIT" = Paid with Audible credit
+  // - items[].is_returned: true = Item was returned/refunded
+
   "max_number_of_pages": 0,
-  "number_of_orders_in_range": 137,
+  "number_of_orders_in_range": 137,  // Total orders in your history
   "orders": [
     {
       "amount_charged": {

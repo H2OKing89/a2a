@@ -1,4 +1,11 @@
 {
+  // Sample response from: GET /1.0/customer/information?response_groups=subscription_details
+  // Returns customer account and subscription details
+  //
+  // KEY FIELDS:
+  // - preference.language: User's language preference
+  // - preference.currency: Currency for pricing
+
   "customer_details": {
     "login_customer_id": "REDACTED",
     "preference": {

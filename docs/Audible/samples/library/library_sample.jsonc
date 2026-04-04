@@ -1,4 +1,16 @@
 {
+  // Sample response from: GET /1.0/library
+  // Returns your Audible library (owned audiobooks)
+  // Date captured: Real library data
+  //
+  // KEY FIELDS:
+  // - asin: Unique identifier for the audiobook
+  // - available_codecs: Audio quality options (look for LC_128_44100 = AAC-LC @ 128kbps)
+  // - runtime_length_min: Duration in minutes
+  // - plans: Array showing if book is in Plus Catalog (plan_name: "US Minerva")
+  // - price: Pricing info (lowest_price vs list_price)
+  // - is_ayce: true = All You Can Eat (included in subscription/Plus Catalog)
+
   "items": [
     {
       "accolades": null,

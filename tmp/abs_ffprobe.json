@@ -1,0 +1,1456 @@
+{
+  "programs": [],
+  "streams": [
+    {
+      "index": 0,
+      "codec_name": "aac",
+      "codec_long_name": "AAC (Advanced Audio Coding)",
+      "profile": "xHE-AAC",
+      "codec_type": "audio",
+      "codec_tag_string": "mp4a",
+      "codec_tag": "0x6134706d",
+      "sample_fmt": "fltp",
+      "sample_rate": "44100",
+      "channels": 2,
+      "channel_layout": "stereo",
+      "bits_per_sample": 0,
+      "initial_padding": 0,
+      "id": "0x1",
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/44100",
+      "start_pts": 0,
+      "start_time": "0.000000",
+      "duration_ts": 4594503854,
+      "duration": "104183.760862",
+      "bit_rate": "118653",
+      "nb_frames": "4486877",
+      "extradata_size": 20,
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "creation_time": "2025-09-29T23:07:49.000000Z",
+        "language": "und",
+        "handler_name": "SoundHandler",
+        "vendor_id": "[0][0][0][0]"
+      }
+    },
+    {
+      "index": 1,
+      "codec_name": "bin_data",
+      "codec_long_name": "binary data",
+      "codec_type": "data",
+      "codec_tag_string": "text",
+      "codec_tag": "0x74786574",
+      "id": "0x2",
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/44100",
+      "start_pts": 0,
+      "start_time": "0.000000",
+      "duration_ts": 4594503854,
+      "duration": "104183.760862",
+      "nb_frames": "115",
+      "extradata_size": 43,
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "creation_time": "2025-09-29T23:07:49.000000Z",
+        "language": "mis",
+        "handler_name": "\u0018Apple Text Media Handler",
+        "title": "End Credits",
+        "comment": "End Credits"
+      }
+    },
+    {
+      "index": 2,
+      "codec_name": "mjpeg",
+      "codec_long_name": "Motion JPEG",
+      "profile": "Progressive",
+      "codec_type": "video",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 2400,
+      "height": 2400,
+      "coded_width": 2400,
+      "coded_height": 2400,
+      "has_b_frames": 0,
+      "sample_aspect_ratio": "1:1",
+      "display_aspect_ratio": "1:1",
+      "pix_fmt": "yuvj420p",
+      "level": -99,
+      "color_range": "pc",
+      "color_space": "bt470bg",
+      "chroma_location": "center",
+      "refs": 1,
+      "id": "0x0",
+      "r_frame_rate": "90000/1",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/90000",
+      "start_pts": 0,
+      "start_time": "0.000000",
+      "duration_ts": 9376538478,
+      "duration": "104183.760867",
+      "bits_per_raw_sample": "8",
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 1,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": 0,
+      "time_base": "1/44100",
+      "start": 0,
+      "start_time": "0.000000",
+      "end": 871636,
+      "end_time": "19.764989",
+      "tags": {
+        "title": "Opening Credits"
+      }
+    },
+    {
+      "id": 1,
+      "time_base": "1/44100",
+      "start": 871636,
+      "start_time": "19.764989",
+      "end": 44728556,
+      "end_time": "1014.252971",
+      "tags": {
+        "title": "1. Strange Business"
+      }
+    },
+    {
+      "id": 2,
+      "time_base": "1/44100",
+      "start": 44728556,
+      "start_time": "1014.252971",
+      "end": 75867477,
+      "end_time": "1720.350952",
+      "tags": {
+        "title": "2. Of Course Magic Is a Thing"
+      }
+    },
+    {
+      "id": 3,
+      "time_base": "1/44100",
+      "start": 75867477,
+      "start_time": "1720.350952",
+      "end": 104053551,
+      "end_time": "2359.490952",
+      "tags": {
+        "title": "3. Local Cuisine"
+      }
+    },
+    {
+      "id": 4,
+      "time_base": "1/44100",
+      "start": 104053551,
+      "start_time": "2359.490952",
+      "end": 132751140,
+      "end_time": "3010.229932",
+      "tags": {
+        "title": "4. Cannibals and Spelunking"
+      }
+    },
+    {
+      "id": 5,
+      "time_base": "1/44100",
+      "start": 132751140,
+      "start_time": "3010.229932",
+      "end": 162649176,
+      "end_time": "3688.189932",
+      "tags": {
+        "title": "5. Wizard"
+      }
+    },
+    {
+      "id": 6,
+      "time_base": "1/44100",
+      "start": 162649176,
+      "start_time": "3688.189932",
+      "end": 191979027,
+      "end_time": "4353.265918",
+      "tags": {
+        "title": "6. Potent Potable"
+      }
+    },
+    {
+      "id": 7,
+      "time_base": "1/44100",
+      "start": 191979027,
+      "start_time": "4353.265918",
+      "end": 229065627,
+      "end_time": "5194.231905",
+      "tags": {
+        "title": "7. Spoils"
+      }
+    },
+    {
+      "id": 8,
+      "time_base": "1/44100",
+      "start": 229065627,
+      "start_time": "5194.231905",
+      "end": 269311110,
+      "end_time": "6106.827891",
+      "tags": {
+        "title": "8. Dark Magic"
+      }
+    },
+    {
+      "id": 9,
+      "time_base": "1/44100",
+      "start": 269311110,
+      "start_time": "6106.827891",
+      "end": 309629314,
+      "end_time": "7021.072880",
+      "tags": {
+        "title": "9. Escape"
+      }
+    },
+    {
+      "id": 10,
+      "time_base": "1/44100",
+      "start": 309629314,
+      "start_time": "7021.072880",
+      "end": 340638714,
+      "end_time": "7724.233878",
+      "tags": {
+        "title": "10. The Evil Pit of Evil"
+      }
+    },
+    {
+      "id": 11,
+      "time_base": "1/44100",
+      "start": 340638714,
+      "start_time": "7724.233878",
+      "end": 375713869,
+      "end_time": "8519.588866",
+      "tags": {
+        "title": "11. Dashing Heroics"
+      }
+    },
+    {
+      "id": 12,
+      "time_base": "1/44100",
+      "start": 375713869,
+      "start_time": "8519.588866",
+      "end": 406441293,
+      "end_time": "9216.355850",
+      "tags": {
+        "title": "12. Sanguine Horror"
+      }
+    },
+    {
+      "id": 13,
+      "time_base": "1/44100",
+      "start": 406441293,
+      "start_time": "9216.355850",
+      "end": 449640418,
+      "end_time": "10195.927846",
+      "tags": {
+        "title": "13. This Is the Part Where We Step Back"
+      }
+    },
+    {
+      "id": 14,
+      "time_base": "1/44100",
+      "start": 449640418,
+      "start_time": "10195.927846",
+      "end": 486022565,
+      "end_time": "11020.919841",
+      "tags": {
+        "title": "14. Worlds Apart"
+      }
+    },
+    {
+      "id": 15,
+      "time_base": "1/44100",
+      "start": 486022565,
+      "start_time": "11020.919841",
+      "end": 528393139,
+      "end_time": "11981.703832",
+      "tags": {
+        "title": "15. Outworlder"
+      }
+    },
+    {
+      "id": 16,
+      "time_base": "1/44100",
+      "start": 528393139,
+      "start_time": "11981.703832",
+      "end": 568479950,
+      "end_time": "12890.701814",
+      "tags": {
+        "title": "16. Rescue Party"
+      }
+    },
+    {
+      "id": 17,
+      "time_base": "1/44100",
+      "start": 568479950,
+      "start_time": "12890.701814",
+      "end": 606386634,
+      "end_time": "13750.263810",
+      "tags": {
+        "title": "17. A Conservative Pillage"
+      }
+    },
+    {
+      "id": 18,
+      "time_base": "1/44100",
+      "start": 606386634,
+      "start_time": "13750.263810",
+      "end": 642231731,
+      "end_time": "14563.077800",
+      "tags": {
+        "title": "18. One of Us"
+      }
+    },
+    {
+      "id": 19,
+      "time_base": "1/44100",
+      "start": 642231731,
+      "start_time": "14563.077800",
+      "end": 673501321,
+      "end_time": "15272.138798",
+      "tags": {
+        "title": "19. I Want a Lava Cannon"
+      }
+    },
+    {
+      "id": 20,
+      "time_base": "1/44100",
+      "start": 673501321,
+      "start_time": "15272.138798",
+      "end": 727054817,
+      "end_time": "16486.503787",
+      "tags": {
+        "title": "20. By the Power of Grayskull"
+      }
+    },
+    {
+      "id": 21,
+      "time_base": "1/44100",
+      "start": 727054817,
+      "start_time": "16486.503787",
+      "end": 761801471,
+      "end_time": "17274.409773",
+      "tags": {
+        "title": "21. I Have the Power"
+      }
+    },
+    {
+      "id": 22,
+      "time_base": "1/44100",
+      "start": 761801471,
+      "start_time": "17274.409773",
+      "end": 811296444,
+      "end_time": "18396.744762",
+      "tags": {
+        "title": "22. Apocalypse Stone"
+      }
+    },
+    {
+      "id": 23,
+      "time_base": "1/44100",
+      "start": 811296444,
+      "start_time": "18396.744762",
+      "end": 855136077,
+      "end_time": "19390.840748",
+      "tags": {
+        "title": "23. I May Have Made a Huge Mistake"
+      }
+    },
+    {
+      "id": 24,
+      "time_base": "1/44100",
+      "start": 855136077,
+      "start_time": "19390.840748",
+      "end": 886048457,
+      "end_time": "20091.801746",
+      "tags": {
+        "title": "24. Astral Space"
+      }
+    },
+    {
+      "id": 25,
+      "time_base": "1/44100",
+      "start": 886048457,
+      "start_time": "20091.801746",
+      "end": 918080933,
+      "end_time": "20818.161746",
+      "tags": {
+        "title": "25. Blasphemy Is Kind of My Thing"
+      }
+    },
+    {
+      "id": 26,
+      "time_base": "1/44100",
+      "start": 918080933,
+      "start_time": "20818.161746",
+      "end": 949864067,
+      "end_time": "21538.867732",
+      "tags": {
+        "title": "26. Waterfall"
+      }
+    },
+    {
+      "id": 27,
+      "time_base": "1/44100",
+      "start": 949864067,
+      "start_time": "21538.867732",
+      "end": 987016067,
+      "end_time": "22381.316712",
+      "tags": {
+        "title": "27. Water, Fall"
+      }
+    },
+    {
+      "id": 28,
+      "time_base": "1/44100",
+      "start": 987016067,
+      "start_time": "22381.316712",
+      "end": 1021745831,
+      "end_time": "23168.839705",
+      "tags": {
+        "title": "28. How Did You All Fit in There?"
+      }
+    },
+    {
+      "id": 29,
+      "time_base": "1/44100",
+      "start": 1021745831,
+      "start_time": "23168.839705",
+      "end": 1057766975,
+      "end_time": "23985.645692",
+      "tags": {
+        "title": "29. That\u2019s What Adventurers Do"
+      }
+    },
+    {
+      "id": 30,
+      "time_base": "1/44100",
+      "start": 1057766975,
+      "start_time": "23985.645692",
+      "end": 1089626270,
+      "end_time": "24708.078685",
+      "tags": {
+        "title": "30. Closing the Door Too Hard"
+      }
+    },
+    {
+      "id": 31,
+      "time_base": "1/44100",
+      "start": 1089626270,
+      "start_time": "24708.078685",
+      "end": 1141557768,
+      "end_time": "25885.663673",
+      "tags": {
+        "title": "31. Taming the Beast"
+      }
+    },
+    {
+      "id": 32,
+      "time_base": "1/44100",
+      "start": 1141557768,
+      "start_time": "25885.663673",
+      "end": 1185813264,
+      "end_time": "26889.189660",
+      "tags": {
+        "title": "32. Monster Hunting for Beginners"
+      }
+    },
+    {
+      "id": 33,
+      "time_base": "1/44100",
+      "start": 1185813264,
+      "start_time": "26889.189660",
+      "end": 1221840494,
+      "end_time": "27706.133651",
+      "tags": {
+        "title": "33. Mistrun River"
+      }
+    },
+    {
+      "id": 34,
+      "time_base": "1/44100",
+      "start": 1221840494,
+      "start_time": "27706.133651",
+      "end": 1250459806,
+      "end_time": "28355.097642",
+      "tags": {
+        "title": "34. Waving the Flag for Secular Morality"
+      }
+    },
+    {
+      "id": 35,
+      "time_base": "1/44100",
+      "start": 1250459806,
+      "start_time": "28355.097642",
+      "end": 1289379334,
+      "end_time": "29237.626621",
+      "tags": {
+        "title": "35. Greenstone"
+      }
+    },
+    {
+      "id": 36,
+      "time_base": "1/44100",
+      "start": 1289379334,
+      "start_time": "29237.626621",
+      "end": 1328735144,
+      "end_time": "30130.048617",
+      "tags": {
+        "title": "36. The Island"
+      }
+    },
+    {
+      "id": 37,
+      "time_base": "1/44100",
+      "start": 1328735144,
+      "start_time": "30130.048617",
+      "end": 1380275431,
+      "end_time": "31298.762608",
+      "tags": {
+        "title": "37. A Good Adventurer and a Great One"
+      }
+    },
+    {
+      "id": 38,
+      "time_base": "1/44100",
+      "start": 1380275431,
+      "start_time": "31298.762608",
+      "end": 1439659785,
+      "end_time": "32645.346599",
+      "tags": {
+        "title": "38. Just Another Adventurer"
+      }
+    },
+    {
+      "id": 39,
+      "time_base": "1/44100",
+      "start": 1439659785,
+      "start_time": "32645.346599",
+      "end": 1489025721,
+      "end_time": "33764.755578",
+      "tags": {
+        "title": "39. Training"
+      }
+    },
+    {
+      "id": 40,
+      "time_base": "1/44100",
+      "start": 1489025721,
+      "start_time": "33764.755578",
+      "end": 1535010290,
+      "end_time": "34807.489569",
+      "tags": {
+        "title": "40. Eyebeams and the Ethics of Adventuring"
+      }
+    },
+    {
+      "id": 41,
+      "time_base": "1/44100",
+      "start": 1535010290,
+      "start_time": "34807.489569",
+      "end": 1579517156,
+      "end_time": "35816.715556",
+      "tags": {
+        "title": "41. Vulnerable and Exposed"
+      }
+    },
+    {
+      "id": 42,
+      "time_base": "1/44100",
+      "start": 1579517156,
+      "start_time": "35816.715556",
+      "end": 1613329860,
+      "end_time": "36583.443537",
+      "tags": {
+        "title": "42. This Is the Pits"
+      }
+    },
+    {
+      "id": 43,
+      "time_base": "1/44100",
+      "start": 1613329860,
+      "start_time": "36583.443537",
+      "end": 1646294918,
+      "end_time": "37330.950522",
+      "tags": {
+        "title": "43. Nightingale"
+      }
+    },
+    {
+      "id": 44,
+      "time_base": "1/44100",
+      "start": 1646294918,
+      "start_time": "37330.950522",
+      "end": 1683268225,
+      "end_time": "38169.347506",
+      "tags": {
+        "title": "44. Complimentary Ointment"
+      }
+    },
+    {
+      "id": 45,
+      "time_base": "1/44100",
+      "start": 1683268225,
+      "start_time": "38169.347506",
+      "end": 1718540683,
+      "end_time": "38969.176485",
+      "tags": {
+        "title": "45. So Much for Atheism"
+      }
+    },
+    {
+      "id": 46,
+      "time_base": "1/44100",
+      "start": 1718540683,
+      "start_time": "38969.176485",
+      "end": 1773373211,
+      "end_time": "40212.544467",
+      "tags": {
+        "title": "46. Blatant Manipulation"
+      }
+    },
+    {
+      "id": 47,
+      "time_base": "1/44100",
+      "start": 1773373211,
+      "start_time": "40212.544467",
+      "end": 1814467707,
+      "end_time": "41144.392449",
+      "tags": {
+        "title": "47. Mirage Chamber"
+      }
+    },
+    {
+      "id": 48,
+      "time_base": "1/44100",
+      "start": 1814467707,
+      "start_time": "41144.392449",
+      "end": 1863020925,
+      "end_time": "42245.372449",
+      "tags": {
+        "title": "48. An Endless, Inescapable Nightmare"
+      }
+    },
+    {
+      "id": 49,
+      "time_base": "1/44100",
+      "start": 1863020925,
+      "start_time": "42245.372449",
+      "end": 1904291513,
+      "end_time": "43181.213447",
+      "tags": {
+        "title": "49. A Voice from Home"
+      }
+    },
+    {
+      "id": 50,
+      "time_base": "1/44100",
+      "start": 1904291513,
+      "start_time": "43181.213447",
+      "end": 1944059922,
+      "end_time": "44082.991429",
+      "tags": {
+        "title": "50. The Full Keanu"
+      }
+    },
+    {
+      "id": 51,
+      "time_base": "1/44100",
+      "start": 1944059922,
+      "start_time": "44082.991429",
+      "end": 1975202107,
+      "end_time": "44789.163424",
+      "tags": {
+        "title": "51. Song of the Nightingale"
+      }
+    },
+    {
+      "id": 52,
+      "time_base": "1/44100",
+      "start": 1975202107,
+      "start_time": "44789.163424",
+      "end": 2011123938,
+      "end_time": "45603.717415",
+      "tags": {
+        "title": "52. Pain"
+      }
+    },
+    {
+      "id": 53,
+      "time_base": "1/44100",
+      "start": 2011123938,
+      "start_time": "45603.717415",
+      "end": 2061446888,
+      "end_time": "46744.827392",
+      "tags": {
+        "title": "53. Nightlife"
+      }
+    },
+    {
+      "id": 54,
+      "time_base": "1/44100",
+      "start": 2061446888,
+      "start_time": "46744.827392",
+      "end": 2104548508,
+      "end_time": "47722.188390",
+      "tags": {
+        "title": "54. Field Assessment"
+      }
+    },
+    {
+      "id": 55,
+      "time_base": "1/44100",
+      "start": 2104548508,
+      "start_time": "47722.188390",
+      "end": 2140117539,
+      "end_time": "48528.742381",
+      "tags": {
+        "title": "55. Rune Tortoise"
+      }
+    },
+    {
+      "id": 56,
+      "time_base": "1/44100",
+      "start": 2140117539,
+      "start_time": "48528.742381",
+      "end": 2172779851,
+      "end_time": "49269.384376",
+      "tags": {
+        "title": "56. Gary\u2019s Gift"
+      }
+    },
+    {
+      "id": 57,
+      "time_base": "1/44100",
+      "start": 2172779851,
+      "start_time": "49269.384376",
+      "end": 2210734163,
+      "end_time": "50130.026372",
+      "tags": {
+        "title": "57. Rainbow Smoke"
+      }
+    },
+    {
+      "id": 58,
+      "time_base": "1/44100",
+      "start": 2210734163,
+      "start_time": "50130.026372",
+      "end": 2258484716,
+      "end_time": "51212.805351",
+      "tags": {
+        "title": "58. A Man of Malevolent Intellect"
+      }
+    },
+    {
+      "id": 59,
+      "time_base": "1/44100",
+      "start": 2258484716,
+      "start_time": "51212.805351",
+      "end": 2291496829,
+      "end_time": "51961.379342",
+      "tags": {
+        "title": "59. Falling Short"
+      }
+    },
+    {
+      "id": 60,
+      "time_base": "1/44100",
+      "start": 2291496829,
+      "start_time": "51961.379342",
+      "end": 2324524201,
+      "end_time": "52710.299342",
+      "tags": {
+        "title": "60. Making Music"
+      }
+    },
+    {
+      "id": 61,
+      "time_base": "1/44100",
+      "start": 2324524201,
+      "start_time": "52710.299342",
+      "end": 2375755303,
+      "end_time": "53872.002336",
+      "tags": {
+        "title": "61. Trade Hall"
+      }
+    },
+    {
+      "id": 62,
+      "time_base": "1/44100",
+      "start": 2375755303,
+      "start_time": "53872.002336",
+      "end": 2413296133,
+      "end_time": "54723.268322",
+      "tags": {
+        "title": "62. Have Some Damn Adventures"
+      }
+    },
+    {
+      "id": 63,
+      "time_base": "1/44100",
+      "start": 2413296133,
+      "start_time": "54723.268322",
+      "end": 2457960392,
+      "end_time": "55736.063311",
+      "tags": {
+        "title": "63. Sunk-Cost Fallacy"
+      }
+    },
+    {
+      "id": 64,
+      "time_base": "1/44100",
+      "start": 2457960392,
+      "start_time": "55736.063311",
+      "end": 2488488308,
+      "end_time": "56428.306304",
+      "tags": {
+        "title": "64. Take My Wife, Please"
+      }
+    },
+    {
+      "id": 65,
+      "time_base": "1/44100",
+      "start": 2488488308,
+      "start_time": "56428.306304",
+      "end": 2537776937,
+      "end_time": "57545.962290",
+      "tags": {
+        "title": "65. Curious Urges"
+      }
+    },
+    {
+      "id": 66,
+      "time_base": "1/44100",
+      "start": 2537776937,
+      "start_time": "57545.962290",
+      "end": 2574010820,
+      "end_time": "58367.592290",
+      "tags": {
+        "title": "66. A Stronger Weapon Than the One in Your Hand"
+      }
+    },
+    {
+      "id": 67,
+      "time_base": "1/44100",
+      "start": 2574010820,
+      "start_time": "58367.592290",
+      "end": 2638999314,
+      "end_time": "59841.254286",
+      "tags": {
+        "title": "67. This Is What It Means to Fight Me"
+      }
+    },
+    {
+      "id": 68,
+      "time_base": "1/44100",
+      "start": 2638999314,
+      "start_time": "59841.254286",
+      "end": 2678751715,
+      "end_time": "60742.669274",
+      "tags": {
+        "title": "68. Good News for Clive"
+      }
+    },
+    {
+      "id": 69,
+      "time_base": "1/44100",
+      "start": 2678751715,
+      "start_time": "60742.669274",
+      "end": 2721340672,
+      "end_time": "61708.405261",
+      "tags": {
+        "title": "69. Dumpling Soup"
+      }
+    },
+    {
+      "id": 70,
+      "time_base": "1/44100",
+      "start": 2721340672,
+      "start_time": "61708.405261",
+      "end": 2763315052,
+      "end_time": "62660.205261",
+      "tags": {
+        "title": "70. Rewards"
+      }
+    },
+    {
+      "id": 71,
+      "time_base": "1/44100",
+      "start": 2763315052,
+      "start_time": "62660.205261",
+      "end": 2802889862,
+      "end_time": "63557.593243",
+      "tags": {
+        "title": "71. A Bit of Poo"
+      }
+    },
+    {
+      "id": 72,
+      "time_base": "1/44100",
+      "start": 2802889862,
+      "start_time": "63557.593243",
+      "end": 2831995994,
+      "end_time": "64217.596236",
+      "tags": {
+        "title": "72. Rat Race"
+      }
+    },
+    {
+      "id": 73,
+      "time_base": "1/44100",
+      "start": 2831995994,
+      "start_time": "64217.596236",
+      "end": 2859818110,
+      "end_time": "64848.483220",
+      "tags": {
+        "title": "73. A Grim Sword to Live By"
+      }
+    },
+    {
+      "id": 74,
+      "time_base": "1/44100",
+      "start": 2859818110,
+      "start_time": "64848.483220",
+      "end": 2894887973,
+      "end_time": "65643.718209",
+      "tags": {
+        "title": "74. Doing Better"
+      }
+    },
+    {
+      "id": 75,
+      "time_base": "1/44100",
+      "start": 2894887973,
+      "start_time": "65643.718209",
+      "end": 2933183531,
+      "end_time": "66512.098209",
+      "tags": {
+        "title": "75. Progress"
+      }
+    },
+    {
+      "id": 76,
+      "time_base": "1/44100",
+      "start": 2933183531,
+      "start_time": "66512.098209",
+      "end": 2969847036,
+      "end_time": "67343.470204",
+      "tags": {
+        "title": "76. Preparations"
+      }
+    },
+    {
+      "id": 77,
+      "time_base": "1/44100",
+      "start": 2969847036,
+      "start_time": "67343.470204",
+      "end": 3006806187,
+      "end_time": "68181.546190",
+      "tags": {
+        "title": "77. Group Cohesion"
+      }
+    },
+    {
+      "id": 78,
+      "time_base": "1/44100",
+      "start": 3006806187,
+      "start_time": "68181.546190",
+      "end": 3041543404,
+      "end_time": "68969.238186",
+      "tags": {
+        "title": "78. Jason Has the Good Biscuits"
+      }
+    },
+    {
+      "id": 79,
+      "time_base": "1/44100",
+      "start": 3041543404,
+      "start_time": "68969.238186",
+      "end": 3076151584,
+      "end_time": "69754.004172",
+      "tags": {
+        "title": "79. Sand Everywhere"
+      }
+    },
+    {
+      "id": 80,
+      "time_base": "1/44100",
+      "start": 3076151584,
+      "start_time": "69754.004172",
+      "end": 3117818146,
+      "end_time": "70698.824172",
+      "tags": {
+        "title": "80. It\u2019s Not Work If You Love What You Do"
+      }
+    },
+    {
+      "id": 81,
+      "time_base": "1/44100",
+      "start": 3117818146,
+      "start_time": "70698.824172",
+      "end": 3145944508,
+      "end_time": "71336.610159",
+      "tags": {
+        "title": "81. Crazy Desperation Move"
+      }
+    },
+    {
+      "id": 82,
+      "time_base": "1/44100",
+      "start": 3145944508,
+      "start_time": "71336.610159",
+      "end": 3186449872,
+      "end_time": "72255.099138",
+      "tags": {
+        "title": "82. Choices"
+      }
+    },
+    {
+      "id": 83,
+      "time_base": "1/44100",
+      "start": 3186449872,
+      "start_time": "72255.099138",
+      "end": 3221706587,
+      "end_time": "73054.571134",
+      "tags": {
+        "title": "83. It Makes No Difference to the Ant"
+      }
+    },
+    {
+      "id": 84,
+      "time_base": "1/44100",
+      "start": 3221706587,
+      "start_time": "73054.571134",
+      "end": 3261453696,
+      "end_time": "73955.866122",
+      "tags": {
+        "title": "84. Injury and Death"
+      }
+    },
+    {
+      "id": 85,
+      "time_base": "1/44100",
+      "start": 3261453696,
+      "start_time": "73955.866122",
+      "end": 3295986112,
+      "end_time": "74738.914104",
+      "tags": {
+        "title": "85. Because I\u2019m an Adventurer"
+      }
+    },
+    {
+      "id": 86,
+      "time_base": "1/44100",
+      "start": 3295986112,
+      "start_time": "74738.914104",
+      "end": 3347720703,
+      "end_time": "75912.034082",
+      "tags": {
+        "title": "86. Some Kind of Secret"
+      }
+    },
+    {
+      "id": 87,
+      "time_base": "1/44100",
+      "start": 3347720703,
+      "start_time": "75912.034082",
+      "end": 3413610248,
+      "end_time": "77406.128073",
+      "tags": {
+        "title": "87. Can\u2019t Lose"
+      }
+    },
+    {
+      "id": 88,
+      "time_base": "1/44100",
+      "start": 3413610248,
+      "start_time": "77406.128073",
+      "end": 3460142363,
+      "end_time": "78461.278073",
+      "tags": {
+        "title": "88. The Nature of Absolution"
+      }
+    },
+    {
+      "id": 89,
+      "time_base": "1/44100",
+      "start": 3460142363,
+      "start_time": "78461.278073",
+      "end": 3498081769,
+      "end_time": "79321.582063",
+      "tags": {
+        "title": "89. Anti-Pirate Operations"
+      }
+    },
+    {
+      "id": 90,
+      "time_base": "1/44100",
+      "start": 3498081769,
+      "start_time": "79321.582063",
+      "end": 3536084679,
+      "end_time": "80183.326054",
+      "tags": {
+        "title": "90. The Path to Bronze"
+      }
+    },
+    {
+      "id": 91,
+      "time_base": "1/44100",
+      "start": 3536084679,
+      "start_time": "80183.326054",
+      "end": 3565788542,
+      "end_time": "80856.883039",
+      "tags": {
+        "title": "91. Life and Death"
+      }
+    },
+    {
+      "id": 92,
+      "time_base": "1/44100",
+      "start": 3565788542,
+      "start_time": "80856.883039",
+      "end": 3613369840,
+      "end_time": "81935.824036",
+      "tags": {
+        "title": "92. Unusual Contract"
+      }
+    },
+    {
+      "id": 93,
+      "time_base": "1/44100",
+      "start": 3613369840,
+      "start_time": "81935.824036",
+      "end": 3660228250,
+      "end_time": "82998.373016",
+      "tags": {
+        "title": "93. Truth"
+      }
+    },
+    {
+      "id": 94,
+      "time_base": "1/44100",
+      "start": 3660228250,
+      "start_time": "82998.373016",
+      "end": 3699251810,
+      "end_time": "83883.260998",
+      "tags": {
+        "title": "94. Consequences"
+      }
+    },
+    {
+      "id": 95,
+      "time_base": "1/44100",
+      "start": 3699251810,
+      "start_time": "83883.260998",
+      "end": 3768894882,
+      "end_time": "85462.468980",
+      "tags": {
+        "title": "95. Punishment"
+      }
+    },
+    {
+      "id": 96,
+      "time_base": "1/44100",
+      "start": 3768894882,
+      "start_time": "85462.468980",
+      "end": 3803907371,
+      "end_time": "86256.402971",
+      "tags": {
+        "title": "96. You Don\u2019t Get a Third"
+      }
+    },
+    {
+      "id": 97,
+      "time_base": "1/44100",
+      "start": 3803907371,
+      "start_time": "86256.402971",
+      "end": 3863774973,
+      "end_time": "87613.944966",
+      "tags": {
+        "title": "97. Integrity Is Sexy"
+      }
+    },
+    {
+      "id": 98,
+      "time_base": "1/44100",
+      "start": 3863774973,
+      "start_time": "87613.944966",
+      "end": 3902058006,
+      "end_time": "88482.040952",
+      "tags": {
+        "title": "98. The Point of Money and Power"
+      }
+    },
+    {
+      "id": 99,
+      "time_base": "1/44100",
+      "start": 3902058006,
+      "start_time": "88482.040952",
+      "end": 3961558343,
+      "end_time": "89831.254943",
+      "tags": {
+        "title": "99. Someone Else\u2019s Game"
+      }
+    },
+    {
+      "id": 100,
+      "time_base": "1/44100",
+      "start": 3961558343,
+      "start_time": "89831.254943",
+      "end": 3999643191,
+      "end_time": "90694.856939",
+      "tags": {
+        "title": "100. Legwork"
+      }
+    },
+    {
+      "id": 101,
+      "time_base": "1/44100",
+      "start": 3999643191,
+      "start_time": "90694.856939",
+      "end": 4042636148,
+      "end_time": "91669.753923",
+      "tags": {
+        "title": "101. Fantasy World Goodness"
+      }
+    },
+    {
+      "id": 102,
+      "time_base": "1/44100",
+      "start": 4042636148,
+      "start_time": "91669.753923",
+      "end": 4085619095,
+      "end_time": "92644.423923",
+      "tags": {
+        "title": "102. You Fight Like Me"
+      }
+    },
+    {
+      "id": 103,
+      "time_base": "1/44100",
+      "start": 4085619095,
+      "start_time": "92644.423923",
+      "end": 4147790040,
+      "end_time": "94054.195918",
+      "tags": {
+        "title": "103. Silver Hair"
+      }
+    },
+    {
+      "id": 104,
+      "time_base": "1/44100",
+      "start": 4147790040,
+      "start_time": "94054.195918",
+      "end": 4195286974,
+      "end_time": "95131.223900",
+      "tags": {
+        "title": "104. An Outcome That Satisfies"
+      }
+    },
+    {
+      "id": 105,
+      "time_base": "1/44100",
+      "start": 4195286974,
+      "start_time": "95131.223900",
+      "end": 4230408787,
+      "end_time": "95927.636893",
+      "tags": {
+        "title": "105. You Aren\u2019t in Control of What Happens Next"
+      }
+    },
+    {
+      "id": 106,
+      "time_base": "1/44100",
+      "start": 4230408787,
+      "start_time": "95927.636893",
+      "end": 4275237451,
+      "end_time": "96944.159887",
+      "tags": {
+        "title": "106. Something Shady"
+      }
+    },
+    {
+      "id": 107,
+      "time_base": "1/44100",
+      "start": 4275237451,
+      "start_time": "96944.159887",
+      "end": 4323982459,
+      "end_time": "98049.488866",
+      "tags": {
+        "title": "107. All the Good People We Can Get"
+      }
+    },
+    {
+      "id": 108,
+      "time_base": "1/44100",
+      "start": 4323982459,
+      "start_time": "98049.488866",
+      "end": 4374479781,
+      "end_time": "99194.552857",
+      "tags": {
+        "title": "108. You Don\u2019t Have the Strength"
+      }
+    },
+    {
+      "id": 109,
+      "time_base": "1/44100",
+      "start": 4374479781,
+      "start_time": "99194.552857",
+      "end": 4412383951,
+      "end_time": "100054.057846",
+      "tags": {
+        "title": "109. The Tyranny of Rank"
+      }
+    },
+    {
+      "id": 110,
+      "time_base": "1/44100",
+      "start": 4412383951,
+      "start_time": "100054.057846",
+      "end": 4452680281,
+      "end_time": "100967.806825",
+      "tags": {
+        "title": "110. Help Arrives"
+      }
+    },
+    {
+      "id": 111,
+      "time_base": "1/44100",
+      "start": 4452680281,
+      "start_time": "100967.806825",
+      "end": 4498270772,
+      "end_time": "102001.604807",
+      "tags": {
+        "title": "111. Strange Star"
+      }
+    },
+    {
+      "id": 112,
+      "time_base": "1/44100",
+      "start": 4498270772,
+      "start_time": "102001.604807",
+      "end": 4547854077,
+      "end_time": "103125.942789",
+      "tags": {
+        "title": "112. The Accumulation of a Life"
+      }
+    },
+    {
+      "id": 113,
+      "time_base": "1/44100",
+      "start": 4547854077,
+      "start_time": "103125.942789",
+      "end": 4591881708,
+      "end_time": "104124.301769",
+      "tags": {
+        "title": "113. You Need to Work on Making Enemies"
+      }
+    },
+    {
+      "id": 114,
+      "time_base": "1/44100",
+      "start": 4591881708,
+      "start_time": "104124.301769",
+      "end": 4594503799,
+      "end_time": "104183.759615",
+      "tags": {
+        "title": "End Credits"
+      }
+    }
+  ],
+  "format": {
+    "filename": "/audiobooks/Shirtaloon/He Who Fights With Monsters/He Who Fights with Monsters vol_01 (2021) (Shirtaloon) {ASIN.1774248182} [H2OKing]/He Who Fights with Monsters A LitRPG Adventure vol_01 (2021) (Shirtaloon) {ASIN.1774248182}.m4b",
+    "nb_streams": 3,
+    "nb_programs": 0,
+    "nb_stream_groups": 0,
+    "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+    "format_long_name": "QuickTime / MOV",
+    "start_time": "0.000000",
+    "duration": "104183.760862",
+    "size": "1564116076",
+    "bit_rate": "120104",
+    "probe_score": 100,
+    "tags": {
+      "major_brand": "mp42",
+      "minor_version": "0",
+      "compatible_brands": "dby1mp41iso8isomM4A M4B ",
+      "creation_time": "2024-05-03T18:59:51.000000Z",
+      "title": "He Who Fights with Monsters: A LitRPG Adventure",
+      "album": "He Who Fights with Monsters: A LitRPG Adventure: He Who Fights with Monsters, Book 1",
+      "artist": "Shirtaloon; Travis Deverell",
+      "album_artist": "Shirtaloon; Travis Deverell",
+      "genre": "Action & Adventure, Epic, Urban",
+      "comment": "<p><b><i>Selected as one of Audible's best audiobooks of 2021</i></b> </p> <p><b>Jason wakes up in a mysterious world of magic and monsters. </b></p> <p>It\u2019s not easy making the career jump from office-supplies-store middle manager to heroic interdimensional adventurer. At least, Jason<i> tries </i>to be heroic, but it's hard to be good when all your powers are evil.</p> <p>He\u2019ll face off against cannibals, cultists, wizards, monsters...and that\u2019s just on the first day. He\u2019s going to need courage, he\u2019s going to need wit, and he\u2019s going to need some magic powers of his own. But first, he\u2019s going to need pants.</p> <p><b>After cementing itself as one of the best-rated serial novels on Royal Road with an astonishing 13 million views,</b><b><i> He Who Fights with Monsters</i></b><b> is now brought to you in professionally formatted audio. </b></p>",
+      "date": "2021",
+      "composer": "Heath Miller",
+      "SUBTITLE": "He Who Fights with Monsters, Book 1",
+      "PUBLISHER": "Podium Audio",
+      "LANGUAGE": "English",
+      "AUDIBLE_ASIN": "1774248182",
+      "SERIES": "He Who Fights with Monsters",
+      "PART": "1"
+    }
+  }
+}

@@ -40,6 +40,18 @@ class TestContentReference:
         )
         assert ref.bitrate_kbps == 0.0
 
+    def test_bitrate_inferred_from_content_format_hint(self):
+        """Test bitrate falls back to content_format hints when runtime is missing."""
+        ref = ContentReference(
+            codec="mp4a.40.2",
+            content_format="AAX_22_64",
+            content_size_bytes=100_000_000,
+            runtime_ms=0,
+        )
+
+        assert ref.bitrate_hint_kbps == 64.0
+        assert ref.bitrate_kbps == 64.0
+
     def test_bitrate_zero_size(self):
         """Test bitrate returns 0 when size is 0."""
         ref = ContentReference(
@@ -150,6 +162,19 @@ class TestContentMetadata:
         )
 
         assert abs(metadata.bitrate_kbps - 222.22) < 1
+
+    def test_bitrate_property_uses_content_format_hint(self):
+        """Test bitrate property falls back to content_format hints when runtime is missing."""
+        metadata = ContentMetadata(
+            asin="B0TEST123",
+            content_reference={
+                "codec": "mp4a.40.2",
+                "content_format": "AAX_22_64",
+                "content_size_in_bytes": 100_000_000,
+            },
+        )
+
+        assert metadata.bitrate_kbps == 64.0
 
     def test_codec_property(self):
         """Test codec property delegates to parsed_content_ref."""
@@ -292,3 +317,41 @@ class TestFastQualityCheckIntegration:
         assert len(result.formats) == 2
         # Widevine format should have higher bitrate
         assert result.best_format.drm_type == "Widevine"
+
+    @pytest.mark.asyncio
+    async def test_fast_quality_check_keeps_unresolved_formats_for_fallback(self):
+        """Test metadata quality keeps zero-bitrate formats so slow fallback can detect them."""
+        from src.audible.async_client import AsyncAudibleClient
+
+        mock_client = MagicMock(spec=AsyncAudibleClient)
+        mock_client._cache = None
+        mock_client._cache_ttl_seconds = 3600
+
+        widevine_metadata = ContentMetadata(
+            asin="B0TEST123",
+            content_reference={
+                "codec": "mp4a.40.42",
+                "content_format": "M4A_XHE",
+                "content_size_in_bytes": 150_000_000,
+            },
+            drm_type="Widevine",
+        )
+        adrm_metadata = ContentMetadata(
+            asin="B0TEST123",
+            content_reference={
+                "codec": "mp4a.40.2",
+                "content_format": "AAX_22_64",
+                "content_size_in_bytes": 100_000_000,
+            },
+            drm_type="Adrm",
+        )
+
+        mock_client.get_content_metadata = AsyncMock(side_effect=[widevine_metadata, adrm_metadata])
+
+        result = await AsyncAudibleClient.fast_quality_check(mock_client, "B0TEST123", use_cache=False)
+
+        assert result is not None
+        assert len(result.formats) == 2
+        assert any(fmt.drm_type == "Widevine" and fmt.bitrate_kbps == 0 for fmt in result.formats)
+        assert any(fmt.drm_type == "Adrm" and fmt.bitrate_kbps == 64 for fmt in result.formats)
+        assert result.best_bitrate_kbps == 64

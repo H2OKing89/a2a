@@ -1,0 +1,15 @@
+{
+  // Sample response from: GET /1.0/stats/aggregates?response_groups=total_listening_stats
+  // Returns your total listening time statistics
+  //
+  // aggregated_sum is in milliseconds
+  // Example: 917769829 ms = 254.9 hours = 10.6 days of listening time!
+
+  "aggregated_total_listening_stats": {
+    "aggregated_sum": 917769829.0,
+    "unit": "Milliseconds"
+  },
+  "response_groups": [
+    "total_listening_stats"
+  ]
+}

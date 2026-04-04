@@ -1,4 +1,12 @@
 {
+  // Sample response from: GET /1.0/content/{asin}/metadata?drm_type=Adrm
+  // Returns content metadata including chapter info and quality details
+  // ASIN: B0CTXKB2R6
+  // DRM Type: Adrm (Audible DRM - standard AAX format)
+  //
+  // Use for AAC-LC quality discovery (standard format)
+  // Compare with Widevine version to see different codecs available
+
   "content_metadata": {
     "chapter_info": {
       "brandIntroDurationMs": 0,
