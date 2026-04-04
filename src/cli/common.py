@@ -106,7 +106,7 @@ def get_abs_client() -> ABSClient:
     """
     settings = get_settings()
 
-    cache = get_cache() if settings.cache.enabled else None
+    cache = get_cache() if (settings.cache.enabled and settings.cache.abs_cache_enabled) else None
 
     return ABSClient(
         host=settings.abs.host,

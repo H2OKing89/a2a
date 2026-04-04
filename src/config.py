@@ -119,6 +119,9 @@ class CacheSettings(BaseSettings):
     )
 
     enabled: bool = Field(default=True, description="Enable caching globally")
+    abs_cache_enabled: bool = Field(
+        default=False, description="Enable caching for ABS library data (disable to always fetch fresh data)"
+    )
     db_path: Path = Field(default=Path("./data/cache/cache.db"), description="SQLite database path")
     default_ttl_hours: float = Field(default=2.0, description="Default TTL for cached items")
     abs_ttl_hours: float = Field(default=2.0, description="TTL for ABS data")
@@ -199,6 +202,20 @@ class QualitySettings(BaseSettings):
         return legacy_map.get(tier, 0.0)
 
 
+class WebSettings(BaseSettings):
+    """Web dashboard deployment settings."""
+
+    model_config = SettingsConfigDict(
+        env_prefix="WEB_SERVER_",
+        extra="ignore",
+    )
+
+    ssh_host: str | None = Field(default=None, description="SSH host for SCP deployment")
+    ssh_user: str | None = Field(default=None, description="SSH user for SCP deployment")
+    path: str | None = Field(default=None, description="Remote path for dashboard files")
+    host: str | None = Field(default=None, description="Public URL/path for the dashboard")
+
+
 class EnrichmentSettings(BaseSettings):
     """Audible enrichment settings."""
 
@@ -225,6 +242,7 @@ class Settings(BaseSettings):
     cache: CacheSettings = Field(default_factory=CacheSettings)
     quality: QualitySettings = Field(default_factory=QualitySettings)
     enrichment: EnrichmentSettings = Field(default_factory=EnrichmentSettings)
+    web: WebSettings = Field(default_factory=WebSettings)
 
     verbose: bool = Field(default=True)
     debug: bool = Field(default=False)
@@ -265,6 +283,8 @@ class Settings(BaseSettings):
                     )
                     del abs_yaml["insecure_tls"]
                 config_data["abs"] = ABSSettings(**abs_yaml)  # type: ignore
+            if "web" in yaml_config and yaml_config["web"]:
+                config_data["web"] = WebSettings(**yaml_config["web"])  # type: ignore
             if "verbose" in yaml_config:
                 config_data["verbose"] = yaml_config["verbose"]
             if "debug" in yaml_config:

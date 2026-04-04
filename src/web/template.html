@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audiobook Upgrade Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎧</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   CUSTOM PROPERTIES
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --nav-height: 56px;
+  --bg-void: #05080d;
+  --bg-primary: #0a0f1a;
+  --bg-secondary: #111827;
+  --bg-card: rgba(17, 24, 39, 0.7);
+  --bg-card-hover: rgba(22, 33, 55, 0.85);
+  --bg-card-active: rgba(30, 44, 70, 0.9);
+  --bg-input: rgba(10, 15, 26, 0.7);
+  --bg-glass: rgba(255, 255, 255, 0.02);
+
+  --border: rgba(55, 65, 90, 0.4);
+  --border-subtle: rgba(55, 65, 90, 0.2);
+  --border-hover: rgba(99, 120, 170, 0.4);
+  --border-glow: rgba(99, 140, 255, 0.3);
+
+  --text-primary: #f0f4fc;
+  --text-secondary: #94a3c0;
+  --text-dim: #536080;
+  --text-ultra-dim: #2d3a52;
+
+  --green: #34d399;
+  --green-dim: rgba(52, 211, 153, 0.12);
+  --green-glow: rgba(52, 211, 153, 0.25);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96, 165, 250, 0.12);
+  --blue-glow: rgba(96, 165, 250, 0.25);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167, 139, 250, 0.12);
+  --purple-glow: rgba(167, 139, 250, 0.2);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.12);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.12);
+  --cyan: #22d3ee;
+  --cyan-dim: rgba(34, 211, 238, 0.10);
+  --pink: #f472b6;
+  --pink-dim: rgba(244, 114, 182, 0.10);
+
+  --tier-excellent: #60a5fa;
+  --tier-better: #a78bfa;
+  --tier-good: #34d399;
+  --tier-low: #fbbf24;
+  --tier-poor: #f87171;
+
+  --radius: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s ease;
+  --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 30px rgba(96, 165, 250, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET & FOUNDATION
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(96, 165, 250, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(167, 139, 250, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52, 211, 153, 0.02) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.container {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 1;
+}
+
+a { color: var(--blue); text-decoration: none; transition: color var(--transition-fast); }
+a:hover { color: var(--purple); }
+
+/* ═══════════════════════════════════════════════════════════
+   STICKY NAV BAR
+   ═══════════════════════════════════════════════════════════ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5, 8, 13, 0.8);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 32px;
+}
+
+.navbar-inner {
+  max-width: 1520px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.navbar-brand .brand-icon { font-size: 1.3rem; }
+
+.navbar-links {
+  display: flex;
+  gap: 4px;
+}
+
+.navbar-links a {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.navbar-links a:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  text-decoration: none;
+}
+
+.navbar-meta {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  padding: 72px 0 56px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(96, 165, 250, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+}
+
+.hero-badge .pulse {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, var(--blue) 40%, var(--purple) 70%, var(--pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.hero .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS GRID
+   ═══════════════════════════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.stat-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  transition: all var(--transition);
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: background var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
+}
+
+.stat-card:hover::before {
+  background: linear-gradient(135deg, var(--border-glow), transparent 60%);
+}
+
+.stat-icon { font-size: 1.5rem; margin-bottom: 12px; display: block; }
+
+.stat-value {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.stat-card.total .stat-value { color: var(--text-primary); }
+.stat-card.free .stat-value { color: var(--green); }
+.stat-card.free:hover { box-shadow: 0 0 30px rgba(52, 211, 153, 0.08); }
+.stat-card.deals .stat-value { color: var(--blue); }
+.stat-card.deals:hover { box-shadow: 0 0 30px rgba(96, 165, 250, 0.08); }
+.stat-card.owned .stat-value { color: var(--purple); }
+.stat-card.owned:hover { box-shadow: 0 0 30px rgba(167, 139, 250, 0.08); }
+.stat-card.atmos .stat-value { color: var(--cyan); }
+.stat-card.atmos:hover { box-shadow: 0 0 30px rgba(34, 211, 238, 0.08); }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION TITLES
+   ═══════════════════════════════════════════════════════════ */
+.section { margin-top: 56px; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.section-header .section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.section-header .section-icon.charts { background: var(--blue-dim); }
+.section-header .section-icon.actions { background: var(--green-dim); }
+.section-header .section-icon.table { background: var(--purple-dim); }
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHARTS ROW
+   ═══════════════════════════════════════════════════════════ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 28px;
+  transition: border-color var(--transition);
+}
+
+.card:hover { border-color: var(--border-hover); }
+
+.card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.chart-donut-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100% - 40px);
+}
+
+.chart-donut-wrap canvas { max-width: 240px; max-height: 240px; }
+
+.tier-list { display: flex; flex-direction: column; gap: 14px; }
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 32px 70px 1fr 48px;
+  align-items: center;
+  gap: 12px;
+}
+
+.tier-emoji { font-size: 1.2rem; text-align: center; }
+.tier-name { font-weight: 600; font-size: 0.88rem; }
+.tier-name.tier-excellent { color: var(--tier-excellent); }
+.tier-name.tier-better { color: var(--tier-better); }
+.tier-name.tier-good { color: var(--tier-good); }
+.tier-name.tier-low { color: var(--tier-low); }
+.tier-name.tier-poor { color: var(--tier-poor); }
+
+.tier-bar-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.tier-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tier-bar-fill.excellent { background: var(--tier-excellent); }
+.tier-bar-fill.better { background: var(--tier-better); }
+.tier-bar-fill.good { background: var(--tier-good); }
+.tier-bar-fill.low { background: var(--tier-low); }
+.tier-bar-fill.poor { background: var(--tier-poor); }
+
+.tier-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-list { display: flex; flex-direction: column; gap: 10px; }
+
+.rec-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-glass);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.rec-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rec-dot.free { background: var(--green); }
+.rec-dot.monthly-deal { background: var(--blue); }
+.rec-dot.good-deal { background: var(--cyan); }
+.rec-dot.credit { background: var(--amber); }
+.rec-dot.owned { background: var(--purple); }
+.rec-dot.expensive { background: var(--red); }
+
+.rec-label { font-size: 0.88rem; font-weight: 500; flex: 1; }
+
+.rec-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-pct {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  width: 40px;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION CARDS
+   ═══════════════════════════════════════════════════════════ */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.action-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 24px;
+  cursor: pointer;
+  transition: all var(--transition);
+  overflow: hidden;
+}
+
+.action-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  transition: height var(--transition);
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+}
+
+.action-card:hover::after { height: 4px; }
+
+.action-card.free::after { background: linear-gradient(90deg, var(--green), #6ee7b7); }
+.action-card.free:hover { box-shadow: 0 8px 40px rgba(52, 211, 153, 0.1); }
+.action-card.deals::after { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+.action-card.deals:hover { box-shadow: 0 8px 40px rgba(96, 165, 250, 0.1); }
+.action-card.credit::after { background: linear-gradient(90deg, var(--amber), #fcd34d); }
+.action-card.credit:hover { box-shadow: 0 8px 40px rgba(251, 191, 36, 0.08); }
+.action-card.owned::after { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+.action-card.owned:hover { box-shadow: 0 8px 40px rgba(167, 139, 250, 0.08); }
+
+.action-count {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.action-card.free .action-count { color: var(--green); }
+.action-card.deals .action-count { color: var(--blue); }
+.action-card.credit .action-count { color: var(--amber); }
+.action-card.owned .action-count { color: var(--purple); }
+
+.action-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.action-items { display: flex; flex-direction: column; gap: 6px; }
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.action-item .item-cover {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+
+.action-item .item-cover-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--text-ultra-dim);
+  flex-shrink: 0;
+}
+
+.action-item .item-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.action-item .item-price {
+  margin-left: auto;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.action-card.free .action-item .item-price { color: var(--green); }
+.action-card.deals .action-item .item-price { color: var(--blue); }
+
+/* ═══════════════════════════════════════════════════════════
+   SIGNALS & SPOTLIGHTS
+   ═══════════════════════════════════════════════════════════ */
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.insight-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 22px;
+  min-height: 176px;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.insight-kicker {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.insight-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+
+.insight-label {
+  font-size: 0.96rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.insight-copy {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.insight-value.blue { color: var(--blue); }
+.insight-value.green { color: var(--green); }
+.insight-value.amber { color: var(--amber); }
+.insight-value.purple { color: var(--purple); }
+
+.spotlight-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.spotlight-card {
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+}
+
+.spotlight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spotlight-row {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.spotlight-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.spotlight-title {
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.spotlight-value {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spotlight-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.spotlight-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.spotlight-chip.blue { background: var(--blue-dim); color: var(--blue); }
+.spotlight-chip.green { background: var(--green-dim); color: var(--green); }
+.spotlight-chip.amber { background: var(--amber-dim); color: var(--amber); }
+.spotlight-chip.purple { background: var(--purple-dim); color: var(--purple); }
+
+.spotlight-copy {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.spotlight-empty {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE TOOLBAR
+   ═══════════════════════════════════════════════════════════ */
+.toolbar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.search-box .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1); }
+.search-input::placeholder { color: var(--text-dim); }
+
+.subtoolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.facet-label {
+  min-width: 96px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.section-note {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.filter-pill-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filter-pill:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+.filter-pill.active {
+  background: var(--blue-dim);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: var(--blue);
+}
+
+.filter-pill.active.green { background: var(--green-dim); border-color: rgba(52, 211, 153, 0.3); color: var(--green); }
+.filter-pill.active.amber { background: var(--amber-dim); border-color: rgba(251, 191, 36, 0.3); color: var(--amber); }
+.filter-pill.active.purple { background: var(--purple-dim); border-color: rgba(167, 139, 250, 0.3); color: var(--purple); }
+.filter-pill.active.cyan { background: var(--cyan-dim); border-color: rgba(34, 211, 238, 0.3); color: var(--cyan); }
+.filter-pill.active.red { background: var(--red-dim); border-color: rgba(248, 113, 113, 0.3); color: var(--red); }
+
+.toolbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.result-count {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 2px;
+}
+
+.view-btn {
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-btn:hover { color: var(--text-secondary); }
+.view-btn.active { background: var(--bg-card); color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE VIEW
+   ═══════════════════════════════════════════════════════════ */
+.table-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+thead th:hover { color: var(--text-secondary); }
+
+thead th .sort-arrow {
+  margin-left: 4px;
+  font-size: 0.65rem;
+  opacity: 0.25;
+  transition: opacity var(--transition-fast);
+}
+
+thead th.sorted .sort-arrow { opacity: 1; color: var(--blue); }
+
+tbody tr {
+  border-bottom: 1px solid rgba(55, 65, 90, 0.15);
+  transition: background var(--transition-fast);
+}
+
+tbody tr:hover { background: var(--bg-card-hover); }
+tbody tr.interactive-row { cursor: pointer; }
+tbody td { padding: 12px 16px; vertical-align: middle; }
+
+.cover-cell {
+  width: 92px;
+  position: relative;
+}
+
+.cover-thumb {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  isolation: isolate;
+}
+
+.cover-thumb:hover,
+.cover-thumb:focus-visible {
+  z-index: 12;
+}
+
+.cover-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+  transform-origin: center left;
+  cursor: zoom-in;
+}
+
+.cover-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(40, 50, 70, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-ultra-dim);
+  font-size: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+  transform-origin: center left;
+  cursor: zoom-in;
+}
+
+.cover-thumb:hover .cover-img,
+.cover-thumb:hover .cover-placeholder,
+.cover-thumb:focus-visible .cover-img,
+.cover-thumb:focus-visible .cover-placeholder {
+  transform: scale(2.35);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.55);
+  border-color: var(--border-hover);
+}
+
+.title-cell { min-width: 200px; }
+.title-cell .book-title { font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+.title-cell .book-subtitle {
+  margin-top: 4px;
+  font-size: 0.79rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.title-cell .book-author { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
+.title-cell .book-asin { font-size: 0.7rem; color: var(--text-ultra-dim); font-family: 'SF Mono', 'Fira Code', monospace; margin-top: 1px; }
+.meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.detail-text {
+  margin-top: 7px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.detail-text strong {
+  color: var(--text-secondary);
+  font-weight: 650;
+}
+
+.detail-text.detail-reason { color: var(--amber); }
+
+.detail-path {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--text-ultra-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge.excellent { background: rgba(96, 165, 250, 0.12); color: var(--tier-excellent); }
+.badge.better { background: rgba(167, 139, 250, 0.12); color: var(--tier-better); }
+.badge.good { background: rgba(52, 211, 153, 0.12); color: var(--tier-good); }
+.badge.low { background: rgba(251, 191, 36, 0.12); color: var(--tier-low); }
+.badge.poor { background: rgba(248, 113, 113, 0.12); color: var(--tier-poor); }
+.badge .badge-emoji { font-size: 0.85rem; }
+
+.best-cell { white-space: nowrap; }
+
+.best-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(52, 211, 153, 0.08);
+  color: var(--green);
+}
+
+.best-badge.unknown { background: rgba(255, 255, 255, 0.03); color: var(--text-ultra-dim); }
+
+.delta-cell { min-width: 120px; }
+
+.delta-visual {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delta-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.delta-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.delta-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+  min-width: 40px;
+  font-variant-numeric: tabular-nums;
+}
+
+.delta-text.zero { color: var(--text-ultra-dim); }
+
+.rec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.rec-badge.free { background: var(--green-dim); color: var(--green); }
+.rec-badge.monthly-deal { background: var(--blue-dim); color: var(--blue); }
+.rec-badge.good-deal { background: var(--cyan-dim); color: var(--cyan); }
+.rec-badge.credit { background: var(--amber-dim); color: var(--amber); }
+.rec-badge.expensive { background: var(--red-dim); color: var(--red); }
+.rec-badge.owned { background: var(--purple-dim); color: var(--purple); }
+.rec-badge.na { background: rgba(255, 255, 255, 0.02); color: var(--text-ultra-dim); }
+
+.price-cell { white-space: nowrap; }
+
+.price-original {
+  text-decoration: line-through;
+  color: var(--text-ultra-dim);
+  font-size: 0.78rem;
+}
+
+.price-sale {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 0.95rem;
+}
+
+.price-regular { color: var(--text-secondary); font-weight: 500; }
+
+.price-discount {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--green-dim);
+  color: var(--green);
+  margin-left: 6px;
+}
+
+.price-free {
+  font-weight: 700;
+  color: var(--green);
+  font-size: 0.95rem;
+}
+
+.audible-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  background: rgba(96, 165, 250, 0.08);
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.audible-btn:hover {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.2);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GRID VIEW (CARD LAYOUT)
+   ═══════════════════════════════════════════════════════════ */
+.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.grid-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.grid-item:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.grid-item-header {
+  display: flex;
+  gap: 14px;
+  padding: 18px 18px 0;
+}
+
+.grid-cover {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.grid-cover-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(40, 50, 70, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  color: var(--text-ultra-dim);
+}
+
+.grid-meta { flex: 1; min-width: 0; }
+.grid-meta .grid-title { font-weight: 700; font-size: 0.95rem; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-meta .grid-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grid-meta .grid-author { font-size: 0.82rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-meta .grid-asin {
+  font-size: 0.72rem;
+  color: var(--text-ultra-dim);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid-item-body {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grid-quality-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grid-quality-arrow { color: var(--text-dim); font-size: 0.8rem; }
+
+.grid-delta-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.grid-delta-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+}
+
+.grid-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.grid-price-tag { font-weight: 700; font-size: 1.1rem; }
+.grid-price-tag.sale { color: var(--green); }
+.grid-price-tag.free { color: var(--green); }
+.grid-price-tag.regular { color: var(--text-secondary); }
+
+.grid-original-price {
+  text-decoration: line-through;
+  color: var(--text-ultra-dim);
+  font-size: 0.8rem;
+  margin-left: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DETAIL DRAWER
+   ═══════════════════════════════════════════════════════════ */
+.drawer-backdrop {
+  position: fixed;
+  inset: var(--nav-height) 0 0 0;
+  background: rgba(5, 8, 13, 0.68);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: 140;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: var(--nav-height);
+  right: 0;
+  width: min(520px, 100vw);
+  height: calc(100dvh - var(--nav-height));
+  max-height: calc(100dvh - var(--nav-height));
+  background: rgba(10, 15, 26, 0.96);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: transform var(--transition);
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer.open { transform: translateX(0); }
+
+.drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.drawer-body {
+  overflow-y: auto;
+  padding: 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.drawer-hero {
+  display: flex;
+  gap: 18px;
+  padding-right: 48px;
+}
+
+.drawer-cover {
+  width: 116px;
+  height: 116px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--bg-secondary);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.drawer-cover-placeholder {
+  width: 116px;
+  height: 116px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(40, 50, 70, 0.6));
+  color: var(--text-ultra-dim);
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.drawer-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.drawer-subtitle {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.drawer-author {
+  margin-top: 8px;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+}
+
+.drawer-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.drawer-block-title {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.drawer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.drawer-stat {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.drawer-stat-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.drawer-stat-value {
+  margin-top: 4px;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.drawer-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drawer-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.drawer-copy {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.drawer-copy strong {
+  color: var(--text-primary);
+}
+
+.drawer-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-dim);
+}
+
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+.empty-state .empty-text { font-size: 1.1rem; }
+.empty-state .empty-hint { font-size: 0.85rem; color: var(--text-ultra-dim); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+.footer {
+  padding: 40px 0;
+  margin-top: 64px;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  color: var(--text-ultra-dim);
+  font-size: 0.8rem;
+}
+
+.footer-inner a { color: var(--text-dim); }
+.footer-inner a:hover { color: var(--blue); }
+
+.footer-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-ultra-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+.anim-d1 { animation-delay: 0.05s; }
+.anim-d2 { animation-delay: 0.1s; }
+.anim-d3 { animation-delay: 0.15s; }
+.anim-d4 { animation-delay: 0.2s; }
+.anim-d5 { animation-delay: 0.25s; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .charts-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .action-grid { grid-template-columns: repeat(2, 1fr); }
+  .insight-grid { grid-template-columns: repeat(2, 1fr); }
+  .spotlight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.2rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: 1fr; }
+  .insight-grid { grid-template-columns: 1fr; }
+  .spotlight-grid { grid-template-columns: 1fr; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .subtoolbar { align-items: flex-start; }
+  .facet-label { min-width: 0; }
+  .search-box { min-width: 100%; }
+  .toolbar-meta { margin-left: 0; justify-content: space-between; }
+  .container { padding: 0 16px; }
+  .navbar { padding: 0 16px; }
+  .navbar-links { display: none; }
+  .grid-view { grid-template-columns: 1fr; }
+  .drawer-grid { grid-template-columns: 1fr; }
+  .drawer-hero { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+  .filter-pill-group { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+</style>
+</head>
+<body data-max-delta="{{ max_delta }}">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="navbar-brand">
+      <span class="brand-icon">🎧</span>
+      <span>A2A Dashboard</span>
+    </div>
+    <div class="navbar-links">
+      <a href="#stats">Overview</a>
+      <a href="#charts">Analytics</a>
+      <a href="#actions">Actions</a>
+      <a href="#signals">Signals</a>
+      <a href="#spotlight">Spotlight</a>
+      <a href="#browse">Browse</a>
+    </div>
+    <div class="navbar-meta">{{ generated_at }}</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="container">
+  <section class="hero" id="stats">
+    <div class="hero-badge anim">
+      <span class="pulse"></span>
+      Auto-updated &bull; v{{ version }}
+    </div>
+    <h1 class="anim anim-d1">Audiobook Upgrades</h1>
+    <p class="subtitle anim anim-d2">
+      Quality analysis of your library with Audible pricing, deals, and upgrade recommendations
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat-card total anim anim-d1">
+        <span class="stat-icon">📊</span>
+        <div class="stat-value" data-count="{{ total_candidates }}">0</div>
+        <div class="stat-label">Candidates</div>
+      </div>
+      <div class="stat-card free anim anim-d2">
+        <span class="stat-icon">🎁</span>
+        <div class="stat-value" data-count="{{ summary.get('plus_catalog_count', 0) }}">0</div>
+        <div class="stat-label">Free (Plus)</div>
+      </div>
+      <div class="stat-card deals anim anim-d3">
+        <span class="stat-icon">🏷️</span>
+        <div class="stat-value" data-count="{{ summary.get('good_deals_count', 0) + summary.get('monthly_deals_count', 0) }}">0</div>
+        <div class="stat-label">On Sale</div>
+      </div>
+      <div class="stat-card owned anim anim-d4">
+        <span class="stat-icon">📚</span>
+        <div class="stat-value" data-count="{{ summary.get('already_owned_count', 0) }}">0</div>
+        <div class="stat-label">Owned</div>
+      </div>
+      <div class="stat-card atmos anim anim-d5">
+        <span class="stat-icon">🎵</span>
+        <div class="stat-value" data-count="{{ summary.get('atmos_available_count', 0) }}">0</div>
+        <div class="stat-label">Atmos</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="section" id="charts">
+    <div class="section-header">
+      <div class="section-icon charts">📈</div>
+      <div>
+        <div class="section-title">Analytics</div>
+        <div class="section-subtitle">Quality tier and recommendation breakdown</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-title">Tier Distribution</div>
+        <div class="chart-donut-wrap">
+          <canvas id="tierChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Quality Breakdown</div>
+        <div class="tier-list">
+          {% set tier_meta = [
+            ('Excellent', '💎', tier_distribution.get('Excellent', 0), 'excellent'),
+            ('Better', '✨', tier_distribution.get('Better', 0), 'better'),
+            ('Good', '👍', tier_distribution.get('Good', 0), 'good'),
+            ('Low', '👎', tier_distribution.get('Low', 0), 'low'),
+            ('Poor', '💩', tier_distribution.get('Poor', 0), 'poor'),
+          ] %}
+          {% for name, emoji, count, tier_class in tier_meta %}
+          <div class="tier-row">
+            <span class="tier-emoji">{{ emoji }}</span>
+            <span class="tier-name tier-{{ tier_class }}">{{ name }}</span>
+            <div class="tier-bar-track">
+              <div
+                class="tier-bar-fill {{ tier_class }}"
+                data-width="{{ (count / total_candidates * 100) if total_candidates > 0 else 0 }}"
+              ></div>
+            </div>
+            <span class="tier-count">{{ count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recommendations</div>
+        <div class="rec-list" id="recList">
+          {% set rec_meta = [
+            ('FREE', 'Free (Plus Catalog)', 'free'),
+            ('MONTHLY_DEAL', 'Monthly Deal', 'monthly-deal'),
+            ('GOOD_DEAL', 'Good Deal', 'good-deal'),
+            ('CREDIT', 'Use a Credit', 'credit'),
+            ('OWNED', 'Already Owned', 'owned'),
+            ('EXPENSIVE', 'Full Price', 'expensive'),
+          ] %}
+          {% for key, label, rec_class in rec_meta %}
+          {% set count = recommendation_counts.get(key, 0) %}
+          {% if count > 0 %}
+          <div class="rec-row" data-rec="{{ key }}">
+            <span class="rec-dot {{ rec_class }}"></span>
+            <span class="rec-label">{{ label }}</span>
+            <span class="rec-count">{{ count }}</span>
+            <span class="rec-pct">{{ '%.0f' | format(count / total_candidates * 100 if total_candidates > 0 else 0) }}%</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIONS -->
+  <section class="section" id="actions">
+    <div class="section-header">
+      <div class="section-icon actions">⚡</div>
+      <div>
+        <div class="section-title">Quick Actions</div>
+        <div class="section-subtitle">Click a card to filter the table below</div>
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <div class="action-card free anim" onclick="setFilter('FREE')">
+        <div class="action-count">{{ free_items | length }}</div>
+        <div class="action-label">Free Upgrades</div>
+        <div class="action-items">
+          {% for item in free_items[:5] %}
+          <div class="action-item">
+            {% if item.cover_image_url %}<img class="item-cover" src="{{ item.cover_image_url }}" loading="lazy" onerror="this.outerHTML='<div class=item-cover-placeholder>📖</div>'">{% else %}<div class="item-cover-placeholder">📖</div>{% endif %}
+            <span class="item-text">{{ item.title }}</span>
+            <span class="item-price">FREE</span>
+          </div>
+          {% endfor %}
+          {% if free_items | length > 5 %}<div class="action-item"><span class="item-text" style="color:var(--text-ultra-dim)">+{{ free_items | length - 5 }} more</span></div>{% endif %}
+        </div>
+      </div>
+
+      <div class="action-card deals anim anim-d1" onclick="setFilter('DEAL')">
+        <div class="action-count">{{ deal_items | length }}</div>
+        <div class="action-label">Deals &amp; Sales</div>
+        <div class="action-items">
+          {% for item in deal_items[:5] %}
+          <div class="action-item">
+            {% if item.cover_image_url %}<img class="item-cover" src="{{ item.cover_image_url }}" loading="lazy" onerror="this.outerHTML='<div class=item-cover-placeholder>📖</div>'">{% else %}<div class="item-cover-placeholder">📖</div>{% endif %}
+            <span class="item-text">{{ item.title }}</span>
+            <span class="item-price">{% if item.sale_price %}${{ '%.2f' | format(item.sale_price) }}{% endif %}</span>
+          </div>
+          {% endfor %}
+          {% if deal_items | length > 5 %}<div class="action-item"><span class="item-text" style="color:var(--text-ultra-dim)">+{{ deal_items | length - 5 }} more</span></div>{% endif %}
+        </div>
+      </div>
+
+      <div class="action-card credit anim anim-d2" onclick="setFilter('CREDIT')">
+        <div class="action-count">{{ recommendation_counts.get('CREDIT', 0) }}</div>
+        <div class="action-label">Use a Credit</div>
+        <div class="action-items">
+          {% for item in candidates if item.acquisition_recommendation == 'CREDIT' %}
+          {% if loop.index <= 5 %}
+          <div class="action-item">
+            {% if item.cover_image_url %}<img class="item-cover" src="{{ item.cover_image_url }}" loading="lazy" onerror="this.outerHTML='<div class=item-cover-placeholder>📖</div>'">{% else %}<div class="item-cover-placeholder">📖</div>{% endif %}
+            <span class="item-text">{{ item.title }}</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="action-card owned anim anim-d3" onclick="setFilter('OWNED')">
+        <div class="action-count">{{ owned_items | length }}</div>
+        <div class="action-label">Owned — Redownload</div>
+        <div class="action-items">
+          {% for item in owned_items[:5] %}
+          <div class="action-item">
+            {% if item.cover_image_url %}<img class="item-cover" src="{{ item.cover_image_url }}" loading="lazy" onerror="this.outerHTML='<div class=item-cover-placeholder>📖</div>'">{% else %}<div class="item-cover-placeholder">📖</div>{% endif %}
+            <span class="item-text">{{ item.title }}</span>
+          </div>
+          {% endfor %}
+          {% if owned_items | length > 5 %}<div class="action-item"><span class="item-text" style="color:var(--text-ultra-dim)">+{{ owned_items | length - 5 }} more</span></div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="signals">
+    <div class="section-header">
+      <div class="section-icon charts">🧬</div>
+      <div>
+        <div class="section-title">Metadata Signals</div>
+        <div class="section-subtitle">Subtitle, series, narrator, and source-shape patterns pulled out of the upgrade pool</div>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-card anim">
+        <div class="insight-kicker">Series density</div>
+        <div class="insight-value blue">{{ signal_counts.get('series_linked_count', 0) }}</div>
+        <div class="insight-label">Series-linked candidates</div>
+        <div class="insight-copy">
+          {% if series_clusters %}
+          {{ series_clusters[0].label }} is the heaviest cluster in the current dashboard.
+          {% else %}
+          No recurring series metadata is present in this export set yet.
+          {% endif %}
+        </div>
+      </div>
+      <div class="insight-card anim anim-d1">
+        <div class="insight-kicker">Narrator coverage</div>
+        <div class="insight-value green">{{ signal_counts.get('narrated_count', 0) }}</div>
+        <div class="insight-label">Titles with narrator data</div>
+        <div class="insight-copy">
+          {% if narrator_leaders %}
+          {{ narrator_leaders[0].name }} currently anchors the biggest narrator cluster.
+          {% else %}
+          Narrator metadata is sparse in the current candidate set.
+          {% endif %}
+        </div>
+      </div>
+      <div class="insight-card anim anim-d2">
+        <div class="insight-kicker">Import shape</div>
+        <div class="insight-value amber">{{ signal_counts.get('multi_file_count', 0) }}</div>
+        <div class="insight-label">Multi-file source sets</div>
+        <div class="insight-copy">
+          Older disc-rip style imports stand out here and are often the easiest cleanup wins.
+        </div>
+      </div>
+      <div class="insight-card anim anim-d3">
+        <div class="insight-kicker">Long-form backlog</div>
+        <div class="insight-value purple">{{ signal_counts.get('epic_count', 0) }}</div>
+        <div class="insight-label">Epic listens over 15h</div>
+        <div class="insight-copy">
+          {% if epic_items %}
+          {{ epic_items[0].title }} is one of the biggest time investments still waiting for a better copy.
+          {% else %}
+          No 15-hour-plus listens are currently represented in this slice.
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="spotlight">
+    <div class="section-header">
+      <div class="section-icon table">🎛️</div>
+      <div>
+        <div class="section-title">Spotlight Views</div>
+        <div class="section-subtitle">Grouped slices that make series pressure, narrator patterns, and cleanup queues obvious at a glance</div>
+      </div>
+    </div>
+
+    <div class="spotlight-grid">
+      <div class="card spotlight-card">
+        <div class="card-title">Series Radar</div>
+        {% if series_clusters %}
+        <div class="spotlight-list">
+          {% for cluster in series_clusters[:6] %}
+          <div class="spotlight-row">
+            <div class="spotlight-row-head">
+              <div class="spotlight-title">{{ cluster.label }}</div>
+              <div class="spotlight-value">{{ cluster.count }} titles</div>
+            </div>
+            <div class="spotlight-meta">
+              <span class="spotlight-chip blue">avg +{{ cluster.avg_delta }}k</span>
+              {% if cluster.free_count %}<span class="spotlight-chip green">{{ cluster.free_count }} free</span>{% endif %}
+              {% if cluster.deal_count %}<span class="spotlight-chip amber">{{ cluster.deal_count }} on sale</span>{% endif %}
+            </div>
+            <div class="spotlight-copy">{{ cluster.titles | join(', ') }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="spotlight-empty">No grouped series metadata is available in the current candidate set.</div>
+        {% endif %}
+      </div>
+
+      <div class="card spotlight-card">
+        <div class="card-title">Narrator Heatmap</div>
+        {% if narrator_leaders %}
+        <div class="spotlight-list">
+          {% for narrator in narrator_leaders[:6] %}
+          <div class="spotlight-row">
+            <div class="spotlight-row-head">
+              <div class="spotlight-title">{{ narrator.name }}</div>
+              <div class="spotlight-value">{{ narrator.count }} titles</div>
+            </div>
+            <div class="spotlight-meta">
+              <span class="spotlight-chip purple">avg priority {{ narrator.avg_priority }}</span>
+              {% if narrator.free_count %}<span class="spotlight-chip green">{{ narrator.free_count }} free</span>{% endif %}
+              {% if narrator.deal_count %}<span class="spotlight-chip amber">{{ narrator.deal_count }} deals</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="spotlight-empty">Narrator metadata was not available for the current candidate set.</div>
+        {% endif %}
+      </div>
+
+      <div class="card spotlight-card">
+        <div class="card-title">Legacy Rescue Queue</div>
+        {% if legacy_rescue_items %}
+        <div class="spotlight-list">
+          {% for item in legacy_rescue_items[:6] %}
+          <div class="spotlight-row">
+            <div class="spotlight-row-head">
+              <div class="spotlight-title">{{ item.title }}</div>
+              <div class="spotlight-value">+{{ item.delta_kbps or 0 }}k</div>
+            </div>
+            <div class="spotlight-meta">
+              <span class="spotlight-chip red">{{ item.format }}</span>
+              {% if item.file_count and item.file_count > 1 %}<span class="spotlight-chip amber">{{ item.file_count }} files</span>{% endif %}
+              {% if item.series_label %}<span class="spotlight-chip blue">{{ item.series_label }}</span>{% endif %}
+            </div>
+            {% if item.primary_narrator %}<div class="spotlight-copy">Narrated by {{ item.primary_narrator }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="spotlight-empty">No MP3-heavy rescue queue is present in the current result set.</div>
+        {% endif %}
+      </div>
+
+      <div class="card spotlight-card">
+        <div class="card-title">Long-Haul Upgrades</div>
+        {% set long_haul_items = epic_items if epic_items else top_priority_items %}
+        {% if long_haul_items %}
+        <div class="spotlight-list">
+          {% for item in long_haul_items[:6] %}
+          <div class="spotlight-row">
+            <div class="spotlight-row-head">
+              <div class="spotlight-title">{{ item.title }}</div>
+              <div class="spotlight-value">{{ '%.1f' | format(item.duration_hours or 0) }}h</div>
+            </div>
+            <div class="spotlight-meta">
+              <span class="spotlight-chip blue">priority {{ item.upgrade_priority }}</span>
+              {% if item.is_plus_catalog %}<span class="spotlight-chip green">free</span>{% endif %}
+              {% if item.is_good_deal or item.is_monthly_deal %}<span class="spotlight-chip amber">sale</span>{% endif %}
+            </div>
+            {% if item.subtitle %}<div class="spotlight-copy">{{ item.subtitle }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="spotlight-empty">No long-form listening candidates were identified.</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- BROWSE ALL -->
+  <section class="section" id="browse">
+    <div class="section-header">
+      <div class="section-icon table">🔍</div>
+      <div>
+        <div class="section-title">Browse All Candidates</div>
+        <div class="section-subtitle">Search, filter, and sort your upgrade opportunities</div>
+      </div>
+    </div>
+
+    <div class="toolbar-stack">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔎</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search title, subtitle, series, narrator, publisher, file, ASIN, or reason...">
+        </div>
+
+        <div class="toolbar-meta">
+          <span class="result-count" id="resultCount"></span>
+          <div class="view-toggle">
+            <button class="view-btn active" id="viewTable" title="Table view">☰</button>
+            <button class="view-btn" id="viewGrid" title="Grid view">⊞</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="subtoolbar">
+        <span class="facet-label">Recommendation</span>
+        <div class="filter-pill-group" id="recommendationFilters">
+          <button class="filter-pill active" data-filter="">All</button>
+          <button class="filter-pill green" data-filter="FREE">🎁 Free</button>
+          <button class="filter-pill cyan" data-filter="DEAL">🔥 All Sales</button>
+          <button class="filter-pill cyan" data-filter="MONTHLY_DEAL">🏷️ Monthly Deal</button>
+          <button class="filter-pill cyan" data-filter="GOOD_DEAL">💰 Good Deal</button>
+          <button class="filter-pill amber" data-filter="CREDIT">🎫 Credit</button>
+          <button class="filter-pill purple" data-filter="OWNED">📚 Owned</button>
+        </div>
+      </div>
+
+      <div class="subtoolbar">
+        <span class="facet-label">Tier</span>
+        <div class="filter-pill-group" id="tierFilters">
+          <button class="filter-pill active" data-tier="">All</button>
+          <button class="filter-pill" data-tier="Excellent">💎 Excellent</button>
+          <button class="filter-pill purple" data-tier="Better">✨ Better</button>
+          <button class="filter-pill green" data-tier="Good">👍 Good</button>
+          <button class="filter-pill amber" data-tier="Low">👎 Low</button>
+          <button class="filter-pill red" data-tier="Poor">💩 Poor</button>
+        </div>
+      </div>
+
+      <div class="subtoolbar">
+        <span class="facet-label">Signals</span>
+        <div class="filter-pill-group" id="featureFilters">
+          <button class="filter-pill active" data-feature="">All</button>
+          <button class="filter-pill blue" data-feature="SERIES">🧬 Series</button>
+          <button class="filter-pill green" data-feature="NARRATED">🎙️ Narrated</button>
+          <button class="filter-pill amber" data-feature="MULTI_FILE">📦 Multi-file</button>
+          <button class="filter-pill red" data-feature="LEGACY">🧯 Legacy MP3</button>
+          <button class="filter-pill purple" data-feature="EPIC">⏳ Epic</button>
+          <button class="filter-pill cyan" data-feature="ATMOS">🎧 Atmos</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-note">Click any table row or grid card to open the full metadata drawer.</div>
+
+    <div id="tableContainer">
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="cover-cell"></th>
+                <th data-sort="title">Title <span class="sort-arrow">▲</span></th>
+                <th data-sort="bitrate_kbps">Current Quality <span class="sort-arrow">▲</span></th>
+                <th data-sort="audible_best_bitrate">Audible Best <span class="sort-arrow">▲</span></th>
+                <th data-sort="delta_kbps">Improvement <span class="sort-arrow">▲</span></th>
+                <th data-sort="acquisition_recommendation">Recommendation <span class="sort-arrow">▲</span></th>
+                <th data-sort="sale_price">Price <span class="sort-arrow">▲</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyTable" style="display:none">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-text">No items match your search</div>
+          <div class="empty-hint">Try a different search term or clear your filters</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gridContainer" style="display:none">
+      <div class="grid-view" id="gridView"></div>
+      <div class="empty-state" id="emptyGrid" style="display:none">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">No items match your search</div>
+        <div class="empty-hint">Try a different search term or clear your filters</div>
+      </div>
+    </div>
+
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <aside class="drawer" id="detailDrawer" aria-hidden="true">
+      <button class="drawer-close" id="drawerClose" type="button" aria-label="Close details">×</button>
+      <div class="drawer-body" id="drawerContent"></div>
+    </aside>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>Generated {{ generated_at }}</span>
+      <div class="footer-dot"></div>
+      <span>A2A v{{ version }}</span>
+      <div class="footer-dot"></div>
+      <a href="https://github.com/H2OKing89/a2a" target="_blank" rel="noopener">GitHub</a>
+      <div class="footer-dot"></div>
+      <span>{{ total_candidates }} audiobooks analyzed</span>
+    </div>
+  </footer>
+</div>
+
+<script id="dashboard-candidates" type="application/json">{{ candidates | tojson }}</script>
+<script id="dashboard-tier-data" type="application/json">{{ tier_distribution | tojson }}</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+const DATA = JSON.parse(document.getElementById('dashboard-candidates').textContent).map((item, index) => ({
+  ...item,
+  _key: item.item_id || item.asin || `candidate-${index}`,
+}));
+const DATA_BY_KEY = new Map(DATA.map((item) => [item._key, item]));
+const MAX_DELTA = Number(document.body.dataset.maxDelta || 0);
+const tierData = JSON.parse(document.getElementById('dashboard-tier-data').textContent);
+
+const TIER_META = {
+  Excellent: { emoji: '💎', cls: 'excellent' },
+  Better: { emoji: '✨', cls: 'better' },
+  Good: { emoji: '👍', cls: 'good' },
+  Low: { emoji: '👎', cls: 'low' },
+  Poor: { emoji: '💩', cls: 'poor' },
+};
+
+const REC_META = {
+  FREE: { label: 'FREE', cls: 'free' },
+  MONTHLY_DEAL: { label: 'MONTHLY DEAL', cls: 'monthly-deal' },
+  GOOD_DEAL: { label: 'GOOD DEAL', cls: 'good-deal' },
+  CREDIT: { label: 'CREDIT', cls: 'credit' },
+  EXPENSIVE: { label: 'FULL PRICE', cls: 'expensive' },
+  OWNED: { label: 'OWNED', cls: 'owned' },
+  'N/A': { label: '—', cls: 'na' },
+};
+
+const REC_SORT_ORDER = { FREE: 0, MONTHLY_DEAL: 1, GOOD_DEAL: 2, CREDIT: 3, OWNED: 4, EXPENSIVE: 5 };
+
+let sortKey = 'delta_kbps';
+let sortDir = -1;
+let searchQuery = '';
+let activeRecommendation = '';
+let activeTier = '';
+let activeFeature = '';
+let currentView = 'table';
+
+const drawer = document.getElementById('detailDrawer');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+const drawerContent = document.getElementById('drawerContent');
+
+function esc(value) {
+  if (value === null || value === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(value);
+  return div.innerHTML;
+}
+
+function joinList(values) {
+  return (values || []).filter(Boolean).join(', ');
+}
+
+function shortenMiddle(text, maxLen) {
+  if (!text || text.length <= maxLen) return text || '';
+  const keep = Math.max(8, Math.floor((maxLen - 1) / 2));
+  return `${text.slice(0, keep)}…${text.slice(-keep)}`;
+}
+
+function formatHours(hours) {
+  if (!hours) return null;
+  return `${hours >= 10 ? hours.toFixed(0) : hours.toFixed(1)}h`;
+}
+
+function formatFiles(fileCount) {
+  if (!fileCount) return null;
+  return fileCount === 1 ? '1 file' : `${fileCount} files`;
+}
+
+function formatChannels(item) {
+  if (item.channel_layout) return item.channel_layout;
+  if (item.channels) return `${item.channels}ch`;
+  return null;
+}
+
+function priceHTML(item) {
+  if (item.is_plus_catalog) return '<span class="price-free">FREE</span>';
+  if (item.sale_price && item.list_price && item.sale_price < item.list_price) {
+    let html = `<span class="price-original">$${item.list_price.toFixed(2)}</span><br>`;
+    html += `<span class="price-sale">$${item.sale_price.toFixed(2)}</span>`;
+    if (item.discount_percent) html += `<span class="price-discount">${item.discount_percent.toFixed(0)}% off</span>`;
+    return html;
+  }
+  if (item.list_price) return `<span class="price-regular">$${item.list_price.toFixed(2)}</span>`;
+  return '<span style="color:var(--text-ultra-dim)">—</span>';
+}
+
+function priceTagHTML(item) {
+  if (item.is_plus_catalog) return '<span class="grid-price-tag free">FREE</span>';
+  if (item.sale_price) {
+    return `<span class="grid-price-tag sale">$${item.sale_price.toFixed(2)}</span>${item.list_price ? `<span class="grid-original-price">$${item.list_price.toFixed(2)}</span>` : ''}`;
+  }
+  if (item.list_price) return `<span class="grid-price-tag regular">$${item.list_price.toFixed(2)}</span>`;
+  return '<span class="grid-price-tag regular">—</span>';
+}
+
+function detailLine(label, value, extraClass = 'detail-text') {
+  if (!value) return '';
+  return `<div class="${extraClass}"><strong>${esc(label)}:</strong> ${esc(value)}</div>`;
+}
+
+function buildMetaPills(item) {
+  const pills = [];
+  if (item.codec) pills.push(String(item.codec).toUpperCase());
+  if (formatChannels(item)) pills.push(formatChannels(item));
+  if (formatHours(item.duration_hours)) pills.push(formatHours(item.duration_hours));
+  if (item.size_mb) pills.push(`${Math.round(item.size_mb)} MB`);
+  if (formatFiles(item.file_count)) pills.push(formatFiles(item.file_count));
+  if ((item.codec_mix || []).length > 1) pills.push(`${item.codec_mix.length} codecs`);
+  if ((item.format_mix || []).length > 1) pills.push(`${item.format_mix.length} formats`);
+  if (item.quality_score) pills.push(`Q${Math.round(item.quality_score)}`);
+  if (item.upgrade_priority) pills.push(`P${item.upgrade_priority}`);
+  if (item.plus_expiration) pills.push(`Exp ${item.plus_expiration}`);
+  return pills.map((pill) => `<span class="meta-pill">${esc(pill)}</span>`).join('');
+}
+
+function buildMetadataBlock(item) {
+  const pills = buildMetaPills(item);
+  const seriesLine = detailLine('Series', item.series_label);
+  const narratorLine = detailLine('Narrator', item.primary_narrator || joinList(item.narrators));
+  const editionSummary = [item.publisher, item.language, item.published_year || item.published_date].filter(Boolean).join(' • ');
+  const editionLine = detailLine('Edition', editionSummary);
+  const fileLine = detailLine('File', item.primary_filename);
+  const reasonLine = item.upgrade_reason ? `<div class="detail-text detail-reason">${esc(item.upgrade_reason)}</div>` : '';
+  const pathLine = item.path ? `<div class="detail-path" title="${esc(item.path)}">${esc(shortenMiddle(item.path, 72))}</div>` : '';
+  return `${pills ? `<div class="meta-pills">${pills}</div>` : ''}${seriesLine}${narratorLine}${editionLine}${fileLine}${reasonLine}${pathLine}`;
+}
+
+function bestQualityBadge(item) {
+  if (item.has_atmos_upgrade) return '<span class="best-badge">Atmos available</span>';
+  if (item.audible_best_bitrate) {
+    return `<span class="best-badge">${item.audible_best_bitrate}k ${esc(item.audible_best_codec || '')}</span>`;
+  }
+  return '<span class="best-badge unknown">—</span>';
+}
+
+function matchesFeature(item, feature) {
+  if (!feature) return true;
+  switch (feature) {
+    case 'SERIES':
+      return Boolean(item.series_label);
+    case 'NARRATED':
+      return Boolean(item.primary_narrator || (item.narrators || []).length);
+    case 'MULTI_FILE':
+      return (item.file_count || 0) > 1;
+    case 'LEGACY':
+      return item.format === 'MP3' || String(item.codec || '').toLowerCase() === 'mp3';
+    case 'EPIC':
+      return (item.duration_hours || 0) >= 15;
+    case 'ATMOS':
+      return Boolean(item.has_atmos_upgrade || item.is_current_atmos);
+    default:
+      return true;
+  }
+}
+
+function searchBlob(item) {
+  return [
+    item.title,
+    item.subtitle,
+    item.author,
+    item.asin,
+    item.series_label,
+    joinList((item.series || []).map((series) => series.label || series.name)),
+    item.primary_narrator,
+    joinList(item.narrators),
+    item.publisher,
+    item.language,
+    item.primary_filename,
+    item.path,
+    item.upgrade_reason,
+    joinList(item.codec_mix),
+    joinList(item.format_mix),
+  ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function getSortValue(item, key) {
+  if (key === 'acquisition_recommendation') return REC_SORT_ORDER[item[key]] ?? 99;
+  if (key === 'title') return (item[key] || '').toLowerCase();
+  return item[key];
+}
+
+function getFiltered() {
+  let items = DATA.slice();
+
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    items = items.filter((item) => searchBlob(item).includes(query));
+  }
+
+  if (activeRecommendation) {
+    items = items.filter((item) => {
+      if (activeRecommendation === 'DEAL') {
+        return item.acquisition_recommendation === 'MONTHLY_DEAL' || item.acquisition_recommendation === 'GOOD_DEAL';
+      }
+      return item.acquisition_recommendation === activeRecommendation;
+    });
+  }
+
+  if (activeTier) {
+    items = items.filter((item) => item.tier === activeTier);
+  }
+
+  if (activeFeature) {
+    items = items.filter((item) => matchesFeature(item, activeFeature));
+  }
+
+  items.sort((left, right) => {
+    let a = getSortValue(left, sortKey);
+    let b = getSortValue(right, sortKey);
+
+    if (a === null || a === undefined) a = sortDir === 1 ? Infinity : -Infinity;
+    if (b === null || b === undefined) b = sortDir === 1 ? Infinity : -Infinity;
+
+    if (typeof a === 'string') return sortDir * a.localeCompare(String(b));
+    return sortDir * (a - b);
+  });
+
+  return items;
+}
+
+function renderRow(item) {
+  const tierMeta = TIER_META[item.tier] || { emoji: '❓', cls: '' };
+  const recMeta = REC_META[item.acquisition_recommendation] || REC_META['N/A'];
+  const delta = item.delta_kbps || 0;
+  const deltaWidth = MAX_DELTA > 0 ? Math.min((delta / MAX_DELTA) * 100, 100) : 0;
+  const cover = item.cover_image_url
+    ? `<div class="cover-thumb" tabindex="0" aria-label="Preview cover for ${esc(item.title)}"><img class="cover-img" src="${esc(item.cover_image_url)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=cover-placeholder>📖</div>'"></div>`
+    : `<div class="cover-thumb" tabindex="0" aria-label="Preview placeholder cover for ${esc(item.title)}"><div class="cover-placeholder">📖</div></div>`;
+  const link = item.audible_url
+    ? `<a class="audible-btn" href="${esc(item.audible_url)}" target="_blank" rel="noopener">View ↗</a>`
+    : '';
+  const details = buildMetadataBlock(item);
+  const recTitle = item.acquisition_label ? ` title="${esc(item.acquisition_label)}"` : '';
+  const subtitle = item.subtitle ? `<div class="book-subtitle">${esc(item.subtitle)}</div>` : '';
+  const deltaHtml = delta > 0
+    ? `<div class="delta-visual"><div class="delta-bar-track"><div class="delta-bar-fill" style="width:${deltaWidth}%"></div></div><span class="delta-text">+${delta}k</span></div>`
+    : '<span class="delta-text zero">—</span>';
+
+  return `<tr class="interactive-row" data-item-key="${esc(item._key)}">
+    <td class="cover-cell">${cover}</td>
+    <td class="title-cell"><div class="book-title">${esc(item.title)}</div>${subtitle}<div class="book-author">${esc(item.author || 'Unknown')}</div><div class="book-asin">${esc(item.asin || '')}</div>${details}</td>
+    <td><span class="badge ${tierMeta.cls}"><span class="badge-emoji">${tierMeta.emoji}</span>${esc(item.format || 'Unknown')} ${esc(item.bitrate_kbps)}k</span></td>
+    <td class="best-cell">${bestQualityBadge(item)}</td>
+    <td class="delta-cell">${deltaHtml}</td>
+    <td><span class="rec-badge ${recMeta.cls}"${recTitle}>${recMeta.label}</span></td>
+    <td class="price-cell">${priceHTML(item)}</td>
+    <td>${link}</td>
+  </tr>`;
+}
+
+function renderCard(item) {
+  const tierMeta = TIER_META[item.tier] || { emoji: '❓', cls: '' };
+  const recMeta = REC_META[item.acquisition_recommendation] || REC_META['N/A'];
+  const delta = item.delta_kbps || 0;
+  const deltaWidth = MAX_DELTA > 0 ? Math.min((delta / MAX_DELTA) * 100, 100) : 0;
+  const cover = item.cover_image_url
+    ? `<img class="grid-cover" src="${esc(item.cover_image_url)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=grid-cover-placeholder>📖</div>'">`
+    : '<div class="grid-cover-placeholder">📖</div>';
+  const recTitle = item.acquisition_label ? ` title="${esc(item.acquisition_label)}"` : '';
+  const details = buildMetadataBlock(item);
+  const link = item.audible_url
+    ? `<div style="text-align:right"><a class="audible-btn" href="${esc(item.audible_url)}" target="_blank" rel="noopener">Audible ↗</a></div>`
+    : '';
+
+  return `<div class="grid-item" data-item-key="${esc(item._key)}">
+    <div class="grid-item-header">
+      ${cover}
+      <div class="grid-meta">
+        <div class="grid-title">${esc(item.title)}</div>
+        ${item.subtitle ? `<div class="grid-subtitle">${esc(item.subtitle)}</div>` : ''}
+        <div class="grid-author">${esc(item.author || 'Unknown')}</div>
+        <div class="grid-asin">${esc(item.asin || '')}</div>
+      </div>
+    </div>
+    <div class="grid-item-body">
+      <div class="grid-quality-row">
+        <span class="badge ${tierMeta.cls}"><span class="badge-emoji">${tierMeta.emoji}</span>${esc(item.bitrate_kbps)}k</span>
+        <span class="grid-quality-arrow">→</span>
+        ${bestQualityBadge(item)}
+        ${delta > 0 ? `<span class="delta-text" style="margin-left:auto">+${delta}k</span>` : ''}
+      </div>
+      <div class="grid-delta-bar"><div class="grid-delta-fill" style="width:${deltaWidth}%"></div></div>
+      ${details}
+      <div class="grid-bottom-row">
+        <div>
+          <span class="rec-badge ${recMeta.cls}"${recTitle}>${recMeta.label}</span>
+          ${item.discount_percent ? `<span class="price-discount" style="margin-left:6px">${item.discount_percent.toFixed(0)}% off</span>` : ''}
+        </div>
+        <div>${priceTagHTML(item)}</div>
+      </div>
+      ${link}
+    </div>
+  </div>`;
+}
+
+function renderDetail(item) {
+  const cover = item.cover_image_url
+    ? `<img class="drawer-cover" src="${esc(item.cover_image_url)}" alt="" loading="lazy">`
+    : '<div class="drawer-cover-placeholder">📖</div>';
+  const recMeta = REC_META[item.acquisition_recommendation] || REC_META['N/A'];
+  const currentQuality = `${item.format || 'Unknown'} ${item.bitrate_kbps}k${item.codec ? ` • ${String(item.codec).toUpperCase()}` : ''}`;
+  const bestQuality = item.has_atmos_upgrade
+    ? 'Dolby Atmos available on Audible'
+    : item.audible_best_bitrate
+      ? `${item.audible_best_bitrate}k ${item.audible_best_codec || ''}`
+      : 'No enriched Audible quality available';
+  const editionSummary = [item.publisher, item.language, item.published_year || item.published_date].filter(Boolean).join(' • ');
+  const seriesSummary = item.series_label || joinList((item.series || []).map((series) => series.label || series.name));
+  const narratorSummary = item.primary_narrator || joinList(item.narrators);
+  const codecMix = joinList(item.codec_mix);
+  const formatMix = joinList(item.format_mix);
+
+  return `
+    <div class="drawer-hero">
+      ${cover}
+      <div>
+        <div class="drawer-title">${esc(item.title)}</div>
+        ${item.subtitle ? `<div class="drawer-subtitle">${esc(item.subtitle)}</div>` : ''}
+        <div class="drawer-author">${esc(item.author || 'Unknown author')}</div>
+        <div class="meta-pills" style="margin-top:10px">
+          <span class="rec-badge ${recMeta.cls}">${recMeta.label}</span>
+          ${item.tier ? `<span class="badge ${(TIER_META[item.tier] || {}).cls || ''}"><span class="badge-emoji">${(TIER_META[item.tier] || {}).emoji || '❓'}</span>${esc(item.tier)}</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-block">
+      <div class="drawer-block-title">Acquisition</div>
+      <div class="drawer-copy">${item.acquisition_label ? esc(item.acquisition_label) : 'No acquisition guidance available.'}</div>
+      <div style="margin-top:12px">${priceHTML(item)}</div>
+      <div class="drawer-actions" style="margin-top:14px">
+        ${item.audible_url ? `<a class="audible-btn" href="${esc(item.audible_url)}" target="_blank" rel="noopener">Open on Audible ↗</a>` : ''}
+      </div>
+    </div>
+
+    <div class="drawer-block">
+      <div class="drawer-block-title">Metadata</div>
+      <div class="drawer-grid">
+        <div class="drawer-stat"><div class="drawer-stat-label">Series</div><div class="drawer-stat-value">${esc(seriesSummary || '—')}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Narrator</div><div class="drawer-stat-value">${esc(narratorSummary || '—')}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Edition</div><div class="drawer-stat-value">${esc(editionSummary || '—')}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Source file</div><div class="drawer-stat-value">${esc(item.primary_filename || '—')}</div></div>
+      </div>
+    </div>
+
+    <div class="drawer-block">
+      <div class="drawer-block-title">Quality profile</div>
+      <div class="drawer-grid">
+        <div class="drawer-stat"><div class="drawer-stat-label">Current</div><div class="drawer-stat-value">${esc(currentQuality)}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Best Audible</div><div class="drawer-stat-value">${esc(bestQuality)}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Runtime</div><div class="drawer-stat-value">${esc(formatHours(item.duration_hours) || '—')}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Files / size</div><div class="drawer-stat-value">${esc(`${formatFiles(item.file_count) || '—'} • ${item.size_mb ? `${Math.round(item.size_mb)} MB` : '—'}`)}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Quality score</div><div class="drawer-stat-value">${esc(item.quality_score ? item.quality_score.toFixed(1) : '—')}</div></div>
+        <div class="drawer-stat"><div class="drawer-stat-label">Upgrade priority</div><div class="drawer-stat-value">${esc(item.upgrade_priority || 0)}</div></div>
+      </div>
+    </div>
+
+    ${codecMix || formatMix ? `
+      <div class="drawer-block">
+        <div class="drawer-block-title">Codec + container mix</div>
+        <div class="drawer-pills">
+          ${codecMix ? codecMix.split(', ').map((value) => `<span class="drawer-pill">Codec: ${esc(value)}</span>`).join('') : ''}
+          ${formatMix ? formatMix.split(', ').map((value) => `<span class="drawer-pill">Format: ${esc(value)}</span>`).join('') : ''}
+        </div>
+      </div>
+    ` : ''}
+
+    ${item.upgrade_reason ? `
+      <div class="drawer-block">
+        <div class="drawer-block-title">Why it surfaced</div>
+        <div class="drawer-copy">${esc(item.upgrade_reason)}</div>
+      </div>
+    ` : ''}
+
+    ${item.path ? `
+      <div class="drawer-block">
+        <div class="drawer-block-title">Library path</div>
+        <div class="drawer-copy">${esc(item.path)}</div>
+      </div>
+    ` : ''}
+  `;
+}
+
+function openDetail(itemKey) {
+  const item = DATA_BY_KEY.get(itemKey);
+  if (!item) return;
+  drawerContent.innerHTML = renderDetail(item);
+  drawerContent.scrollTop = 0;
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden', 'false');
+  drawerBackdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden', 'true');
+  drawerBackdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function render() {
+  const items = getFiltered();
+  document.getElementById('resultCount').textContent = `${items.length} of ${DATA.length} visible`;
+
+  const tableBody = document.getElementById('tableBody');
+  const emptyTable = document.getElementById('emptyTable');
+  const gridView = document.getElementById('gridView');
+  const emptyGrid = document.getElementById('emptyGrid');
+
+  if (items.length === 0) {
+    tableBody.innerHTML = '';
+    gridView.innerHTML = '';
+    emptyTable.style.display = 'block';
+    emptyGrid.style.display = 'block';
+    return;
+  }
+
+  emptyTable.style.display = 'none';
+  emptyGrid.style.display = 'none';
+  tableBody.innerHTML = items.map(renderRow).join('');
+  gridView.innerHTML = items.map(renderCard).join('');
+}
+
+function updateGroupState(groupId, dataKey, value) {
+  document.querySelectorAll(`#${groupId} .filter-pill`).forEach((pill) => {
+    pill.classList.toggle('active', pill.dataset[dataKey] === value);
+  });
+}
+
+function setRecommendationFilter(value) {
+  activeRecommendation = value;
+  updateGroupState('recommendationFilters', 'filter', value);
+  render();
+  document.getElementById('browse').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setFilter(value) {
+  setRecommendationFilter(value);
+}
+
+function setTierFilter(value) {
+  activeTier = value;
+  updateGroupState('tierFilters', 'tier', value);
+  render();
+}
+
+function setFeatureFilter(value) {
+  activeFeature = value;
+  updateGroupState('featureFilters', 'feature', value);
+  render();
+}
+
+function updateSortedHeaders() {
+  document.querySelectorAll('thead th[data-sort]').forEach((header) => {
+    const isSorted = header.dataset.sort === sortKey;
+    header.classList.toggle('sorted', isSorted);
+    const arrow = header.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = isSorted ? (sortDir === 1 ? '▲' : '▼') : '▲';
+  });
+}
+
+document.querySelectorAll('#recommendationFilters .filter-pill').forEach((pill) => {
+  pill.addEventListener('click', () => setRecommendationFilter(pill.dataset.filter));
+});
+
+document.querySelectorAll('#tierFilters .filter-pill').forEach((pill) => {
+  pill.addEventListener('click', () => setTierFilter(pill.dataset.tier));
+});
+
+document.querySelectorAll('#featureFilters .filter-pill').forEach((pill) => {
+  pill.addEventListener('click', () => setFeatureFilter(pill.dataset.feature));
+});
+
+document.querySelectorAll('.rec-row').forEach((row) => {
+  row.addEventListener('click', () => setRecommendationFilter(row.dataset.rec));
+});
+
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', (event) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchQuery = event.target.value;
+    render();
+  }, 160);
+});
+
+document.querySelectorAll('thead th[data-sort]').forEach((header) => {
+  header.addEventListener('click', () => {
+    const key = header.dataset.sort;
+    if (sortKey === key) sortDir *= -1;
+    else {
+      sortKey = key;
+      sortDir = key === 'title' ? 1 : -1;
+    }
+    updateSortedHeaders();
+    render();
+  });
+});
+
+document.getElementById('viewTable').addEventListener('click', () => {
+  currentView = 'table';
+  document.getElementById('tableContainer').style.display = '';
+  document.getElementById('gridContainer').style.display = 'none';
+  document.getElementById('viewTable').classList.add('active');
+  document.getElementById('viewGrid').classList.remove('active');
+});
+
+document.getElementById('viewGrid').addEventListener('click', () => {
+  currentView = 'grid';
+  document.getElementById('tableContainer').style.display = 'none';
+  document.getElementById('gridContainer').style.display = '';
+  document.getElementById('viewGrid').classList.add('active');
+  document.getElementById('viewTable').classList.remove('active');
+});
+
+document.getElementById('tableBody').addEventListener('click', (event) => {
+  if (event.target.closest('a,button')) return;
+  const row = event.target.closest('tr[data-item-key]');
+  if (row) openDetail(row.dataset.itemKey);
+});
+
+document.getElementById('gridView').addEventListener('click', (event) => {
+  if (event.target.closest('a,button')) return;
+  const card = event.target.closest('.grid-item[data-item-key]');
+  if (card) openDetail(card.dataset.itemKey);
+});
+
+document.getElementById('drawerClose').addEventListener('click', closeDetail);
+drawerBackdrop.addEventListener('click', closeDetail);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeDetail();
+});
+
+document.querySelectorAll('.tier-bar-fill[data-width]').forEach((bar) => {
+  bar.style.width = `${bar.dataset.width}%`;
+});
+
+new Chart(document.getElementById('tierChart').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(tierData),
+    datasets: [{
+      data: Object.values(tierData),
+      backgroundColor: [
+        'rgba(96, 165, 250, 0.85)',
+        'rgba(167, 139, 250, 0.85)',
+        'rgba(52, 211, 153, 0.85)',
+        'rgba(251, 191, 36, 0.85)',
+        'rgba(248, 113, 113, 0.85)',
+      ],
+      borderColor: 'rgba(10, 15, 26, 0.9)',
+      borderWidth: 3,
+      hoverOffset: 8,
+    }],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        titleColor: '#f0f4fc',
+        bodyColor: '#94a3c0',
+        borderColor: 'rgba(55, 65, 90, 0.5)',
+        borderWidth: 1,
+        cornerRadius: 10,
+        padding: 14,
+        callbacks: {
+          label(context) {
+            const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+            const pct = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+            return `${context.label}: ${context.parsed} (${pct}%)`;
+          },
+        },
+      },
+    },
+  },
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const element = entry.target;
+    const target = parseInt(element.dataset.count, 10);
+    if (Number.isNaN(target) || target === 0) {
+      element.textContent = '0';
+      observer.unobserve(element);
+      return;
+    }
+
+    const duration = 900;
+    const start = performance.now();
+    element.textContent = '0';
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      element.textContent = Math.round(target * eased).toLocaleString();
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+    observer.unobserve(element);
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.stat-value[data-count]').forEach((element) => observer.observe(element));
+
+updateSortedHeaders();
+render();
+</script>
+</body>
+</html>

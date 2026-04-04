@@ -109,13 +109,34 @@ class FormatRank(IntEnum):
             return cls.OTHER
 
 
+class QualitySeriesEntry(BaseModel):
+    """Series membership for an analyzed audiobook."""
+
+    name: str = Field(description="Series name")
+    sequence: str | None = Field(default=None, description="Series sequence number")
+
+    @property
+    def label(self) -> str:
+        """Human-readable series label."""
+        if self.sequence:
+            return f"{self.name} #{self.sequence}"
+        return self.name
+
+
 class AudioQuality(BaseModel):
     """Quality analysis result for a single audiobook."""
 
     # Item identification
     item_id: str = Field(description="ABS library item ID")
     title: str = Field(description="Book title")
+    subtitle: str | None = Field(default=None, description="Book subtitle")
     author: str | None = Field(default=None, description="Author name")
+    narrators: list[str] = Field(default_factory=list, description="Narrator names")
+    series: list[QualitySeriesEntry] = Field(default_factory=list, description="Series memberships")
+    publisher: str | None = Field(default=None, description="Publisher")
+    language: str | None = Field(default=None, description="Book language")
+    published_year: str | None = Field(default=None, description="Published year")
+    published_date: str | None = Field(default=None, description="Published date")
     asin: str | None = Field(default=None, description="Audible ASIN")
 
     # File info
@@ -126,10 +147,12 @@ class AudioQuality(BaseModel):
 
     # Audio properties
     codec: str | None = Field(default=None, description="Audio codec (aac, mp3, eac3, etc.)")
+    codec_mix: list[str] = Field(default_factory=list, description="All detected codecs across files")
     bitrate_kbps: float = Field(description="Bitrate in kbps")
     channels: int = Field(default=2, description="Number of audio channels")
     channel_layout: str | None = Field(default=None, description="Channel layout (stereo, 5.1, etc.)")
     format_rank: FormatRank = Field(default=FormatRank.OTHER, description="Format quality rank")
+    format_mix: list[str] = Field(default_factory=list, description="All detected formats across files")
     duration_hours: float = Field(default=0, description="Duration in hours")
 
     # Quality assessment
@@ -173,6 +196,18 @@ class AudioQuality(BaseModel):
     def tier_label(self) -> str:
         """Human-readable tier label."""
         return self.tier.label
+
+    @property
+    def primary_narrator(self) -> str | None:
+        """Primary narrator if available."""
+        return self.narrators[0] if self.narrators else None
+
+    @property
+    def series_label(self) -> str | None:
+        """Human-readable series summary."""
+        if not self.series:
+            return None
+        return " / ".join(entry.label for entry in self.series)
 
     @property
     def format_label(self) -> str:

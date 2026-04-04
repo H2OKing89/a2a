@@ -37,8 +37,16 @@ paths:
 quality:
   bitrate_threshold_kbps: 100.0
 
+web:
+  # SSH deployment for HTML dashboard (used by `quality publish`)
+  #ssh_host: your-server.example.com
+  #ssh_user: your-user
+  #path: /var/www/html/audiobook-dashboard/
+  #host: your-server.example.com/audiobook-dashboard/index.html
+
 cache:
   enabled: true
+  abs_cache_enabled: false  # Set to true to cache ABS library data (speeds up repeated scans but hides new books)
   db_path: ./data/cache/cache.db
   default_ttl_hours: 2.0
   abs_ttl_hours: 2.0

@@ -10,7 +10,7 @@ import httpx
 from pydantic import ValidationError
 
 from ..abs import ABSAuthError, ABSConnectionError, ABSError, ABSNotFoundError
-from .models import AudioQuality, FormatRank, QualityReport, QualityTier
+from .models import AudioQuality, FormatRank, QualityReport, QualitySeriesEntry, QualityTier
 
 if TYPE_CHECKING:
     from ..config import QualitySettings
@@ -128,6 +128,67 @@ class QualityAnalyzer:
             atmos_min_channels=config.atmos_min_channels,
             premium_formats=set(config.premium_formats),
         )
+
+    @staticmethod
+    def _extract_author(metadata: dict) -> str | None:
+        """Extract a primary author name from ABS metadata."""
+        author = metadata.get("authorName")
+        if author:
+            return str(author)
+
+        authors = metadata.get("authors") or []
+        for entry in authors:
+            if isinstance(entry, dict) and entry.get("name"):
+                return str(entry["name"])
+            if isinstance(entry, str) and entry:
+                return entry
+        return None
+
+    @staticmethod
+    def _extract_narrators(metadata: dict) -> list[str]:
+        """Extract narrator names from ABS metadata."""
+        narrators = metadata.get("narrators") or []
+        normalized: list[str] = []
+
+        for narrator in narrators:
+            if isinstance(narrator, dict):
+                name = narrator.get("name")
+            else:
+                name = narrator
+
+            if name:
+                normalized.append(str(name))
+
+        narrator_name = metadata.get("narratorName")
+        if narrator_name and narrator_name not in normalized:
+            normalized.append(narrator_name)
+
+        return normalized
+
+    @staticmethod
+    def _extract_series(metadata: dict) -> list[QualitySeriesEntry]:
+        """Extract series memberships from ABS metadata."""
+        entries: list[QualitySeriesEntry] = []
+        raw_series = metadata.get("series") or []
+
+        for series in raw_series:
+            name = None
+            sequence = None
+
+            if isinstance(series, dict):
+                name = series.get("name") or series.get("series")
+                sequence = series.get("sequence")
+            elif isinstance(series, str):
+                name = series
+
+            if name:
+                entries.append(QualitySeriesEntry(name=str(name), sequence=str(sequence) if sequence else None))
+
+        series_name = metadata.get("seriesName")
+        if series_name and all(entry.name != series_name for entry in entries):
+            entries.append(QualitySeriesEntry(name=str(series_name)))
+
+        return entries
 
     def is_atmos(self, codec: str, channels: int, channel_layout: str | None = None) -> bool:
         """
@@ -321,7 +382,14 @@ class QualityAnalyzer:
         # Basic info
         item_id = item_data.get("id", "")
         title = metadata.get("title", "Unknown")
-        author = metadata.get("authorName")
+        subtitle = metadata.get("subtitle")
+        author = self._extract_author(metadata)
+        narrators = self._extract_narrators(metadata)
+        series = self._extract_series(metadata)
+        publisher = metadata.get("publisher")
+        language = metadata.get("language")
+        published_year = metadata.get("publishedYear")
+        published_date = metadata.get("publishedDate")
         asin = metadata.get("asin")
         path = item_data.get("path", "")
         size_bytes = item_data.get("size", 0)
@@ -337,10 +405,32 @@ class QualityAnalyzer:
         primary_channels = 2
         primary_channel_layout = None
         primary_format = FormatRank.OTHER
+        codec_mix: set[str] = set()
+        format_mix: set[str] = set()
 
         for i, af in enumerate(audio_files):
             duration = af.get("duration", 0)
             bitrate = af.get("bitRate", 0) / 1000  # Convert to kbps
+            codec = af.get("codec")
+            mime_type = af.get("mimeType", "")
+            filename = af.get("metadata", {}).get("filename")
+
+            if codec:
+                codec_mix.add(str(codec))
+
+            detected_format = (
+                FormatRank.from_filename(filename) if filename else FormatRank.from_codec_mime(codec or "", mime_type)
+            )
+            format_mix.add(
+                {
+                    FormatRank.M4B: "M4B",
+                    FormatRank.M4A: "M4A",
+                    FormatRank.MP3: "MP3",
+                    FormatRank.OPUS: "Opus",
+                    FormatRank.FLAC: "FLAC",
+                    FormatRank.OTHER: "Other",
+                }.get(detected_format, "Other")
+            )
 
             total_duration += duration
             total_bitrate_weighted += bitrate * duration
@@ -350,8 +440,7 @@ class QualityAnalyzer:
                 primary_codec = af.get("codec", "unknown")
                 primary_channels = af.get("channels", 2)
                 primary_channel_layout = af.get("channelLayout")
-                primary_filename = af.get("metadata", {}).get("filename")
-                mime_type = af.get("mimeType", "")
+                primary_filename = filename
 
                 # Determine format from filename or codec/mime
                 if primary_filename:
@@ -381,17 +470,26 @@ class QualityAnalyzer:
         return AudioQuality(
             item_id=item_id,
             title=title,
+            subtitle=subtitle,
             author=author,
+            narrators=narrators,
+            series=series,
+            publisher=publisher,
+            language=language,
+            published_year=published_year,
+            published_date=published_date,
             asin=asin,
             path=path,
             size_bytes=size_bytes,
             file_count=file_count,
             primary_filename=primary_filename,
             codec=primary_codec,
+            codec_mix=sorted(codec_mix),
             bitrate_kbps=avg_bitrate,
             channels=primary_channels,
             channel_layout=primary_channel_layout,
             format_rank=primary_format,
+            format_mix=sorted(format_mix),
             duration_hours=total_duration / 3600,
             is_atmos=is_atmos,
             tier=tier,
