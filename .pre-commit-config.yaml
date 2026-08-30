@@ -30,7 +30,7 @@ repos:
 
   # Python code formatting
 - repo: https://github.com/psf/black
-  rev: 25.12.0
+  rev: 26.5.1
   hooks:
   - id: black
     language_version: python3
@@ -38,7 +38,7 @@ repos:
 
   # Import sorting
 - repo: https://github.com/PyCQA/isort
-  rev: 7.0.0
+  rev: 9.0.1
   hooks:
   - id: isort
     args: [--profile=black, --line-length=120]
@@ -66,7 +66,7 @@ repos:
 
   # Security checks
 - repo: https://github.com/PyCQA/bandit
-  rev: 1.9.2
+  rev: 1.9.4
   hooks:
   - id: bandit
     args:
@@ -98,14 +98,14 @@ repos:
 
   # YAML formatting
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.15.0
+  rev: v2.16.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent=2]
 
   # Spell checking (markdown and code comments)
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: v2.4.3
   hooks:
   - id: codespell
     args:
